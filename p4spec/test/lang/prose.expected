@@ -5010,27 +5010,24 @@ xref:update_mode_tbl[``TBLC`` with match mode updated based on key ``text`` of t
  .. Else:
   ... Let ``+TYPE+`` ``++_++`` ``typeIR'`` be ``typeIR``.
   ... Return xref:update_mode_tbl[``TBLC`` with match mode updated based on key ``"lpm"`` of type ``typeIR'``].
- .. If ``typeIR`` does not have type ``aliasTypeIR``:
-  ... Check that ``TBLC.+MODE+`` is ``PRI``.
-  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRILPM+``.
 . Else if ``text`` is equal to ``"range"``:
  .. If ``TBLC.+MODE+`` is ``NOPRI``:
   ... Return ``TBLC`` with ``+MODE+`` set to ``+PRI+``.
  .. Let ``matchMode`` be ``TBLC.+MODE+``.
  .. If ``matchMode`` matches pattern ``NOPRILPM`` ``%``:
-  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRILPM+``.
+  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRI+``.
 . Else if ``text`` is equal to ``"ternary"``:
  .. If ``TBLC.+MODE+`` is ``NOPRI``:
   ... Return ``TBLC`` with ``+MODE+`` set to ``+PRI+``.
  .. Let ``matchMode`` be ``TBLC.+MODE+``.
  .. If ``matchMode`` matches pattern ``NOPRILPM`` ``%``:
-  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRILPM+``.
+  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRI+``.
 . Else:
  .. If ``TBLC.+MODE+`` is ``NOPRI``:
   ... Return ``TBLC`` with ``+MODE+`` set to ``+PRI+``.
  .. Let ``matchMode`` be ``TBLC.+MODE+``.
  .. If ``matchMode`` matches pattern ``NOPRILPM`` ``%``:
-  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRILPM+``.
+  ... Return ``TBLC`` with ``+MODE+`` set to ``+PRI+``.
 . Otherwise:
  .. Return ``TBLC``.
 
@@ -8743,7 +8740,7 @@ xref:TableEntry_keyset_ok[Typing ``keysetExpression``, under context ``TC`` and 
  .. If let ``+NOPRILPM+`` ``n`` be ``matchMode``:
   ... Let ``TBLS`` be ``+LPM+`` ``n``.
   ... Result in table entry state ``TBLS`` and ``+DEFAULT+``.
- .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+`` or ``TBLC.+MODE+`` is equal to ``+PRILPM+``:
+ .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+``:
   ... Let ``TBLS`` be ``+NON_LPM+``.
   ... Result in table entry state ``TBLS`` and ``+DEFAULT+``.
 . Else if ``keysetExpression`` is equal to ``+(+`` ``+DEFAULT+`` ``+)+``:
@@ -8751,7 +8748,7 @@ xref:TableEntry_keyset_ok[Typing ``keysetExpression``, under context ``TC`` and 
  .. If let ``+NOPRILPM+`` ``n`` be ``matchMode``:
   ... Let ``TBLS`` be ``+LPM+`` ``n``.
   ... Result in table entry state ``TBLS`` and ``+(+`` ``+DEFAULT+`` ``+)+``.
- .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+`` or ``TBLC.+MODE+`` is equal to ``+PRILPM+``:
+ .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+``:
   ... Let ``TBLS`` be ``+NON_LPM+``.
   ... Result in table entry state ``TBLS`` and ``+(+`` ``+DEFAULT+`` ``+)+``.
 
@@ -8762,7 +8759,7 @@ xref:TableEntry_keyset_ok[Typing ``keysetExpression``, under context ``TC`` and 
  .. If ``matchMode`` matches pattern ``NOPRILPM`` ``%``:
   ... Let ``TBLS`` be ``+LPM+`` ``0``.
   ... Result in table entry state ``TBLS`` and ``+_+``.
- .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+`` or ``TBLC.+MODE+`` is equal to ``+PRILPM+``:
+ .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+``:
   ... Let ``TBLS`` be ``+NON_LPM+``.
   ... Result in table entry state ``TBLS`` and ``+_+``.
 . Else if ``keysetExpression`` is equal to ``+(+`` ``+_+`` ``+)+``:
@@ -8770,7 +8767,7 @@ xref:TableEntry_keyset_ok[Typing ``keysetExpression``, under context ``TC`` and 
  .. If ``matchMode`` matches pattern ``NOPRILPM`` ``%``:
   ... Let ``TBLS`` be ``+LPM+`` ``0``.
   ... Result in table entry state ``TBLS`` and ``+(+`` ``+_+`` ``+)+``.
- .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+`` or ``TBLC.+MODE+`` is equal to ``+PRILPM+``:
+ .. If ``TBLC.+MODE+`` is equal to ``+NOPRI+`` or ``TBLC.+MODE+`` is equal to ``+PRI+``:
   ... Let ``TBLS`` be ``+NON_LPM+``.
   ... Result in table entry state ``TBLS`` and ``+(+`` ``+_+`` ``+)+``.
 
@@ -8820,7 +8817,7 @@ xref:TableEntry_priority_ok[Typing ``·``, under context ``TC`` and table contex
  .. Check that ``TBLS`` matches pattern ``LPM`` ``%``.
  .. Let ``+LPM+`` ``n~prefix~`` be ``TBLS``.
  .. Result in table context ``tableContext`` and ``+PRIORITY+`` ``+=+`` ``+D+`` ``n~prefix~`` ``+:+``.
-. If ``tableContext.+MODE+`` is equal to ``+PRI+`` or ``tableContext.+MODE+`` is equal to ``+PRILPM+``:
+. If ``tableContext.+MODE+`` is ``PRI``:
  .. If ``tableContext.+PRIORITIES+.+VALUES+`` is equal to ``·``:
   ... Let ``b~lw~`` be ``tableContext.+PRIORITIES+.+LARGEST_WINS+``.
   ... Let ``n~size~`` be ``tableContext.+ENTRIES+.+SIZE+``.
@@ -8842,7 +8839,7 @@ xref:TableEntry_priority_ok[Typing ``·``, under context ``TC`` and table contex
 
 xref:TableEntry_priority_ok[Typing ``+PRIORITY+`` ``+=+`` ``integerLiteral`` ``+:+``, under context ``TC`` and table context ``tableContext``, and table entry state ``TBLS``]:
 
-. Check that ``tableContext.+MODE+`` is equal to ``+PRI+`` or ``tableContext.+MODE+`` is equal to ``+PRILPM+``.
+. Check that ``tableContext.+MODE+`` is ``PRI``.
 . Check that ``~tableContext.+ENTRIES+.+CONST+``.
 . If ``tableContext.+PRIORITIES+.+VALUES+`` is equal to ``·``:
  .. Let ``n`` be xref:option_get[*!*] xref:nat_of_integerValue[the natural number representation of  ``integerLiteral``].
@@ -8857,7 +8854,7 @@ xref:TableEntry_priority_ok[Typing ``+PRIORITY+`` ``+=+`` ``integerLiteral`` ``+
 
 xref:TableEntry_priority_ok[Typing ``+PRIORITY+`` ``+=+`` ``+(+`` ``expression`` ``+)+`` ``+:+``, under context ``TC`` and table context ``tableContext``, and table entry state ``TBLS``]:
 
-. Check that ``tableContext.+MODE+`` is equal to ``+PRI+`` or ``tableContext.+MODE+`` is equal to ``+PRILPM+``.
+. Check that ``tableContext.+MODE+`` is ``PRI``.
 . Check that ``~tableContext.+ENTRIES+.+CONST+``.
 . If ``tableContext.+PRIORITIES+.+VALUES+`` is equal to ``·``:
  .. Let ``typedExpressionIR`` be

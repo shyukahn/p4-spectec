@@ -8521,7 +8521,6 @@ syntax matchMode =
    | nopri
    | noprilpm nat
    | pri
-   | prilpm
 
 syntax tableContext = {keys matchKey*, actions matchAction*, priorities matchPriority, entries matchEntries, mode matchMode}
 
@@ -8579,36 +8578,31 @@ def $update_mode_tbl(tableContext, id, typeIR) : tableContext =
   -- if typeIR' <: newTypeIR
   -- let type _typeId typeIR = typeIR' as newTypeIR
 
-  clause 5 : (TBLC, text, typeIR) = TBLC[mode = prilpm]
-  -- if (text = "lpm")
-  -- if ~typeIR <: aliasTypeIR
-  -- if (TBLC.mode = pri)
+  clause 5 : (TBLC, text, _typeIR) = TBLC[mode = pri]
+  -- if (text = "range")
+  -- if (TBLC.mode = nopri)
 
   clause 6 : (TBLC, text, _typeIR) = TBLC[mode = pri]
-  -- if (text = "range")
+  -- if (text = "ternary")
   -- if (TBLC.mode = nopri)
 
   clause 7 : (TBLC, text, _typeIR) = TBLC[mode = pri]
-  -- if (text = "ternary")
-  -- if (TBLC.mode = nopri)
-
-  clause 8 : (TBLC, text, _typeIR) = TBLC[mode = pri]
   -- if (text = "optional")
   -- if (TBLC.mode = nopri)
 
-  clause 9 : (TBLC, text, _typeIR) = TBLC[mode = prilpm]
+  clause 8 : (TBLC, text, _typeIR) = TBLC[mode = pri]
   -- if (text = "range")
   -- let matchMode = TBLC.mode
   -- if matchMode matches `NOPRILPM%`
   -- let noprilpm _nat = matchMode
 
-  clause 10 : (TBLC, text, _typeIR) = TBLC[mode = prilpm]
+  clause 9 : (TBLC, text, _typeIR) = TBLC[mode = pri]
   -- if (text = "ternary")
   -- let matchMode = TBLC.mode
   -- if matchMode matches `NOPRILPM%`
   -- let noprilpm _nat = matchMode
 
-  clause 11 : (TBLC, text, _typeIR) = TBLC[mode = prilpm]
+  clause 10 : (TBLC, text, _typeIR) = TBLC[mode = pri]
   -- if (text = "optional")
   -- let matchMode = TBLC.mode
   -- if matchMode matches `NOPRILPM%`
@@ -14728,7 +14722,7 @@ relation TableEntry_keyset_ok: typingContext tableContext |- keysetExpression : 
 
     rulepath simple-non-noprilpm
     -- if (keysetExpression = default as keysetExpression)
-    -- if (((TBLC.mode = nopri) \/ (TBLC.mode = pri)) \/ (TBLC.mode = prilpm))
+    -- if ((TBLC.mode = nopri) \/ (TBLC.mode = pri))
     -- let TBLS = non_lpm
     -- output: % % |- % : TBLS default as keysetExpressionIR
 
@@ -14742,7 +14736,7 @@ relation TableEntry_keyset_ok: typingContext tableContext |- keysetExpression : 
 
     rulepath tuple-non-noprilpm
     -- if (keysetExpression = (default) as keysetExpression)
-    -- if (((TBLC.mode = nopri) \/ (TBLC.mode = pri)) \/ (TBLC.mode = prilpm))
+    -- if ((TBLC.mode = nopri) \/ (TBLC.mode = pri))
     -- let TBLS = non_lpm
     -- output: % % |- % : TBLS ( [default] ) as keysetExpressionIR
 
@@ -14765,7 +14759,7 @@ relation TableEntry_keyset_ok: typingContext tableContext |- keysetExpression : 
 
     rulepath simple-non-noprilpm
     -- if (keysetExpression = _ as keysetExpression)
-    -- if (((TBLC.mode = nopri) \/ (TBLC.mode = pri)) \/ (TBLC.mode = prilpm))
+    -- if ((TBLC.mode = nopri) \/ (TBLC.mode = pri))
     -- let TBLS = non_lpm
     -- output: % % |- % : TBLS _ as keysetExpressionIR
 
@@ -14779,7 +14773,7 @@ relation TableEntry_keyset_ok: typingContext tableContext |- keysetExpression : 
 
     rulepath tuple-non-noprilpm
     -- if (keysetExpression = (_) as keysetExpression)
-    -- if (((TBLC.mode = nopri) \/ (TBLC.mode = pri)) \/ (TBLC.mode = prilpm))
+    -- if ((TBLC.mode = nopri) \/ (TBLC.mode = pri))
     -- let TBLS = non_lpm
     -- output: % % |- % : TBLS ( [_] ) as keysetExpressionIR
 
@@ -14864,9 +14858,9 @@ relation TableEntry_priority_ok: typingContext tableContext tableEntryState |- t
     -- let lpm n_prefix = tableEntryState
     -- output: % % % |- % : TBLC ?(priority= d n_prefix as int :)
 
-    rulepath pri-prilpm-number-init
+    rulepath pri-number-init
     -- let TBLC_0 = tableContext
-    -- if ((TBLC_0.mode = pri) \/ (TBLC_0.mode = prilpm))
+    -- if (TBLC_0.mode = pri)
     -- if (TBLC_0.priorities.values = [])
     -- let b_lw = TBLC_0.priorities.largest_wins
     -- let n_size = TBLC_0.entries.size
@@ -14877,9 +14871,9 @@ relation TableEntry_priority_ok: typingContext tableContext tableEntryState |- t
     -- let TBLC_1 = $add_table_priority(TBLC_0, n)
     -- output: % % % |- % : TBLC_1 ?(priority= d n as int :)
 
-    rulepath pri-prilpm-number-non-init
+    rulepath pri-number-non-init
     -- let TBLC_0 = tableContext
-    -- if ((TBLC_0.mode = pri) \/ (TBLC_0.mode = prilpm))
+    -- if (TBLC_0.mode = pri)
     -- if (TBLC_0.priorities.values =/= [])
     -- let b_lw = TBLC_0.priorities.largest_wins
     -- let n_last = $find_table_priority_last(TBLC_0)
@@ -14903,8 +14897,8 @@ relation TableEntry_priority_ok: typingContext tableContext tableEntryState |- t
 
    paths
 
-    rulepath pri-prilpm-number-init
-    -- if ((TBLC_0.mode = pri) \/ (TBLC_0.mode = prilpm))
+    rulepath pri-number-init
+    -- if (TBLC_0.mode = pri)
     -- if ~TBLC_0.entries.const
     -- if (TBLC_0.priorities.values = [])
     -- let nat?{nat <- nat?} = $nat_of_integerValue(integerLiteral as integerValue)
@@ -14914,8 +14908,8 @@ relation TableEntry_priority_ok: typingContext tableContext tableEntryState |- t
     -- let TBLC_2 = $add_table_priority(TBLC_1, n)
     -- output: % % % |- % : TBLC_2 ?(priority= integerLiteral :)
 
-    rulepath pri-prilpm-number-non-init
-    -- if ((TBLC_0.mode = pri) \/ (TBLC_0.mode = prilpm))
+    rulepath pri-number-non-init
+    -- if (TBLC_0.mode = pri)
     -- if ~TBLC_0.entries.const
     -- if (TBLC_0.priorities.values =/= [])
     -- if TBLC_0.priorities.init
@@ -14938,8 +14932,8 @@ relation TableEntry_priority_ok: typingContext tableContext tableEntryState |- t
 
    paths
 
-    rulepath pri-prilpm-expression-init
-    -- if ((TBLC_0.mode = pri) \/ (TBLC_0.mode = prilpm))
+    rulepath pri-expression-init
+    -- if (TBLC_0.mode = pri)
     -- if ~TBLC_0.entries.const
     -- if (TBLC_0.priorities.values = [])
     -- Expr_ok: local TC |- expression : typedExpressionIR
@@ -14954,8 +14948,8 @@ relation TableEntry_priority_ok: typingContext tableContext tableEntryState |- t
     -- let TBLC_2 = $add_table_priority(TBLC_1, n)
     -- output: % % % |- % : TBLC_2 ?(priority= d n as int :)
 
-    rulepath pri-prilpm-expression-non-init
-    -- if ((TBLC_0.mode = pri) \/ (TBLC_0.mode = prilpm))
+    rulepath pri-expression-non-init
+    -- if (TBLC_0.mode = pri)
     -- if ~TBLC_0.entries.const
     -- if (TBLC_0.priorities.values =/= [])
     -- if TBLC_0.priorities.init

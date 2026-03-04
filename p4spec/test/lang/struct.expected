@@ -11845,7 +11845,6 @@ syntax matchMode =
    | nopri
    | noprilpm nat
    | pri
-   | prilpm
 
 syntax tableContext = {keys matchKey*, actions matchAction*, priorities matchPriority, entries matchEntries, mode matchMode}
 
@@ -11921,12 +11920,6 @@ def $update_mode_tbl(TBLC, text, typeIR)
 
           1. Return $update_mode_tbl(TBLC, "lpm", typeIR')
 
-    2. If (~(typeIR has type aliasTypeIR)), then
-
-      1. If ((TBLC.mode matches pattern `PRI`)), then
-
-        1. Return TBLC[mode = (prilpm)]
-
   2. Case (% = "range")
 
     1. If ((TBLC.mode matches pattern `NOPRI`)), then
@@ -11937,7 +11930,7 @@ def $update_mode_tbl(TBLC, text, typeIR)
 
       1. If ((matchMode matches pattern `NOPRILPM%`)), then
 
-        1. Return TBLC[mode = (prilpm)]
+        1. Return TBLC[mode = (pri)]
 
   3. Case (% = "ternary")
 
@@ -11949,7 +11942,7 @@ def $update_mode_tbl(TBLC, text, typeIR)
 
       1. If ((matchMode matches pattern `NOPRILPM%`)), then
 
-        1. Return TBLC[mode = (prilpm)]
+        1. Return TBLC[mode = (pri)]
 
   4. Case (% = "optional")
 
@@ -11961,7 +11954,7 @@ def $update_mode_tbl(TBLC, text, typeIR)
 
       1. If ((matchMode matches pattern `NOPRILPM%`)), then
 
-        1. Return TBLC[mode = (prilpm)]
+        1. Return TBLC[mode = (pri)]
 
 2. Otherwise,
 
@@ -19561,7 +19554,7 @@ relation TableEntry_keyset_ok: TC TBLC |- keysetExpression : % %
 
         1. Else Phantom#1043
 
-      2. If ((((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri))) \/ (TBLC.mode = (prilpm)))), then
+      2. If (((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri)))), then
 
         1. (Let TBLS be (non_lpm))
 
@@ -19583,7 +19576,7 @@ relation TableEntry_keyset_ok: TC TBLC |- keysetExpression : % %
 
         1. Else Phantom#1045
 
-      2. If ((((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri))) \/ (TBLC.mode = (prilpm)))), then
+      2. If (((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri)))), then
 
         1. (Let TBLS be (non_lpm))
 
@@ -19609,7 +19602,7 @@ relation TableEntry_keyset_ok: TC TBLC |- keysetExpression : % %
 
         1. Else Phantom#1048
 
-      2. If ((((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri))) \/ (TBLC.mode = (prilpm)))), then
+      2. If (((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri)))), then
 
         1. (Let TBLS be (non_lpm))
 
@@ -19629,7 +19622,7 @@ relation TableEntry_keyset_ok: TC TBLC |- keysetExpression : % %
 
         1. Else Phantom#1050
 
-      2. If ((((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri))) \/ (TBLC.mode = (prilpm)))), then
+      2. If (((TBLC.mode = (nopri)) \/ (TBLC.mode = (pri)))), then
 
         1. (Let TBLS be (non_lpm))
 
@@ -19739,7 +19732,7 @@ relation TableEntry_priority_ok: TC tableContext TBLS |- (tableEntryPriority)? :
 
         1. Else Phantom#1061
 
-      3. If (((tableContext.mode = (pri)) \/ (tableContext.mode = (prilpm)))), then
+      3. If ((tableContext.mode matches pattern `PRI`)), then
 
         1. Case analysis on tableContext.priorities.values
 
@@ -19797,7 +19790,7 @@ relation TableEntry_priority_ok: TC tableContext TBLS |- (tableEntryPriority)? :
 
             1. Group number: TC tableContext TBLS |- ?((priority= integerLiteral :)) : % %
 
-              1. If (((tableContext.mode = (pri)) \/ (tableContext.mode = (prilpm)))), then
+              1. If ((tableContext.mode matches pattern `PRI`)), then
 
                 1. If (~tableContext.entries.const), then
 
@@ -19847,7 +19840,7 @@ relation TableEntry_priority_ok: TC tableContext TBLS |- (tableEntryPriority)? :
 
             1. Group expression: TC tableContext TBLS |- ?((priority=( expression ):)) : % %
 
-              1. If (((tableContext.mode = (pri)) \/ (tableContext.mode = (prilpm)))), then
+              1. If ((tableContext.mode matches pattern `PRI`)), then
 
                 1. If (~tableContext.entries.const), then
 
