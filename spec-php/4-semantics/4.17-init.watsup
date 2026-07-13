@@ -1,0 +1,134 @@
+;;
+;;;; Initialization (K: init.k)
+;;
+;; Builds the initial machine state before any user PHP code runs:
+;; the three scope arrays (current/global/super-global — global-static is a
+;; fourth, ported alongside since GSTATIC is already staged on config),
+;; the builtin-function wrapper table (4.16's raw builtins made callable from
+;; PHP source), the two builtin classes (stdClass, Exception), and the
+;; isEqualArray PHP-source function that 4.03's array comparison calls
+;; through the ordinary CALL machinery.
+;;
+;; INITSTATE is NOT wired to the top-level driver here — that happens in the
+;; top-level program driver (M12), which runs INITSTATE once before handing
+;; control to the parsed phpProgram, matching K's own split between
+;; buildInitState (this file) and whatever invokes it before `start`.
+;;
+;;; built as a chain of $add_map calls, one per builtin wrapper (K: |-> ...
+;;; entries in initBuiltinFunctions)
+dec $builtin_func_table(loc) : map<id, funcDef>
+def $builtin_func_table(loc) = $add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($add_map<id, funcDef>($empty_map<id, funcDef>, "current", { PARAMS ([ PARAMREF "x" ]), BODY ([ RETURN (BUILTIN "current" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "count", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "count" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "array_key_exists", { PARAMS ((PARAM "k") :: (PARAMREF "x") :: eps), BODY ([ RETURN (BUILTIN "array_key_exists" ((VAR "k") :: (VAR "x") :: eps)) ]), RET BYVALUE, STATICS loc }), "key", { PARAMS ([ PARAMREF "x" ]), BODY ([ RETURN (BUILTIN "key" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "next", { PARAMS ([ PARAMREF "x" ]), BODY ([ RETURN (BUILTIN "next" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "each", { PARAMS ([ PARAMREF "x" ]), BODY ([ RETURN (BUILTIN "each" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "reset", { PARAMS ([ PARAMREF "x" ]), BODY ([ RETURN (BUILTIN "reset" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "var_dump", { PARAMS ([ PARAM "x" ]), BODY ([ EXPR (BUILTIN "var_dump" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "print_r", { PARAMS ([ PARAM "x" ]), BODY ([ EXPR (BUILTIN "print_r" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "strlen", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "strlen" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "substr", { PARAMS ((PARAM "str") :: (PARAM "start") :: (PARAMDEFAULT "len" (LITINT 999)) :: eps), BODY ([ RETURN (BUILTIN "substr" ((VAR "str") :: (VAR "start") :: (VAR "len") :: eps)) ]), RET BYVALUE, STATICS loc }), "define", { PARAMS ((PARAM "name") :: (PARAM "value") :: eps), BODY ([ RETURN (BUILTIN "define" ((VAR "name") :: (VAR "value") :: eps)) ]), RET BYVALUE, STATICS loc }), "gettype", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "gettype" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "defined", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "defined" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "is_float", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "is_float" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "is_string", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "is_string" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "is_array", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "is_array" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "is_scalar", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "is_scalar" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "is_numeric", { PARAMS ([ PARAM "x" ]), BODY ([ RETURN (BUILTIN "is_numeric" ([ VAR "x" ])) ]), RET BYVALUE, STATICS loc }), "user_input", { PARAMS eps, BODY ([ RETURN (BUILTIN "user_input" eps) ]), RET BYVALUE, STATICS loc })
+
+
+rule Step/initstate:
+  `< (INITSTATE :: kitem*) `; config > ~>
+  `< (INITSCOPES :: INITBUILTINFUNCS :: INITBUILTINCLASSES :: INITSUPERGLOBALS
+     :: BUILDARRAYCOMPAREFUN :: kitem*) `; config >
+
+;;
+;;;; Scopes (K: initScopes)
+;;
+;; Four fresh empty arrays: current==global (the top-level scope is the
+;; global scope, matching K's initScopes setting both cells to the same
+;; fresh Loc), the super-global scope, and the global static-locals scope.
+;;
+
+rule Step/initscopes:
+  `< (INITSCOPES :: kitem*) `; config > ~>
+  `< kitem* `; config_4 >
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc_g ] `; config_0 >
+  -- if config_1 = config_0[.HEAP = $inc_ref_count(config_0.HEAP, loc_g)]
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config_1 > ~> `< [ loc_sg ] `; config_2 >
+  -- if config_3 = config_2[.HEAP = $inc_ref_count(config_2.HEAP, loc_sg)]
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config_3 > ~> `< [ loc_gs ] `; config_3_5 >
+  -- if config_4 = config_3_5[.HEAP = $inc_ref_count(config_3_5.HEAP, loc_gs)]
+       [.CRNT = loc_g] [.GLOB = loc_g] [.SUPERGLOB = loc_sg] [.GSTATIC = loc_gs]
+
+;;
+;;;; Superglobals (K: initSuperGlobals)
+;;
+;; $_GET/$_COOKIE/$_POST are initialized to empty arrays; $GLOBALS is a
+;; reference alias for the global scope array itself (K: ReferenceAssign to
+;; the global scope's own Loc — a genuinely self-referential/aliasing setup,
+;; ported exactly as K does it: a ref-assign whose RHS is a bare loc, using
+;; REFASSIGNTO directly since there is no surface expr that already denotes
+;; "the global scope's own location").
+;;
+
+rule Step/initsuperglobals:
+  `< (INITSUPERGLOBALS :: kitem*) `; config > ~>
+  `< ((EXPR (ASSIGN (VAR "_GET") (ARRLIT eps))) :: POPV ::
+      (EXPR (ASSIGN (VAR "_COOKIE") (ARRLIT eps))) :: POPV ::
+      (EXPR (ASSIGN (VAR "_POST") (ARRLIT eps))) :: POPV ::
+      (REFASSIGNTO (REF config.SUPERGLOB (STR "GLOBALS")) config.GLOB) :: POPV ::
+      kitem*) `; config >
+
+;;
+;;;; Builtin classes (K: initBuiltinClasses — stdClass, Exception)
+;;
+;; Built directly as classDecl-shaped kitems rather than re-parsing PHP
+;; source text, matching K's own approach of constructing the class AST
+;; literally in init.k.
+;;
+
+rule Step/initbuiltinclasses:
+  `< (INITBUILTINCLASSES :: kitem*) `; config > ~>
+  `< ((CLASSDECL "stdClass" eps eps) :: (CLASSDECL "Exception" eps
+       ((PROPS (MODS PUB false) ([ PDECL "errorMsg" eps ])) ::
+        (METHOD (MODS PUB false) false "Exception" ([ PARAM "msg" ])
+           ([ EXPR (ASSIGN (PROP (VAR "this") "errorMsg") (VAR "msg")) ])) ::
+        (METHOD (MODS PUB false) false "getMessage" eps
+           ([ RETURN (PROP (VAR "this") "errorMsg") ])) :: eps))
+     :: kitem*) `; config >
+
+;;
+;;;; Builtin function wrapper table (K: initBuiltinFunctions)
+;;
+;; Each entry is a real funcDef whose one-statement body calls the raw
+;; BUILTIN kitem (4.16) — this is what makes `count($x)` in PHP source
+;; resolve through the ordinary CALL/RUNFUNC machinery (4.08) into the
+;; actual builtin logic. Every wrapper shares K's single fresh static-locals
+;; scope location L (K reuses one L across all these funcDefs — none of
+;; these funcDefs ever declares a `static` local, so the shared scope is
+;; never actually touched; ported faithfully rather than allocating one each).
+;;
+
+rule Step/initbuiltinfuncs:
+  `< (INITBUILTINFUNCS :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc ] `; config_0 >
+  -- if config_1 = config_0[.HEAP = $inc_ref_count(config_0.HEAP, loc)]
+       [.FUNCS = $builtin_func_table(loc)]
+
+;;
+;;;; isEqualArray (K: buildArrayCompareFun)
+;;
+;; A real user-level PHP function, installed as parsed AST at init time
+;; (matching K's own approach — this is literal PHP semantics, not machine
+;; internals, so it is genuine source-shaped AST rather than a BUILTIN
+;; dispatch). 4.03's array comparison rules call it through the ordinary
+;; CALL machinery: count($op1) <=> count($op2) breaks ties by length, then a
+;; per-key structural comparison against $op2 decides <=>0 (K: 'Less/'Greater
+;; sequenced through 'ElseIf, folded here into an IF/elseIf chain — an absent
+;; key in $op2, i.e. array_key_exists false, makes the two arrays unequal by
+;; kphp's own convention of returning NULL — 0 is not used for "unequal", it
+;; is reserved for count-tie AND full structural match, exactly as K writes it).
+;;
+
+rule Step/buildarraycomparefun:
+  `< (BUILDARRAYCOMPAREFUN :: kitem*) `; config > ~>
+  `< ((FUNDECL false "isEqualArray" ([ PARAM "op1", PARAM "op2" ])
+        ([ IF (BINOP LT (CALL "count" ([ ARG (VAR "op1") ])) (CALL "count" ([ ARG (VAR "op2") ])))
+                ([ RETURN (UNOP NEG (LITINT 1)) ])
+                ([ ELSEIF (BINOP GT (CALL "count" ([ ARG (VAR "op1") ])) (CALL "count" ([ ARG (VAR "op2") ])))
+                          ([ RETURN (LITINT 1) ]) ])
+                eps,
+           FOREACH (VAR "op1") (KEYVAL (VAR "key") (BYVAL (VAR "val")))
+             ([ IF (UNOP NOT (CALL "array_key_exists" ([ ARG (VAR "key"), ARG (VAR "op2") ])))
+                    ([ RETURN LITNULL ])
+                    ([ ELSEIF (BINOP LT (VAR "val") (ARRACC (VAR "op2") (VAR "key")))
+                              ([ RETURN (UNOP NEG (LITINT 1)) ]),
+                       ELSEIF (BINOP GT (VAR "val") (ARRACC (VAR "op2") (VAR "key")))
+                              ([ RETURN (LITINT 1) ]) ])
+                    eps ]),
+           RETURN (LITINT 0) ])) :: kitem*) `; config >

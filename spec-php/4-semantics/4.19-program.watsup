@@ -1,0 +1,49 @@
+;;
+;;;; Top-level driver (K: php.k's configuration `<k> buildInitState ~> $PGM
+;;;; </k>`, plus core.k's runScript / detectDeprecated / initStatic / start)
+;;
+;; The whole-program entry point: build the initial machine state, then run
+;; the parsed program through the two compile-time passes (4.18) before
+;; handing control to its (now-reordered, warning-annotated) top-level
+;; statements.
+;;
+;;   buildInitState ~> $PGM                                  (K: configuration.k)
+;;   runScript(Prog) => refactor(Prog) ~> detectDeprecated ~> initStatic
+;;   detectDeprecated: quotedCode(Prog) ~> detectDeprecated => detectDeprecated(Prog)
+;;   initStatic: visitedK(Prog) ~> initStatic
+;;                 => makeStaticDecls(Prog, GlobalStaticScopeLoc) ~> start
+;;   start: visitedK(Prog) ~> start => Prog
+;;
+;; Ported directly as one Step rule per stage rather than K's visitor-based
+;; staging (4.18's $refactor/$detect_deprecated_stmts are ordinary pure defs,
+;; so there is no need for K's quotedCode/visitedK boxing — the whole
+;; transformation happens in one rule's premises). makeStaticDecls itself is
+;; NOT ported (see 4.18's header: it is dead code in K — the STATIC statement
+;; has no active runtime semantics either way), so RUNSCRIPT's pipeline here
+;; is refactor ~> detectDeprecated ~> splice, matching K's *actual* (not
+;; aspirational) behavior.
+;;
+;; Trap rules for not-supported.k's remaining active-trap KLabels
+;; ('InterfaceDecl, 'RefValue, 'ErrorFree, 'HexaChar, 'MagicConstant,
+;; 'IncludeOnce) are intentionally absent: none of those constructs have any
+;; corresponding AST case anywhere in 1-surface (1.4's header already
+;; documents the omission), so no PHP program can ever produce a kitem for
+;; them to trap — the omission from the grammar IS the trap, exactly as for
+;; the other ~47 declared-only labels. The same reasoning closes out 4.04's
+;; forward reference for 'ArrayCast/'NullCast: castKind (1.1) simply has no
+;; case for them, so CAST can never carry one.
+;;
+
+;;; the whole-program entry point (K: <k> buildInitState ~> $PGM </k>). No
+;;; separate rule is needed to kick off INITSTATE itself: 4.17's Step/initstate
+;;; already matches (INITSTATE :: kitem*) and rewrites only the head, so
+;;; `INITSTATE :: phpProgram :: eps` (the state a run begins in) steps
+;;; directly through it, dispatching to INITSCOPES/.../BUILDARRAYCOMPAREFUN
+;;; and leaving `phpProgram :: eps` as the untouched tail, which then runs
+;;; via 4.02's DOCUMENT/TEMPLATEDOC rules into RUNSCRIPT below.
+
+rule Step/runscript:
+  `< ((RUNSCRIPT stmt*) :: kitem*) `; config > ~>
+  `< ($kitems($detect_deprecated_stmts(stmt_d*)) ++ $kitems($detect_deprecated_stmts(stmt_c*))
+     ++ kitem*) `; config >
+  -- if (stmt_d*, stmt_c*) = $refactor(stmt*)

@@ -1,0 +1,143 @@
+;;
+;;;; Expressions
+;;
+;; K constructors folded here:
+;;   'LNumber('Deci)/'DNumber/'Literal/'True/'False/'Null  -> literals
+;;   'Variable('Simple)/'IndirectReference                 -> VAR / VARVAR
+;;   'ArrayAccess                                          -> ARRACC
+;;   'Assign/'ReferenceAssign/'ListAssign                  -> ASSIGN / REFASSIGN / LISTASSIGN
+;;   'Plus/'Min/'Mul/.../'IsEqual/.../'LAnd/'LOr/'LXor      -> BINOP binop
+;;   '<Op>Assign (PlusAssign, ConcatAssign, ...)           -> ASSIGNOP binop
+;;   'Not/'Negative/'Positive/'PreInc/.../'PostDec         -> UNOP unop
+;;   'IntCast/'StringCast/'BoolCast/'FloatCast/'ObjectCast -> CAST castKind
+;;   'FunctionCall/'StaticFunctionCall/method-call         -> CALL / SCALL / MCALL
+;;   'ObjectProperty access / 'ClassConstant / static prop -> PROP / CLSCONST / SPROP
+;;   'ObjectCreation/'Instanceof                           -> NEWOBJ / INSTANCEOF
+;;   'DoubleQuoted / 'SingleQuoted / 'Concat               -> DQSTR / LITSTR / BINOP CONCAT
+;;   'Print / 'Exit|'Die / 'Isset / 'Empty                 -> PRINT / EXIT / ISSET / EMPTY
+;;
+;; NOTE: expression literals keep a LIT prefix (LITINT vs runtime INT) because
+;; kitem unions expr with runtime value, and K rewrites literals INTO values
+;; (e.g. 'LNumber('Deci("5")) => 5) — the two must stay distinct constructors.
+;;
+
+;;; Binary operators (K per-label -> one enum)
+syntax binop =
+  | ADD                  ;; 'Plus
+  | SUB                  ;; 'Min
+  | MUL                  ;; 'Mul
+  | DIV                  ;; 'Div
+  | MOD                  ;; 'Mod
+  | CONCAT               ;; 'Concat
+  | EQ                   ;; 'IsEqual
+  | NEQ                  ;; 'IsNotEqual
+  | IDEQ                 ;; 'IsIdentical
+  | NIDEQ                ;; 'IsNotIdentical
+  | LT                   ;; 'Less
+  | GT                   ;; 'Greater
+  | LE                   ;; 'LessEqual
+  | GE                   ;; 'GreaterEqual
+  | LAND                 ;; 'LAnd / 'And
+  | LOR                  ;; 'LOr / 'Or
+  | LXOR                 ;; 'LXor
+
+;;; Unary operators
+syntax unop =
+  | NOT                  ;; 'Not
+  | NEG                  ;; 'Negative
+  | POS                  ;; 'Positive
+  | PREINC               ;; 'PreInc
+  | PREDEC               ;; 'PreDec
+  | POSTINC              ;; 'PostInc
+  | POSTDEC              ;; 'PostDec
+
+;;; Cast kinds ('ArrayCast/'NullCast are trapped as unsupported, see 4.19)
+syntax castKind =
+  | CINT
+  | CSTRING
+  | CBOOL
+  | CFLOAT
+  | COBJECT
+
+;;; Class reference: a bare class name, or self/parent (K scope-resolution.k)
+syntax classRef =
+  | CNAME id
+  | CSELF
+  | CPARENT
+
+;;; Call arguments: by value or by reference (K 'Ref wrapper in call position)
+syntax arg =
+  | ARG expr
+  | ARGREF expr
+
+;;; list() destructuring pattern element: a hole, a target expr, or a nested list
+syntax listPattern
+syntax listElem =
+  | BLANK
+  | ELEM expr
+  | NEST listPattern
+syntax listPattern = LIST listElem*
+
+;;; array literal item: optional key expression + value expression
+syntax arrItem = ITEM expr? expr
+
+;;; floats appear in literals; defined in the runtime domain (2-runtime/2.0)
+syntax float
+
+;;
+;;;; The expression type
+;;
+
+syntax expr =
+  ;; literals
+  | LITINT int
+  | LITFLOAT float
+  | LITSTR text
+  | LITBOOL bool
+  | LITNULL
+  | DQSTR dqPart*                        ;; double-quoted (interpolated) string
+  ;; variables
+  | VAR id                               ;; $name
+  | VARVAR expr                          ;; $$e  (indirect reference)
+  ;; array access ('ArrayAccess(base, keyExpr?) ; no-key = append)
+  | ARRACC expr expr?
+  ;; array literal ('Array of 'Pair('Key?, 'Value))
+  | ARRLIT arrItem*
+  ;; assignment
+  | ASSIGN expr expr                     ;; $l = e
+  | REFASSIGN expr expr                  ;; $l =& e
+  | ASSIGNOP binop expr expr             ;; $l op= e (compound assignment)
+  | LISTASSIGN listPattern expr          ;; list(...) = e
+  ;; operators
+  | BINOP binop expr expr
+  | UNOP unop expr
+  | TERNARY expr expr expr               ;; e ? e : e
+  | CAST castKind expr
+  | INSTANCEOF expr classRef
+  ;; tests
+  | ISSET expr*                          ;; isset($a, $b, ...)
+  | EMPTY expr                           ;; empty($a)
+  ;; names
+  | CONSTANT id                          ;; a bare constant reference
+  | CLSCONST classRef id                 ;; C::CONST
+  | SPROP classRef id                    ;; C::$prop  (static property)
+  ;; objects
+  | PROP expr id                         ;; $o->prop
+  | NEWOBJ id arg*                       ;; new C(args)
+  ;; calls
+  | CALL id arg*                         ;; f(args)
+  | SCALL classRef id arg*               ;; C::m(args)
+  | MCALL expr id arg*                   ;; $o->m(args)
+  ;; io-ish expressions
+  | PRINT expr                           ;; print e  (yields 1)
+  | EXIT expr?                           ;; exit / die (optional message)
+  ;; internal-only: the raw builtin dispatch a builtin-wrapper funcDef's body
+  ;; calls (K: bare builtin syntax like `count(K) [strict]`, `current(K)
+  ;; [strict]`, distinct from an ordinary 'FunctionCall — the wrapper funcDefs
+  ;; installed by init.k (4.17) are the only place this ever appears; no
+  ;; surface PHP syntax ever produces it)
+  | BUILTIN id expr*                     ;; e.g. BUILTIN "count" [VAR "x"]
+  ;; internal-only: wraps an expr with a preceding deprecation warning; never
+  ;; produced by the parser — inserted by detectDeprecated (4.18) in place of
+  ;; a `$x =& new C(...)` node it finds anywhere in the program
+  | DEPRECATEDWARN expr

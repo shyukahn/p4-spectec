@@ -1,0 +1,64 @@
+;;
+;;;; References (K: memory.k Ref/BasicRef/LRef, shared.k thisTag)
+;;
+;; A basic reference is a slot: (location of an array/environment, key).
+;; A chained reference lref(r, k, t) denotes slot k inside the compound value
+;; reached through r, where t records what to auto-vivify on lvalue access
+;; (arr = missing base becomes an empty array, obj = a bare stdClass object,
+;; nul = plain NULL; K: RefType).
+;;
+
+;;; vivification mode of a chained reference (K: RefType ::= arr | obj | nul)
+syntax refType =
+  | ARR
+  | OBJ
+  | NUL
+
+;;; forward declaration: lref recursively contains phpRef
+syntax phpRef
+
+;;; basic reference: slot (array location, key)
+syntax basicRef = REF loc key
+
+;;; chained reference
+syntax lref = LREF phpRef key refType
+
+syntax phpRef =
+  | basicRef
+  | lref
+  | REFNULL                      ;; K: refNull
+
+;;; the tag wrapping $this (K: thisTag(Loc)); a KResult but not a value, so
+;;; that assignment to $this can be trapped as a fatal error
+syntax thisTag = THIS loc
+
+;;
+;;;; The value union (completing 2.1)
+;;
+
+;;; Semantic values: hidden from the programmer, needed by the semantics
+syntax semanticValue =
+  | loc
+  | phpRef
+
+;;; Values = language values + semantic values
+syntax value =
+  | languageValue
+  | semanticValue
+
+;;; Results of evaluation (K: KResult = Value, plus isKResult(thisTag));
+;;; evaluation premises in the Step rules require this shape
+syntax kResult =
+  | value
+  | thisTag
+
+;;; things that resolve to a location (K: ConvertibleToLoc, shared.k)
+syntax convertibleToLoc =
+  | literalValue
+  | phpRef
+  | thisTag
+
+;;; things that resolve to a language value (K: ConvertibleToLanguageValue)
+syntax convertibleToLangValue =
+  | loc
+  | convertibleToLoc

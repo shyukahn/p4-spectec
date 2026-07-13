@@ -1,0 +1,23 @@
+;;
+;;;; Constants (K: constants.k)
+;;
+;; Constants are populated via the define() builtin (deferred to M11,
+;; builtin-functions.k); this file only ports the read side — CONSTANT id
+;; looks the name up, or falls back to the bare name as a string if
+;; undeclared (K's historical PHP behavior for unknown bareword constants).
+;;
+
+var constsMap : map<id, value>
+
+dec $constant_value(map<id, value>, id) : value
+def $constant_value(constsMap, id) = value
+  -- if value = $find_map<id, value>(constsMap, id)
+def $constant_value(constsMap, id) = STR id
+  -- if value? = $find_map<id, value>(constsMap, id)
+  -- if ~ $is_some_<value>(value?)
+
+;;; (K: constant-declared / constant-undeclared)
+rule Step/constant:
+  `< ((CONSTANT id) :: kitem*) `; config > ~>
+  `< (value :: kitem*) `; config >
+  -- if value = $constant_value(config.CONSTS, id)

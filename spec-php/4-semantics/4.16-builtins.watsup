@@ -1,0 +1,713 @@
+;;
+;;;; Builtin functions (K: builtin-functions.k)
+;;
+;; kphp implements its ~21 builtins as bare internal K syntax (`count(K)
+;; [strict]`, `current(K) [strict]`, ...) that ordinary PHP source never
+;; produces directly — instead, init.k (4.17) pre-populates <functions> with
+;; wrapper funcDefs whose bodies call this raw internal syntax (e.g.
+;; `"count" |-> f(['Param(x)], ['Return(count(x))], ...)`), so `count($x)` in
+;; PHP source resolves through the ordinary user-function-call machinery
+;; (4.08) to a ONE-STATEMENT function body that invokes the ACTUAL builtin.
+;; This file ports that raw internal layer; 4.17 ports the wrapper-funcDef
+;; table that makes it reachable from PHP source.
+;;
+;; BUILTIN id expr* (declared in 1.1, marked internal-only there) is the
+;; port's stand-in for K's bare builtin syntax — the wrapper funcDef bodies
+;; built in 4.17 use it in RETURN position, e.g. RETURN (BUILTIN "count" [VAR
+;; "x"]). No surface PHP parse ever produces a BUILTIN node.
+;;
+;; current/next/reset/key have TWO layers in K, both ported here:
+;;   - the OUTER layer (K: current/next/reset/key, [strict]) resolves its
+;;     ConvertibleToLoc argument to a Loc, then — ONLY for current/next —
+;;     checks whether that Loc is the array currently being iterated by an
+;;     enclosing foreach, redirecting to the LOCAL COPY's cursor if so (K's
+;;     current-1a/1b/2a/2b/3/4, next-ignore/next-do-1/2/3); reset/key have no
+;;     such redirection in K, matching PHP (`reset`/`key` never special-case
+;;     the foreach-local-copy the way current/next do — kphp doesn't invent
+;;     that quirk for them);
+;;   - the INNER layer (K: myCurrent/myNext/reset's array case/key, all
+;;     taking a plain Loc) is exactly the CURRENTV/MYNEXTV/RESETV/KEYV kitems
+;;     already declared in 2.5 and already emitted by 4.06's foreach
+;;     desugaring — foreach calls the inner layer directly (it manages its
+;;     own loopFrame, so it never needs the outer redirection check on
+;;     itself). Their Step rules are given here, completing that M6/M7-era
+;;     forward dependency (elab was green throughout via partial relations).
+;;
+;; var_dump/print_r's recursive dump machinery ports K's dump_content /
+;; print_r_content faithfully, including the visibility-tag-driven property
+;; label formatting (public/protected/private) and the VARDUMPLVL-based
+;; indentation K threads through <varDumpLevel>.
+;;
+
+;;
+;;;; Pure helpers used by the rules below
+;;
+
+;;; the visibility-tagged property line prefix, e.g. ["x"]=> / ["x":protected]=>
+;;; / ["x":"C":private]=> (K: dump_content's three visibility cases)
+dec $prop_label(key, visibility) : text
+def $prop_label(INT i, PUB) = "[" ++ $int_to_text(i) ++ "]"
+def $prop_label(STR t, PUB) = "[\"" ++ t ++ "\"]"
+def $prop_label(STR t, PROT) = "[\"" ++ t ++ "\":protected]"
+def $prop_label(STR t, PRIV id) = "[\"" ++ t ++ "\":\"" ++ id ++ "\":private]"
+
+dec $indent_text(nat, text) : text
+def $indent_text(0, t_unit) = ""
+def $indent_text(n, t_unit) = t_unit ++ $indent_text(n_1, t_unit)
+  -- if n =/= 0
+  -- if n_1 = $(n - 1)
+
+dec $length(arrayEntry*) : int
+def $length(eps) = 0
+def $length(arrayEntry_h :: arrayEntry_t*) = $(1 + $length(arrayEntry_t*))
+
+;;; whether a foreach frame's tracked pair is centered on the given loc
+;;; (either side — K's current-1a matches the orig side, current-1b the
+;;; local-copy side, both redirecting to the local copy's own loc)
+dec $fe_matches(foreachArrayPair?, loc) : bool
+def $fe_matches(eps, loc) = false
+def $fe_matches(FEPAIR loc_orig loc_local?, loc) = loc_orig = loc \/ loc_local? = loc
+
+dec $fe_is_orig(foreachArrayPair?, loc) : bool
+def $fe_is_orig(eps, loc) = false
+def $fe_is_orig(FEPAIR loc_orig loc_local?, loc) = loc_orig = loc
+
+;;; redirect to the local-copy loc if the argument is the array currently
+;;; being iterated by an enclosing foreach; otherwise operate directly
+;;; (K: current-1a/1b/2a/2b/3/4, collapsed to one pure dispatch since all six
+;;; only differ in which Loc CURRENTV ends up targeting)
+dec $current_dispatch(loopFrame*, loc) : kitem
+def $current_dispatch(eps, loc) = CURRENTV loc
+def $current_dispatch((loopFrame_h :: loopFrame_t*), loc) = CURRENTV loc_local
+  -- if (FEPAIR loc loc_local) = loopFrame_h.FE
+def $current_dispatch((loopFrame_h :: loopFrame_t*), loc) = CURRENTV loc
+  -- if ~ $fe_matches(loopFrame_h.FE, loc)
+
+;;; next() on the array actively driving an enclosing foreach is ignored
+;;; (K: next-ignore); otherwise it runs normally (K: next-do-1/2/3)
+dec $next_dispatch(loopFrame*, loc) : kitem
+def $next_dispatch(eps, loc) = MYNEXTV loc
+def $next_dispatch((loopFrame_h :: loopFrame_t*), loc) = NULL
+  -- if (FEPAIR loc loc_local?) = loopFrame_h.FE
+def $next_dispatch((loopFrame_h :: loopFrame_t*), loc) = MYNEXTV loc
+  -- if ~ $fe_is_orig(loopFrame_h.FE, loc)
+
+dec $value_of_key(key) : value
+def $value_of_key(INT i) = INT i
+def $value_of_key(STR t) = STR t
+def $value_of_key(NULL) = NULL
+
+;;; reify a heap value back into a literal expr for splicing into an
+;;; ARRLIT-based result (K: convertToLanguageValue(L1)); scalars/NULL are the
+;;; only cases handled — a compound current-value (nested array/object) has
+;;; no literal-expr reification path in this port's AST (deviation: each()
+;;; on a compound-valued current entry is left undefined here, same status
+;;; as any other construct outside this port's AST scope; each() is itself
+;;; PHP-deprecated and kphp's own each() is rarely exercised on nested
+;;; compounds in practice)
+dec $expr_of_scalar_or_loc(loc, heap) : expr
+def $expr_of_scalar_or_loc(loc, heap) = $expr_of_scalar(scalarValue)
+  -- if scalarValue = $read(heap, loc)
+def $expr_of_scalar_or_loc(loc, heap) = LITNULL
+  -- if NULL = $read(heap, loc)
+
+dec $is_string_val(value) : bool
+def $is_string_val(STR t) = true
+def $is_string_val(value) = false
+  -- otherwise
+
+dec $text_of_string(value) : text
+def $text_of_string(STR t) = t
+
+;;; a substring, clamped to the source text's bounds (K's substrString is
+;;; assumed total on in-range non-negative arguments; clamping added here
+;;; since kphp's wrapper defaults Len to 999, routinely exceeding |t|; a
+;;; builtin like $text_at (3.1) since int-to-nat index conversion has no
+;;; direct watsup-level operator)
+builtin dec $text_slice(text, int, int) : text
+
+dec $type_name(value) : text
+def $type_name(INT i) = "int"
+def $type_name(FLOAT float) = "double"
+def $type_name(STR t) = "string"
+def $type_name(BOOL b) = "boolean"
+def $type_name(ARR arrayCursor? `{ arrayEntry* }) = "array"
+def $type_name(OID loc id n) = "object"
+def $type_name(NULL) = "NULL"
+
+;;
+;;;; Argument evaluation front door: BUILTIN id expr*
+;;
+;; Each builtin evaluates its own arguments its own way (some read a value,
+;; some resolve to a location without reading through it — current/next/etc.
+;; need the LOCATION, not a copied value, since they mutate the array's
+;; cursor in place). One rule per builtin name below; BUILTIN itself has no
+;; generic Step rule, only these per-name ones.
+;;
+
+;;
+;;;; array_key_exists (K: array_key_exists)
+;;
+
+rule Step/builtin-array-key-exists:
+  `< ((BUILTIN "array_key_exists" (expr_k :: expr_a :: eps)) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_3 >
+  -- Steps: `< [ expr_k ] `; config > ~> `< [ convertibleToLangValue_k ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue_k ] `; config_0 > ~> `< [ key_v ] `; config_1 >
+  -- Steps: `< [ expr_a ] `; config_1 > ~> `< [ convertibleToLangValue_a ] `; config_2 >
+  -- Steps: `< [ TOLV convertibleToLangValue_a ] `; config_2 > ~> `< [ (ARR arrayCursor? `{ arrayEntry* }) ] `; config_3 >
+  -- if b = $has_key(arrayEntry*, $key_of(key_v))
+
+;;
+;;;; count (K: count)
+;;
+
+rule Step/builtin-count-scalar:
+  `< ((BUILTIN "count" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((INT 1) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if ~ $is_compound(value) /\ ~ (value = NULL)
+
+rule Step/builtin-count-null:
+  `< ((BUILTIN "count" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((INT 0) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ NULL ] `; config_1 >
+
+rule Step/builtin-count-array:
+  `< ((BUILTIN "count" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((INT n) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ (ARR arrayCursor? `{ arrayEntry* }) ] `; config_1 >
+  -- if n = $length(arrayEntry*)
+
+;;; kphp's count-object rule reads the object's Loc but never actually
+;;; dispatches on the compound case beyond that — it is scheduled as
+;;; `count(L)` and then falls through to the scalar case, matching PHP4's
+;;; count(object)==1 for a non-Countable object (kphp implements no Countable
+;;; interface, so every object takes this path).
+rule Step/builtin-count-object:
+  `< ((BUILTIN "count" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((INT 1) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ (OID loc id n) ] `; config_1 >
+
+;;
+;;;; current / next / reset / key: outer (loop-context-aware) layer
+;;
+
+;;; the argument resolves to a location (K: current-arg2Loc / next-arg2Loc /
+;;; reset-arg-strict / key-arg2Loc)
+rule Step/builtin-current:
+  `< ((BUILTIN "current" ([ expr ])) :: kitem*) `; config > ~>
+  `< kitem_1 `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+  -- if kitem_1 = $current_dispatch(config_1.CTRL.LOOPSTACK, loc)
+
+rule Step/builtin-next:
+  `< ((BUILTIN "next" ([ expr ])) :: kitem*) `; config > ~>
+  `< kitem_1 `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+  -- if kitem_1 = $next_dispatch(config_1.CTRL.LOOPSTACK, loc)
+
+;;; reset/key have no foreach-local-copy redirection in K — straight through
+;;; to the inner layer (K: reset-arg-strict + reset-array/-scalar collapse to
+;;; RESETV; key-arg2Loc collapses to KEYV)
+rule Step/builtin-reset:
+  `< ((BUILTIN "reset" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((RESETV loc) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+
+rule Step/builtin-key:
+  `< ((BUILTIN "key" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((KEYV loc) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+
+;;
+;;;; current / next / reset / key: inner layer (K: myCurrent/myNext/reset/key,
+;;;; all on a plain Loc — shared with foreach's own cursor-advance kitems)
+;;
+
+rulegroup Step/currentv {
+
+  ;;; the loc holds an object: dereference to its property array and recurse
+  ;;; (K: current-obj)
+  rule Step/obj:
+    `< ((CURRENTV loc) :: kitem*) `; config > ~>
+    `< ((CURRENTV loc_1) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+
+  ;;; array with no cursor: false (K: current-none)
+  rule Step/none:
+    `< ((CURRENTV loc) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+
+  ;;; array with a cursor: the current element's location, read out
+  ;;; (K: current-some)
+  rule Step/some:
+    `< ((CURRENTV loc) :: kitem*) `; config > ~>
+    `< (value :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR (`[ key `, visibility ]) `{ arrayEntry* }) = zval.VAL
+    -- if loc_1 = $find_entry_vis(arrayEntry*, key, visibility)
+    -- if value = $read(config.HEAP, loc_1)
+
+  ;;; a scalar/NULL base: NULL (K: current-null)
+  rule Step/scalar:
+    `< ((CURRENTV loc) :: kitem*) `; config > ~>
+    `< (NULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+}
+
+rulegroup Step/mynextv {
+
+  ;;; object: dereference and recurse (K: my-next-obj)
+  rule Step/obj:
+    `< ((MYNEXTV loc) :: kitem*) `; config > ~>
+    `< ((MYNEXTV loc_1) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+
+  ;;; array: advance the cursor, then read the new current (K: my-next-not-last-item
+  ;;; / my-next-last-item, collapsed via $next_cursor; K's array recurses through
+  ;;; current(L) after the write, so this does too)
+  rule Step/array:
+    `< ((MYNEXTV loc) :: kitem*) `; config > ~>
+    `< ((CURRENTV loc) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR (`[ key `, visibility ]) `{ arrayEntry* }) = zval.VAL
+    -- if config_1 = config[.HEAP = $write(config.HEAP, ARR $next_cursor(arrayEntry*, key) `{ arrayEntry* }, loc)]
+
+  ;;; no cursor: stays false (K: my-next-none)
+  rule Step/none:
+    `< ((MYNEXTV loc) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+
+  ;;; scalar/NULL: NULL (K: next-scalar)
+  rule Step/scalar:
+    `< ((MYNEXTV loc) :: kitem*) `; config > ~>
+    `< (NULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+}
+
+rulegroup Step/resetv {
+
+  ;;; object: dereference and recurse (K: reset-obj)
+  rule Step/obj:
+    `< ((RESETV loc) :: kitem*) `; config > ~>
+    `< ((RESETV loc_1) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+
+  ;;; array: cursor to the head, then read (K: reset-array)
+  rule Step/array:
+    `< ((RESETV loc) :: kitem*) `; config > ~>
+    `< ((CURRENTV loc) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if config_1 = config[.HEAP = $write(config.HEAP, ARR $head_entry(arrayEntry*) `{ arrayEntry* }, loc)]
+
+  ;;; scalar/NULL: NULL (K: reset-scalar)
+  rule Step/scalar:
+    `< ((RESETV loc) :: kitem*) `; config > ~>
+    `< (NULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+}
+
+rulegroup Step/keyv {
+
+  ;;; object: dereference and recurse (K: key-obj)
+  rule Step/obj:
+    `< ((KEYV loc) :: kitem*) `; config > ~>
+    `< ((KEYV loc_1) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+
+  ;;; no cursor: false (K: key.none)
+  rule Step/none:
+    `< ((KEYV loc) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+
+  ;;; cursor present: the current key, as a value (K: key-some)
+  rule Step/some:
+    `< ((KEYV loc) :: kitem*) `; config > ~>
+    `< (value :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR (`[ key `, visibility ]) `{ arrayEntry* }) = zval.VAL
+    -- if value = $value_of_key(key)
+
+  ;;; scalar/NULL: NULL (K: key-scalar)
+  rule Step/scalar:
+    `< ((KEYV loc) :: kitem*) `; config > ~>
+    `< (NULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+}
+
+;;
+;;;; each (K: each)
+;;
+
+;;; outer layer: resolve the argument to a location (K: each-arg2Loc)
+rule Step/builtin-each:
+  `< ((BUILTIN "each" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((EACHV loc) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+
+rulegroup Step/eachv {
+
+  ;;; object: dereference and recurse (K: each-obj)
+  rule Step/obj:
+    `< ((EACHV loc) :: kitem*) `; config > ~>
+    `< ((EACHV loc_1) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+
+  ;;; scalar/NULL: NULL (K: each-scalar)
+  rule Step/scalar:
+    `< ((EACHV loc) :: kitem*) `; config > ~>
+    `< (NULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+  ;;; no cursor: false (K: each-none)
+  rule Step/none:
+    `< ((EACHV loc) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+
+  ;;; cursor present: advance it, then build the 4-entry result array with
+  ;;; the PRE-advance key/value under both numeric and named keys (K:
+  ;;; each-last / each-non-last — identical result shape, differing only in
+  ;;; whether the cursor lands on none or the next entry, via $next_cursor)
+  rule Step/some:
+    `< ((EACHV loc) :: kitem*) `; config > ~>
+    `< ((LITERAL (ARRLIT (ITEM (LITINT 0) (expr_k) :: ITEM (LITINT 1) (expr_v) ::
+                          ITEM (LITSTR "key") (expr_k) :: ITEM (LITSTR "value") (expr_v) :: eps)))
+       :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR (`[ key `, visibility ]) `{ arrayEntry* }) = zval.VAL
+    -- if loc_1 = $find_entry_vis(arrayEntry*, key, visibility)
+    -- if expr_k = $expr_of_key(key)
+    -- if expr_v = $expr_of_scalar_or_loc(loc_1, config.HEAP)
+    -- if config_1 = config[.HEAP = $write(config.HEAP, ARR $next_cursor(arrayEntry*, key) `{ arrayEntry* }, loc)]
+
+}
+
+;;
+;;;; strlen (K: strlen)
+;;
+
+rule Step/builtin-strlen:
+  `< ((BUILTIN "strlen" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((INT $(|t|)) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if t = $ite<text>($is_string_val(value), $text_of_string(value), $to_text(value))
+
+;;
+;;;; substr (K: substr; substrString/lengthString are K primitives with no
+;;;; visible negative-index handling in the K source shown — ported as a
+;;;; direct, non-negative start/length substring, matching what's actually
+;;;; specified; PHP's negative-start/negative-length semantics are not
+;;;; implemented, faithfully mirroring the K source's own scope)
+;;
+
+rule Step/builtin-substr:
+  `< ((BUILTIN "substr" (expr_s :: expr_start :: expr_len :: eps)) :: kitem*) `; config > ~>
+  `< ((STR $text_slice(t, i_start, i_len)) :: kitem*) `; config_3 >
+  -- Steps: `< [ expr_s ] `; config > ~> `< [ convertibleToLangValue_s ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue_s ] `; config_0 > ~> `< [ STR t ] `; config_1 >
+  -- Steps: `< [ expr_start ] `; config_1 > ~> `< [ convertibleToLangValue_i ] `; config_1_5 >
+  -- Steps: `< [ TOLV convertibleToLangValue_i ] `; config_1_5 > ~> `< [ value_start ] `; config_2 >
+  -- Steps: `< [ expr_len ] `; config_2 > ~> `< [ convertibleToLangValue_l ] `; config_2_5 >
+  -- Steps: `< [ TOLV convertibleToLangValue_l ] `; config_2_5 > ~> `< [ value_len ] `; config_3 >
+  -- if i_start = $to_int(value_start)
+  -- if i_len = $to_int(value_len)
+
+;;
+;;;; gettype (K: gettype)
+;;
+
+rule Step/builtin-gettype:
+  `< ((BUILTIN "gettype" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((STR $type_name(value)) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+
+;;
+;;;; define / defined (K: define / defined)
+;;
+
+rule Step/builtin-define:
+  `< ((BUILTIN "define" (expr_name :: expr_val :: eps)) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_3 >
+  -- Steps: `< [ expr_name ] `; config > ~> `< [ convertibleToLangValue_n ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue_n ] `; config_0 > ~> `< [ STR t_name ] `; config_1 >
+  -- Steps: `< [ expr_val ] `; config_1 > ~> `< [ convertibleToLangValue_v ] `; config_1_5 >
+  -- Steps: `< [ TOLV convertibleToLangValue_v ] `; config_1_5 > ~> `< [ scalarValue ] `; config_2 >
+  -- if value? = $find_map<id, value>(config_2.CONSTS, t_name)
+  -- if b = ~ $is_some_<value>(value?)
+  -- if config_3 = $ite<config>(b, config_2[.CONSTS = $add_map<id, value>(config_2.CONSTS, t_name, scalarValue)], config_2)
+
+rule Step/builtin-defined:
+  `< ((BUILTIN "defined" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ STR t ] `; config_1 >
+  -- if value? = $find_map<id, value>(config_1.CONSTS, t)
+  -- if b = $is_some_<value>(value?)
+
+;;
+;;;; is_float / is_string / is_array / is_scalar / is_numeric (K: is_type)
+;;
+
+rule Step/builtin-is-float:
+  `< ((BUILTIN "is_float" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if b = ($type_of(value) = FLOAT)
+
+rule Step/builtin-is-string:
+  `< ((BUILTIN "is_string" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL $is_string_val(value)) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+
+rule Step/builtin-is-array:
+  `< ((BUILTIN "is_array" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if b = ($type_of(value) = ARRAY)
+
+rule Step/builtin-is-scalar:
+  `< ((BUILTIN "is_scalar" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL $is_scalar(value)) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+
+;;; is_numeric on a string checks numeric-STRING format; on any other value
+;;; it falls back to $is_numeric (K: is-type-numeric-numericString2Number /
+;;; is-type-numeric, gated on notBool isStringType(V))
+rule Step/builtin-is-numeric-string:
+  `< ((BUILTIN "is_numeric" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL $is_numeric_text(t)) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ STR t ] `; config_1 >
+
+rule Step/builtin-is-numeric-other:
+  `< ((BUILTIN "is_numeric" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((BOOL $is_numeric(value)) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if ~ $is_string_val(value)
+
+;;
+;;;; user_input (K: user_input — reads the next line from <in>)
+;;
+;; NOT PORTED: K's label(S) (writes a <label> cell used only by the excluded
+;; model-checking.k harness, per the plan's documented omissions — it has no
+;; effect on observable PHP semantics).
+;;
+
+rule Step/builtin-user-input:
+  `< ((BUILTIN "user_input" eps) :: kitem*) `; config > ~>
+  `< ((STR t) :: kitem*) `; config_1 >
+  -- if t :: text_t* = config.IN
+  -- if config_1 = config[.IN = text_t*]
+
+;;
+;;;; var_dump (K: var_dump, dump_content, indentInc/indentDec, var_dump_indent)
+;;
+;; Outputs directly via PRINTV kitems spliced into the continuation, matching
+;; K's print(...) ~> print(...) ~> ... chains; VARDUMPLVL threads the nesting
+;; depth used to indent recursive array/object dumps.
+;;
+
+rule Step/builtin-vardump:
+  `< ((BUILTIN "var_dump" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((VARDUMPV loc) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+
+rulegroup Step/vardumpv {
+
+  ;;; array (K: vardump-array)
+  rule Step/array:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ("array(" ++ $int_to_text($length(arrayEntry*)) ++ ") {\n")))
+       :: INDENTINC :: (DUMPCONTENT arrayEntry*) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+
+  ;;; object (K: vardump-object)
+  rule Step/object:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ("object(" ++ id ++ ")#N (" ++ $int_to_text($length(arrayEntry*)) ++ ") {\n")))
+       :: INDENTINC :: (DUMPCONTENT arrayEntry*) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+
+  ;;; string (K: vardump-string; the &-prefix for a by-ref zval is omitted —
+  ;;; ISREF is bookkeeping only in this port's refcounting model, see 4.01)
+  rule Step/string:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ("string(" ++ $int_to_text($(|t|)) ++ ") \"" ++ t ++ "\"\n"))) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (STR t) = zval.VAL
+
+  ;;; bool (K: vardump-bool)
+  rule Step/boolean-true:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR "bool(true)\n")) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (BOOL true) = zval.VAL
+
+  rule Step/boolean-false:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR "bool(false)\n")) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (BOOL false) = zval.VAL
+
+  ;;; NULL (K: vardump-null)
+  rule Step/nullval:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR "NULL\n")) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if NULL = zval.VAL
+
+  ;;; int (K: vardump-int)
+  rule Step/integer:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ("int(" ++ $int_to_text(i) ++ ")\n"))) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (INT i) = zval.VAL
+
+  ;;; float (K: vardump-float)
+  rule Step/float:
+    `< ((VARDUMPV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ("float(" ++ $float_to_text(float) ++ ")\n"))) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (FLOAT float) = zval.VAL
+
+}
+
+;;; recursively dumps each array/object property, prefixed with its
+;;; visibility-tagged label (K: dump-content-1/-2/-3/-nil)
+rulegroup Step/dumpcontent {
+
+  rule Step/cons:
+    `< ((DUMPCONTENT ((`[ key `, visibility `, loc ]) :: arrayEntry_t*)) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ($indent_text(config.VARDUMPLVL, "  ") ++ $prop_label(key, visibility) ++ "=>\n")))
+       :: (PRINTV (STR $indent_text(config.VARDUMPLVL, "  ")))
+       :: (VARDUMPV loc) :: (DUMPCONTENT arrayEntry_t*) :: kitem*) `; config >
+
+  rule Step/nil:
+    `< ((DUMPCONTENT eps) :: kitem*) `; config > ~>
+    `< (INDENTDEC :: (PRINTV (STR "}\n")) :: kitem*) `; config >
+
+}
+
+rule Step/indentinc:
+  `< (INDENTINC :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config_1 = config[.VARDUMPLVL = $(config.VARDUMPLVL + 1)]
+
+;;; (K: indentDec on <varDumpLevel>, an unbounded Int there but always
+;;; paired with a prior indentInc in practice; guarded here since VARDUMPLVL
+;;; is nat)
+rule Step/indentdec:
+  `< (INDENTDEC :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config.VARDUMPLVL =/= 0
+  -- if n_1 = $(config.VARDUMPLVL - 1)
+  -- if config_1 = config[.VARDUMPLVL = n_1]
+
+;;
+;;;; print_r (K: print_r, print_r_content, print_r_indent)
+;;
+
+rule Step/builtin-print-r:
+  `< ((BUILTIN "print_r" ([ expr ])) :: kitem*) `; config > ~>
+  `< ((PRINTRV loc) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+
+rulegroup Step/printrv {
+
+  ;;; array (K: printr-array)
+  rule Step/array:
+    `< ((PRINTRV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR "Array\n")) :: (PRINTV (STR $indent_text($(config.VARDUMPLVL * 2), " ")))
+       :: (PRINTV (STR "(\n")) :: INDENTINC :: (PRINTRCONTENT arrayEntry*) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+
+  ;;; object (K: printr-object)
+  rule Step/object:
+    `< ((PRINTRV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR (id ++ " Object\n"))) :: (PRINTV (STR $indent_text($(config.VARDUMPLVL * 2), " ")))
+       :: (PRINTV (STR "(\n")) :: INDENTINC :: (PRINTRCONTENT arrayEntry*) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+
+  ;;; string (K: printr-string)
+  rule Step/string:
+    `< ((PRINTRV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR t)) :: (PRINTV (STR "\n")) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (STR t) = zval.VAL
+
+  ;;; everything else prints its normal text conversion (K: printr-other)
+  rule Step/other:
+    `< ((PRINTRV loc) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ($to_text(zval.VAL)))) :: (PRINTV (STR "\n")) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ ($type_of(zval.VAL) = ARRAY) /\ ~ $is_string_val(zval.VAL) /\ ~ ($type_of(zval.VAL) = OBJECT)
+
+}
+
+;;; (K: printr-content-1/-2/-3/-nil; the outer PRINTRCONTENT closes with just
+;;; indentDec — no trailing "}\n" print, unlike dump_content's — matching K
+;;; exactly: the caller already printed the opening "(\n" and this only ever
+;;; needs to undo the indent)
+rulegroup Step/printrcontent {
+
+  rule Step/cons:
+    `< ((PRINTRCONTENT ((`[ key `, visibility `, loc ]) :: arrayEntry_t*)) :: kitem*) `; config > ~>
+    `< ((PRINTV (STR ($indent_text(n_1, "    ") ++ $prop_label(key, visibility) ++ "=> ")))
+       :: (PRINTRV loc) :: (PRINTRCONTENT arrayEntry_t*) :: kitem*) `; config >
+    -- if n_1 = $(config.VARDUMPLVL * 2 - 1)
+
+  rule Step/nil:
+    `< ((PRINTRCONTENT eps) :: kitem*) `; config > ~>
+    `< (INDENTDEC :: kitem*) `; config >
+
+}

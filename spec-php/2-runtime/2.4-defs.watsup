@@ -1,0 +1,35 @@
+;;
+;;;; Definition-table entries (K: <functions>/<classes> cell contents)
+;;
+
+;;; return mode of a function/method (K: @byValue / @byRef)
+syntax retMode =
+  | BYVALUE
+  | BYREF
+
+;;; function definition (K: f(Parameters, Body, RetType, LStatic));
+;;; STATICS is the location of the function's static-locals scope array
+syntax funcDef =
+  { PARAMS param*,
+    BODY stmt*,
+    RET retMode,
+    STATICS loc }
+
+;;; method definition (K: method(FunDef, Visibility, StaticOrNot))
+syntax methodDef =
+  { FUN funcDef,
+    VIS visibility,
+    STATIC bool }
+
+;;; instance property in a class definition (K: prop(Name, Visibility, DefValue);
+;;; kphp normalizes missing defaults to NULL — folded here to LITNULL)
+syntax classProp = PROP id visibility expr
+
+;;; class definition (K: class(ParentName, PropsList, MethodsMap, StaticScopeLoc));
+;;; PARENT is "ROOT" for classes without a parent (kphp's sentinel);
+;;; STATICS is the location of the class's static-properties scope array
+syntax classDef =
+  { PARENT id,
+    PROPS classProp*,
+    METHODS map<id, methodDef>,
+    STATICS loc }

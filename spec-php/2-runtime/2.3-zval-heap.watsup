@@ -1,0 +1,32 @@
+;;
+;;;; zvals and the heap (K: memory.k zval / <heap> cell)
+;;
+;; A zval stores a value together with its runtime type, a reference count and
+;; the is-reference flag, faithfully mirroring Zend PHP5:
+;;   K: zval(Value, Type, RefCount, IsRef)
+;; The heap maps locations to zvals. Refcount/copy-on-write discipline is
+;; implemented by the memory operations in 4-semantics/4.01-memory.watsup.
+;;
+
+;; REFS is an int, as in K: kphp's dec-refCount-3 decrements refCount even at 0,
+;; so refcounts can go negative (they are bookkeeping, never used for freeing —
+;; gc is disabled).
+syntax zval =
+  { VAL value,
+    TYPE phpType,
+    REFS int,
+    ISREF bool }
+
+syntax heap = map<loc, zval>
+
+;;; pure heap accessors (K's zvalDestroy is declared but never invoked, so no
+;;; removal operation is needed)
+
+dec $find_heap(heap, loc) : zval?
+def $find_heap(heap, loc) = $find_map<loc, zval>(heap, loc)
+
+dec $add_heap(heap, loc, zval) : heap
+def $add_heap(heap, loc, zval) = $add_map<loc, zval>(heap, loc, zval)
+
+dec $update_heap(heap, loc, zval) : heap
+def $update_heap(heap, loc, zval) = $update_map<loc, zval>(heap, loc, zval)

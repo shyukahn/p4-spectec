@@ -1,0 +1,225 @@
+;;
+;;;; Program transformations (K: program-transformations.k)
+;;
+;; Two compile-time passes over the parsed top-level statement list, run once
+;; by runScript (4.19) before the program starts executing:
+;;   - refactor:          hoist top-level function declarations ahead of every
+;;                         other top-level statement, preserving each group's
+;;                         relative order (K: refactor-cons-fun/-cons-no-fun/
+;;                         -nil, run). Class declarations are NOT hoisted —
+;;                         K's predicate only tests 'FunctionDecl, so a
+;;                         'Class stays exactly where it was among the
+;;                         "commands" and runs in its natural top-to-bottom
+;;                         position (confirmed: no special case for 'Class
+;;                         anywhere in refactor).
+;;   - detectDeprecated:   a deep structural rewrite over the WHOLE program
+;;                         (every statement and every nested expression, via
+;;                         K's generic k-visitor) that wraps each occurrence
+;;                         of `$x =& new C(...)` so it emits a deprecation
+;;                         warning right before it runs (K:
+;;                         deprecatedIdiomFound / MakeDeprecatedWarning).
+;;                         Ported here as explicit mutually-recursive defs
+;;                         over stmt/expr, since the k-visitor mechanism
+;;                         itself is dropped per the migration plan.
+;;
+;; K's third pass, makeStaticDecls, is NOT ported here: its cons/nil rules
+;; that would rewrite `static $x;` are themselves commented out in K
+;; (functions.k's declareStatic block is entirely dead code, and 'StaticVariable
+;; is declared-only in not-supported.k, never trapped) — so in K the STATIC
+;; statement genuinely has no effect at runtime, and makeStaticDecls's call in
+;; runScript (initStatic rule) is, in K's actual behavior, an identity pass.
+;; The STATICS/FNSTATIC plumbing (4.08/4.09) stays staged-but-unused, exactly
+;; matching K.
+;;
+;; All `dec`s below are declared before any `def` (rather than each def block
+;; immediately following its own dec, as elsewhere): $detect_deprecated_stmt*
+;; and $detect_deprecated_expr are genuinely mutually recursive (stmt walks
+;; call the expr walk and vice versa through nested constructs), and elab
+;; requires every dec used inside a def to have already appeared earlier in
+;; the file — with true mutual recursion there is no single top-to-bottom
+;; order that puts each def after only its own dec, so all decs are grouped
+;; first to satisfy every call site at once.
+;;
+
+dec $is_fundecl(stmt) : bool
+dec $refactor(stmt*) : (stmt*, stmt*)
+dec $detect_deprecated_stmts(stmt*) : stmt*
+dec $detect_deprecated_stmt(stmt) : stmt
+dec $detect_deprecated_elseifs(elseIf*) : elseIf*
+dec $detect_deprecated_cases(caseClause*) : caseClause*
+dec $detect_deprecated_staticdecls(staticDecl*) : staticDecl*
+dec $detect_deprecated_catch(catchClause) : catchClause
+dec $detect_deprecated_members(classMember*) : classMember*
+dec $detect_deprecated_propdecls(propDecl*) : propDecl*
+dec $detect_deprecated_exprs(expr*) : expr*
+dec $detect_deprecated_expr(expr) : expr
+dec $detect_deprecated_expr_opt(expr?) : expr?
+dec $detect_deprecated_items(arrItem*) : arrItem*
+dec $detect_deprecated_args(arg*) : arg*
+dec $detect_deprecated_dqparts(dqPart*) : dqPart*
+
+def $is_fundecl(FUNDECL bool id param* stmt*) = true
+def $is_fundecl(stmt) = false
+  -- otherwise
+
+;;; hoist FUNDECLs ahead of everything else, preserving order within each
+;;; group (K: refactor-cons-fun / refactor-cons-no-fun / refactor-nil)
+def $refactor(eps) = (eps, eps)
+def $refactor((FUNDECL bool id param* stmt_body*) :: stmt_t*) =
+  (((FUNDECL bool id param* stmt_body*) :: stmt_d*), stmt_c*)
+  -- if (stmt_d*, stmt_c*) = $refactor(stmt_t*)
+def $refactor(stmt_h :: stmt_t*) = (stmt_d*, (stmt_h :: stmt_c*))
+  -- if ~ $is_fundecl(stmt_h)
+  -- if (stmt_d*, stmt_c*) = $refactor(stmt_t*)
+
+;;
+;;;; Detect deprecated: `$x =& new C(...)` (K: deprecatedIdiomFound /
+;;;; MakeDeprecatedWarning)
+;;
+;; A deep walk over every statement and every nested expression; wherever a
+;; REFASSIGN's RHS is exactly a NEWOBJ, that expr node is replaced by
+;; DEPRECATEDWARN of itself (2.5/here: rewrites to emitting a DEPRECATED
+;; kitem immediately before the (unwrapped) original expr runs, matching K's
+;; `DEPRECATED(Msg) ~> visitedK(K)`).
+;;
+
+def $detect_deprecated_stmts(eps) = eps
+def $detect_deprecated_stmts(stmt :: stmt_t*) =
+  $detect_deprecated_stmt(stmt) :: $detect_deprecated_stmts(stmt_t*)
+
+def $detect_deprecated_stmt(EXPR expr) = EXPR $detect_deprecated_expr(expr)
+def $detect_deprecated_stmt(BLOCK stmt*) = BLOCK $detect_deprecated_stmts(stmt*)
+def $detect_deprecated_stmt(SKIP) = SKIP
+def $detect_deprecated_stmt(IF expr stmt_t* elseIf* stmt_e*) =
+  IF $detect_deprecated_expr(expr) $detect_deprecated_stmts(stmt_t*)
+     $detect_deprecated_elseifs(elseIf*) $detect_deprecated_stmts(stmt_e*)
+def $detect_deprecated_stmt(WHILE expr stmt*) =
+  WHILE $detect_deprecated_expr(expr) $detect_deprecated_stmts(stmt*)
+def $detect_deprecated_stmt(DOWHILE stmt* expr) =
+  DOWHILE $detect_deprecated_stmts(stmt*) $detect_deprecated_expr(expr)
+def $detect_deprecated_stmt(FOR expr_i* expr_c* expr_s* stmt*) =
+  FOR $detect_deprecated_exprs(expr_i*) $detect_deprecated_exprs(expr_c*)
+      $detect_deprecated_exprs(expr_s*) $detect_deprecated_stmts(stmt*)
+def $detect_deprecated_stmt(FOREACH expr foreachPattern stmt*) =
+  FOREACH $detect_deprecated_expr(expr) foreachPattern $detect_deprecated_stmts(stmt*)
+def $detect_deprecated_stmt(SWITCH expr caseClause*) =
+  SWITCH $detect_deprecated_expr(expr) $detect_deprecated_cases(caseClause*)
+def $detect_deprecated_stmt(BREAK expr?) = BREAK expr?
+def $detect_deprecated_stmt(CONTINUE expr?) = CONTINUE expr?
+def $detect_deprecated_stmt(RETURN expr?) = RETURN $detect_deprecated_expr_opt(expr?)
+def $detect_deprecated_stmt(ECHO expr*) = ECHO $detect_deprecated_exprs(expr*)
+def $detect_deprecated_stmt(INLINEHTML text) = INLINEHTML text
+def $detect_deprecated_stmt(GLOBAL id*) = GLOBAL id*
+def $detect_deprecated_stmt(STATIC staticDecl*) = STATIC $detect_deprecated_staticdecls(staticDecl*)
+def $detect_deprecated_stmt(UNSET expr*) = UNSET $detect_deprecated_exprs(expr*)
+def $detect_deprecated_stmt(TRY stmt_t* catchClause) =
+  TRY $detect_deprecated_stmts(stmt_t*) $detect_deprecated_catch(catchClause)
+def $detect_deprecated_stmt(THROW expr) = THROW $detect_deprecated_expr(expr)
+def $detect_deprecated_stmt(FUNDECL bool id param* stmt*) =
+  FUNDECL bool id param* $detect_deprecated_stmts(stmt*)
+def $detect_deprecated_stmt(CLASSDECL id id_parent? classMember*) =
+  CLASSDECL id id_parent? $detect_deprecated_members(classMember*)
+
+def $detect_deprecated_elseifs(eps) = eps
+def $detect_deprecated_elseifs((ELSEIF expr stmt*) :: elseIf_t*) =
+  (ELSEIF $detect_deprecated_expr(expr) $detect_deprecated_stmts(stmt*))
+  :: $detect_deprecated_elseifs(elseIf_t*)
+
+def $detect_deprecated_cases(eps) = eps
+def $detect_deprecated_cases((CASE expr stmt*) :: caseClause_t*) =
+  (CASE $detect_deprecated_expr(expr) $detect_deprecated_stmts(stmt*))
+  :: $detect_deprecated_cases(caseClause_t*)
+def $detect_deprecated_cases((DEFAULT stmt*) :: caseClause_t*) =
+  (DEFAULT $detect_deprecated_stmts(stmt*)) :: $detect_deprecated_cases(caseClause_t*)
+
+def $detect_deprecated_staticdecls(eps) = eps
+def $detect_deprecated_staticdecls((DECL id expr?) :: staticDecl_t*) =
+  (DECL id $detect_deprecated_expr_opt(expr?)) :: $detect_deprecated_staticdecls(staticDecl_t*)
+
+def $detect_deprecated_catch(CATCH id_cls id_var stmt*) =
+  CATCH id_cls id_var $detect_deprecated_stmts(stmt*)
+
+def $detect_deprecated_members(eps) = eps
+def $detect_deprecated_members((PROPS modifiers propDecl*) :: classMember_t*) =
+  (PROPS modifiers $detect_deprecated_propdecls(propDecl*)) :: $detect_deprecated_members(classMember_t*)
+def $detect_deprecated_members((METHOD modifiers bool id param* stmt*) :: classMember_t*) =
+  (METHOD modifiers bool id param* $detect_deprecated_stmts(stmt*)) :: $detect_deprecated_members(classMember_t*)
+def $detect_deprecated_members((CONSTS clsConstDecl*) :: classMember_t*) =
+  (CONSTS clsConstDecl*) :: $detect_deprecated_members(classMember_t*)
+
+def $detect_deprecated_propdecls(eps) = eps
+def $detect_deprecated_propdecls((PDECL id expr?) :: propDecl_t*) =
+  (PDECL id $detect_deprecated_expr_opt(expr?)) :: $detect_deprecated_propdecls(propDecl_t*)
+
+def $detect_deprecated_exprs(eps) = eps
+def $detect_deprecated_exprs(expr :: expr_t*) =
+  $detect_deprecated_expr(expr) :: $detect_deprecated_exprs(expr_t*)
+
+;;; maps the walk over an optional expr field (K's visitor descends into
+;;; 'None(_)/'Some(HOLE) the same as any other KLabel's argument)
+def $detect_deprecated_expr_opt(eps) = eps
+def $detect_deprecated_expr_opt(expr) = $detect_deprecated_expr(expr)
+
+;;; the matching case (K: deprecatedIdiomFound('ReferenceAssign(_,,'ObjectCreation(_))))
+;;; wraps itself in DEPRECATEDWARN once, WITHOUT recursing further into the
+;;; NEWOBJ's own args — matching the visitor, whose action REPLACES the
+;;; matched node rather than continuing to recurse inside it
+def $detect_deprecated_expr(REFASSIGN expr_l (NEWOBJ id arg*)) =
+  DEPRECATEDWARN (REFASSIGN $detect_deprecated_expr(expr_l) (NEWOBJ id arg*))
+def $detect_deprecated_expr(VARVAR expr) = VARVAR $detect_deprecated_expr(expr)
+def $detect_deprecated_expr(ARRACC expr expr_k?) =
+  ARRACC $detect_deprecated_expr(expr) $detect_deprecated_expr_opt(expr_k?)
+def $detect_deprecated_expr(ARRLIT arrItem*) = ARRLIT $detect_deprecated_items(arrItem*)
+def $detect_deprecated_expr(ASSIGN expr_l expr_r) =
+  ASSIGN $detect_deprecated_expr(expr_l) $detect_deprecated_expr(expr_r)
+def $detect_deprecated_expr(REFASSIGN expr_l expr_r) =
+  REFASSIGN $detect_deprecated_expr(expr_l) $detect_deprecated_expr(expr_r)
+def $detect_deprecated_expr(ASSIGNOP binop expr_l expr_r) =
+  ASSIGNOP binop $detect_deprecated_expr(expr_l) $detect_deprecated_expr(expr_r)
+def $detect_deprecated_expr(LISTASSIGN listPattern expr) =
+  LISTASSIGN listPattern $detect_deprecated_expr(expr)
+def $detect_deprecated_expr(BINOP binop expr_l expr_r) =
+  BINOP binop $detect_deprecated_expr(expr_l) $detect_deprecated_expr(expr_r)
+def $detect_deprecated_expr(UNOP unop expr) = UNOP unop $detect_deprecated_expr(expr)
+def $detect_deprecated_expr(TERNARY expr_c expr_t expr_e) =
+  TERNARY $detect_deprecated_expr(expr_c) $detect_deprecated_expr(expr_t) $detect_deprecated_expr(expr_e)
+def $detect_deprecated_expr(CAST castKind expr) = CAST castKind $detect_deprecated_expr(expr)
+def $detect_deprecated_expr(INSTANCEOF expr classRef) = INSTANCEOF $detect_deprecated_expr(expr) classRef
+def $detect_deprecated_expr(ISSET expr*) = ISSET $detect_deprecated_exprs(expr*)
+def $detect_deprecated_expr(EMPTY expr) = EMPTY $detect_deprecated_expr(expr)
+def $detect_deprecated_expr(PROP expr id) = PROP $detect_deprecated_expr(expr) id
+def $detect_deprecated_expr(NEWOBJ id arg*) = NEWOBJ id $detect_deprecated_args(arg*)
+def $detect_deprecated_expr(CALL id arg*) = CALL id $detect_deprecated_args(arg*)
+def $detect_deprecated_expr(SCALL classRef id arg*) = SCALL classRef id $detect_deprecated_args(arg*)
+def $detect_deprecated_expr(MCALL expr id arg*) = MCALL $detect_deprecated_expr(expr) id $detect_deprecated_args(arg*)
+def $detect_deprecated_expr(PRINT expr) = PRINT $detect_deprecated_expr(expr)
+def $detect_deprecated_expr(EXIT expr?) = EXIT $detect_deprecated_expr_opt(expr?)
+def $detect_deprecated_expr(DQSTR dqPart*) = DQSTR $detect_deprecated_dqparts(dqPart*)
+def $detect_deprecated_expr(expr) = expr
+  -- otherwise
+
+def $detect_deprecated_items(eps) = eps
+def $detect_deprecated_items((ITEM expr_k? expr_v) :: arrItem_t*) =
+  (ITEM $detect_deprecated_expr_opt(expr_k?) $detect_deprecated_expr(expr_v))
+  :: $detect_deprecated_items(arrItem_t*)
+
+def $detect_deprecated_args(eps) = eps
+def $detect_deprecated_args((ARG expr) :: arg_t*) =
+  (ARG $detect_deprecated_expr(expr)) :: $detect_deprecated_args(arg_t*)
+def $detect_deprecated_args((ARGREF expr) :: arg_t*) =
+  (ARGREF $detect_deprecated_expr(expr)) :: $detect_deprecated_args(arg_t*)
+
+def $detect_deprecated_dqparts(eps) = eps
+def $detect_deprecated_dqparts((LIT text) :: dqPart_t*) =
+  (LIT text) :: $detect_deprecated_dqparts(dqPart_t*)
+def $detect_deprecated_dqparts((ESC text) :: dqPart_t*) =
+  (ESC text) :: $detect_deprecated_dqparts(dqPart_t*)
+def $detect_deprecated_dqparts((EXPR expr) :: dqPart_t*) =
+  (EXPR $detect_deprecated_expr(expr)) :: $detect_deprecated_dqparts(dqPart_t*)
+
+;;; runs the wrapped expr after emitting a deprecation warning (K:
+;;; MakeDeprecatedWarning's `DEPRECATED(Msg) ~> visitedK(K)`)
+rule Step/deprecatedwarn:
+  `< ((DEPRECATEDWARN expr) :: kitem*) `; config > ~>
+  `< ((DEPRECATED "Assigning the return value of new by reference is deprecated in %s on line %d\n")
+     :: expr :: kitem*) `; config >

@@ -1,0 +1,28 @@
+;;
+;;;; Basic syntactic categories
+;;
+;; The PHP abstract syntax below corresponds to the KLabel alphabet the external
+;; parser produces (kphp/src/syntax.k). We fold away purely syntactic wrappers
+;; (e.g. 'Variable('Simple(s)) -> VAR id, 'LNumber('Deci(s)) -> LITINT i) and the
+;; per-operator labels ('Plus/'Min/... -> binop) so that the semantics dispatches
+;; on structured data rather than on ~130 near-duplicate constructors.
+;;
+
+;; Identifiers (variable names, function names, class names, member names).
+;; In K these are Id/String; we keep a single text-backed id.
+
+syntax id = text
+
+;;
+;;;; Double-quoted string parts
+;;
+;; A double-quoted string is a sequence of literal chunks, escape sequences and
+;; embedded expressions (K 'DoubleQuoted / 'DQContent / 'Escape).
+
+;;; `expr` is defined in 1.1; forward-declare so dqPart can mention it.
+syntax expr
+
+syntax dqPart =
+  | LIT text            ;; literal chunk
+  | ESC text            ;; escape sequence (decoded at runtime)
+  | EXPR expr           ;; interpolated expression

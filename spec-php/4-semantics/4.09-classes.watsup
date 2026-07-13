@@ -1,0 +1,208 @@
+;;
+;;;; Classes (K: classes.k)
+;;
+;; Class declaration: creating the empty class-table entry (with its static-
+;; properties scope array) and initializing its members (instance/static
+;; properties, methods). Method bodies are stored un-executed (funcDef, same
+;; shape as top-level functions); static-local hoisting (K's makeStaticDecls)
+;; is a real AST rewrite deferred to M12, same as for 4.08's ordinary
+;; functions — STATICS is already staged on both funcDef and classDef.
+;;
+;; kphp implicitly extends every class without an explicit `extends` from
+;; stdClass (except stdClass itself, which extends the "ROOT" sentinel);
+;; interfaces are not supported and are trapped.
+;;
+;; NOTE on writeClassInstanceMembers/writeClassStaticMembers naming: K's names
+;; are swapped relative to their actual behavior — writeClassInstanceMembers
+;; is guarded by `notBool isStatic(...)` (so it in fact handles STATIC
+;; members, appending to the class's PROPS list) while writeClassStaticMembers
+;; is guarded by `isStatic(...)` (so it handles INSTANCE members, allocating
+;; each into the class's static-scope array). This looks like a bug in kphp's
+;; naming, not its behavior; the port keeps K's actual dispatch (guard ==
+;; truth) and just carries the same (misleading) names forward for
+;; auditability against the K source.
+;;
+
+;;; project a class's method table (used only to check for a name collision
+;;; before registering a new one)
+dec $class_methods(map<id, classDef>, id) : map<id, methodDef>
+def $class_methods(classes, id) = classDef.METHODS
+  -- if classDef = $find_map<id, classDef>(classes, id)
+
+;;; resolves a class reference against the current class context (K:
+;;; scope-resolution.k class-name-normal / class-name-self / class-name-parent;
+;;; pulled forward from 4.11 because 4.10's method-call rules need it too)
+dec $classref_to_id(id?, map<id, classDef>, classRef) : id
+def $classref_to_id(id_ctx?, classes, CNAME id) = id
+def $classref_to_id(id_ctx, classes, CSELF) = id_ctx
+def $classref_to_id(id_ctx, classes, CPARENT) = classDef.PARENT
+  -- if classDef = $find_map<id, classDef>(classes, id_ctx)
+
+;;; whether a class member's expanded modifiers mark it static
+dec $is_static_mods(modifiers) : bool
+def $is_static_mods(MODS visMod bool) = bool
+
+;;; runtime visibility from surface modifiers + owning class (K: getVisibility)
+dec $visibility_of(modifiers, id) : visibility
+def $visibility_of(MODS PUB bool, id) = PUB
+def $visibility_of(MODS PROT bool, id) = PROT
+def $visibility_of(MODS PRIV bool, id_cls) = PRIV id_cls
+
+;;
+;;;; Surface syntax (K: class-no-extends / class-stdClass / class / class-implements)
+;;
+
+rulegroup Step/classdecl {
+
+  ;;; no explicit parent, not stdClass itself: implicitly extends stdClass
+  rule Step/no-extends:
+    `< ((CLASSDECL id eps classMember*) :: kitem*) `; config > ~>
+    `< ((CLASSDECL id "stdClass" classMember*) :: kitem*) `; config >
+    -- if ~ (id = "stdClass")
+
+  ;;; stdClass itself implicitly extends the ROOT sentinel
+  rule Step/stdclass:
+    `< ((CLASSDECL "stdClass" eps classMember*) :: kitem*) `; config > ~>
+    `< ((CLASSDECL "stdClass" "ROOT" classMember*) :: kitem*) `; config >
+
+  rule Step/cons:
+    `< ((CLASSDECL id id_parent classMember*) :: kitem*) `; config > ~>
+    `< ((CREATEEMPTYCLASS id id_parent) :: (INITCLASS id classMember*) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Internal operations for class declaration
+;;
+
+;;; a fresh static-scope array, then the class table entry (K: create-empty-class)
+rule Step/createemptyclass:
+  `< ((CREATEEMPTYCLASS id id_parent) :: kitem*) `; config > ~>
+  `< kitem* `; config_3 >
+  -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc ] `; config_0 >
+  -- if config_1 = config_0[.HEAP = $inc_ref_count(config_0.HEAP, loc)]
+  -- if classDef_new = { PARENT id_parent, PROPS eps, METHODS $empty_map<id, methodDef>, STATICS loc }
+  -- if config_2 = config_1[.CLASSES = $add_map<id, classDef>(config_1.CLASSES, id, classDef_new)]
+  -- if config_3 = config_2[.COUNTERS = $add_map<id, nat>(config_2.COUNTERS, id, 0)]
+
+rulegroup Step/initclass {
+
+  rule Step/cons:
+    `< ((INITCLASS id (classMember_h :: classMember_t*)) :: kitem*) `; config > ~>
+    `< ((INITMEMBER id classMember_h) :: (INITCLASS id classMember_t*) :: kitem*) `; config >
+
+  rule Step/nil:
+    `< ((INITCLASS id eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+rulegroup Step/initmember {
+
+  ;;; class constants are not supported (K: init-class-member-constant-decl-list)
+  rule Step/consts:
+    `< ((INITMEMBER id (CONSTS clsConstDecl*)) :: kitem*) `; config > ~>
+    `< [ NOTSUPPORTED "ClassConstantDeclList" ] `; config >
+
+  ;;; STATIC members: appended to the class's PROPS list, defaulted to NULL
+  ;;; (K's writeClassInstanceMembers — see the file-header naming note)
+  rule Step/static:
+    `< ((INITMEMBER id (PROPS modifiers propDecl*)) :: kitem*) `; config > ~>
+    `< ((WRITEINSTMEMBERS id propDecl* ($visibility_of(modifiers, id))) :: kitem*) `; config >
+    -- if $is_static_mods(modifiers)
+
+  ;;; INSTANCE members: allocated into the class's static-scope array, defaulted
+  ;;; to NULL (K's writeClassStaticMembers — see the file-header naming note)
+  rule Step/instance:
+    `< ((INITMEMBER id (PROPS modifiers propDecl*)) :: kitem*) `; config > ~>
+    `< ((WRITESTATMEMBERS id propDecl* ($visibility_of(modifiers, id))) :: kitem*) `; config >
+    -- if ~ $is_static_mods(modifiers)
+
+  ;;; a method: allocate a fresh static-locals scope, register into METHODS
+  ;;; (K: init-class-member-decl-meth / -meth-ref)
+  rule Step/method:
+    `< ((INITMEMBER id (METHOD modifiers bool_ref id_name param* stmt*)) :: kitem*) `; config > ~>
+    `< ((WRITEMETHOD id id_name param* bool_ref ($visibility_of(modifiers, id))
+                     ($is_static_mods(modifiers)) stmt* loc) :: kitem*) `; config_1 >
+    -- if methodDef = $find_map<id, methodDef>($class_methods(config.CLASSES, id), id_name)
+    -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc ] `; config_0 >
+    -- if config_1 = config_0[.HEAP = $inc_ref_count(config_0.HEAP, loc)]
+
+}
+
+;;; register the method definition (K: write-class-method; the fresh STATICS
+;;; loc was allocated by Step/method above)
+rule Step/writemethod:
+  `< ((WRITEMETHOD id id_name param* bool_ref visibility bool_static stmt* loc) :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+  -- if retMode = $ite<retMode>(bool_ref, BYREF, BYVALUE)
+  -- if funcDef = { PARAMS param*, BODY stmt*, RET retMode, STATICS loc }
+  -- if methodDef_new = { FUN funcDef, VIS visibility, STATIC bool_static }
+  -- if classDef_1 = classDef[.METHODS = $add_map<id, methodDef>(classDef.METHODS, id_name, methodDef_new)]
+  -- if config_1 = config[.CLASSES = $add_map<id, classDef>(config.CLASSES, id, classDef_1)]
+
+;;; (K: write-class-instance-members-nil / -no-default / write-class-instance-members;
+;;; a missing default is folded to NULL by the AST — propDecl already carries
+;;; expr?, and the fold happens here via $default_expr)
+dec $default_expr(expr?) : expr
+def $default_expr(eps) = LITNULL
+def $default_expr(expr) = expr
+
+rulegroup Step/writeinstmembers {
+
+  rule Step/cons:
+    `< ((WRITEINSTMEMBERS id ((PDECL id_prop expr?) :: propDecl*) visibility) :: kitem*) `; config > ~>
+    `< ((WRITEINSTMEMBERS id propDecl* visibility) :: kitem*) `; config_1 >
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if classDef_1 = classDef[.PROPS = classDef.PROPS ++ [ PROP id_prop visibility ($default_expr(expr?)) ]]
+    -- if config_1 = config[.CLASSES = $add_map<id, classDef>(config.CLASSES, id, classDef_1)]
+
+  rule Step/nil:
+    `< ((WRITEINSTMEMBERS id eps visibility) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;; static members are allocated at declaration time, expanding any literal
+;;; default (array/new) the same way ordinary assignment would
+;;; (K: write-class-static-members-nil / -no-default / -default)
+rulegroup Step/writestatmembers {
+
+  rule Step/cons:
+    `< ((WRITESTATMEMBERS id ((PDECL id_prop expr?) :: propDecl*) visibility) :: kitem*) `; config > ~>
+    `< ((WRITESTATMEMBERS id propDecl* visibility) :: kitem*) `; config_2 >
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if expr_default = $default_expr(expr?)
+    -- Steps: `< [ expr_default ] `; config > ~> `< [ languageValue ] `; config_0 >
+    -- Steps: `< [ ALLOCVAL languageValue ] `; config_0 > ~> `< [ loc ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, classDef.STATICS, STR id_prop, visibility, loc)]
+
+  rule Step/nil:
+    `< ((WRITESTATMEMBERS id eps visibility) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;; marker propagation companions: a static property's default-value
+;;; expression can itself be arbitrary user code (e.g. `static $x = new Foo();`
+;;; whose constructor throws), aborting the whole class declaration
+rulegroup Step/writestatmembers-marker {
+
+  rule Step/cons-default:
+    `< ((WRITESTATMEMBERS id ((PDECL id_prop expr?) :: propDecl*) visibility) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if expr_default = $default_expr(expr?)
+    -- Steps: `< [ expr_default ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/cons-alloc:
+    `< ((WRITESTATMEMBERS id ((PDECL id_prop expr?) :: propDecl*) visibility) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if expr_default = $default_expr(expr?)
+    -- Steps: `< [ expr_default ] `; config > ~> `< [ languageValue ] `; config_0 >
+    -- Steps: `< [ ALLOCVAL languageValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}

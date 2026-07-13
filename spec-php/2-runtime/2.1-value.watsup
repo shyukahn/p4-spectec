@@ -1,0 +1,80 @@
+;;
+;;;; Runtime values (K: memory.k "Values" section)
+;;
+;; The K subsort structure (ScalarValue < PlainLanguageValue < LanguageValue < Value,
+;; etc.) is mirrored as unions of named types, so that K side conditions like
+;; `V:ScalarValue` become `value <: scalarValue` premises.
+;;
+
+;;; Locations: natural numbers, plus the distinguished locNull
+syntax loc =
+  | LOC nat
+  | LOCNULL
+
+;;; Runtime types stored in zvals (K: Type; canonical spellings only — the alias
+;;; spellings integer/boolean/double/real are handled by conversion functions)
+syntax phpType =
+  | INT
+  | BOOL
+  | FLOAT
+  | STRING
+  | ARRAY
+  | OBJECT
+  | UNSET
+
+;;; Array keys: Int or String; NULL designates "no key provided" ($x[] = 0),
+;;; for which a default integer key is computed (K: Key ::= Int | String | NULL)
+syntax key =
+  | INT int
+  | STR text
+  | NULL
+
+;;; Visibility of array items (object properties); private is tagged with the
+;;; declaring class (K: ArrayItemVisibility)
+syntax visibility =
+  | PUB
+  | PROT
+  | PRIV id
+
+;;; Array items: key, visibility, and the location holding the element's zval
+;;; (elements live at their own heap locations, enabling sharing/aliasing)
+syntax arrayEntry = `[ key `, visibility `, loc ]
+
+;;; The array-internal cursor (K: ArrayCrntElem), as used by current/next/reset
+syntax arrayCursor = `[ key `, visibility ]
+
+;;; Scalars
+syntax scalarValue =
+  | INT int
+  | FLOAT float
+  | BOOL bool
+  | STR text
+
+;;; Objects: property-array location, class name, instance number (K: OID)
+syntax object = OID loc id nat
+
+;;; Arrays: optional cursor + insertion-ordered entries (K: Array(OptCrnt, List))
+syntax array = ARR arrayCursor? `{ arrayEntry* }
+
+syntax compoundValue =
+  | object
+  | array
+
+;;; NULL (K: SpecialValue)
+syntax specialValue = NULL
+
+syntax plainValue =
+  | scalarValue
+  | compoundValue
+  | specialValue
+
+;;; Literal values delay the evaluation of array literals and object creation
+;;; (K: Literal(K)); they are consumed by allocValue during assignment
+syntax literalValue = LITERAL expr
+
+syntax languageValue =
+  | plainValue
+  | literalValue
+
+;; The full value union (languageValue + semanticValue) is completed in 2.2,
+;; after references are defined: union members must be complete types.

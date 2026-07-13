@@ -1,0 +1,30 @@
+;;
+;;;; Programs (documents)
+;;
+;; K constructors folded here (core.k rules document-1/2/3, template-document-*):
+;;   'Document(pre, openTag, prog)                    -> DOCUMENT eps stmt* eps
+;;   'Document(pre, openTag, prog, closeTag, post)    -> DOCUMENT pre? stmt* post?
+;;   'TemplateDocument('ListWrap(pieces))             -> TEMPLATEDOC tmplPiece*
+;;     where a piece is a 'Literal(text) chunk or an 'InlineEcho'd expression
+;;
+;; The surrounding HTML chunks (pre/post) are echoed verbatim by the driver
+;; (K: document-3, inline-html).
+;;
+;; Omitted (declared in kphp/src/not-supported.k but never given semantics, and
+;; their payload shapes are not derivable from the K sources since the parser is
+;; an external jar): interfaces, abstract/final, clone, finally, continue-with-
+;; label edge forms, type hints beyond parameters, heredoc, hex/octal literals,
+;; magic constants, eval, ASP tags, bitwise shift-assign, error suppression @,
+;; references-in-array-literal values, and the other declared-only KLabels.
+;; kphp traps them with NOT-SUPPORTED; the constructs kphp traps *with known
+;; shape* are included here and trapped in 4.19.
+;;
+
+;;; template document piece
+syntax tmplPiece =
+  | LIT text                     ;; literal HTML chunk, echoed
+  | INLINEECHO expr              ;; <?= expr ?> inline echo
+
+syntax phpProgram =
+  | DOCUMENT text? `{ stmt* } text?
+  | TEMPLATEDOC tmplPiece*

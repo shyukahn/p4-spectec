@@ -1,0 +1,38 @@
+;;
+;;;; Floats
+;;
+;; PHP floats are IEEE-754 doubles. The SpecTec metalanguage has only nat/int,
+;; so a float is represented by its 64-bit pattern encoded as a nat, and the
+;; arithmetic/comparison/formatting operations are declared as builtin functions
+;; (uninterpreted at the meta level; an implementation would supply them).
+;; This deviates from K, whose Float sort had native arithmetic.
+;;
+
+syntax float = F64 nat            ;; the 64-bit IEEE-754 pattern, 0 <= n < 2^64
+
+;;; arithmetic
+builtin dec $fadd(float, float) : float
+builtin dec $fsub(float, float) : float
+builtin dec $fmul(float, float) : float
+builtin dec $fdiv(float, float) : float
+builtin dec $fneg(float) : float
+
+;;; comparison
+builtin dec $feq(float, float) : bool
+builtin dec $flt(float, float) : bool
+builtin dec $fle(float, float) : bool
+builtin dec $fgt(float, float) : bool
+builtin dec $fge(float, float) : bool
+
+;;; conversions and formatting
+builtin dec $int_to_float(int) : float
+builtin dec $float_to_int(float) : int
+builtin dec $float_to_text(float) : text     ;; PHP printing (~14 sig. digits)
+builtin dec $text_to_float(text) : float     ;; numeric-string parsing
+
+;;; constants (IEEE-754 bit patterns: 0.0 = all zeros, 1.0 = 0x3FF0000000000000)
+dec $fzero : float
+def $fzero = F64 0
+
+dec $fone : float
+def $fone = F64 4607182418800017408

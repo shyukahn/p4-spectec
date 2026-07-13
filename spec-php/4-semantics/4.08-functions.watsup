@@ -1,0 +1,272 @@
+;;
+;;;; Functions (K: functions.k)
+;;
+;; Declaration, call, the internal runFunction/return machinery, and the
+;; global construct (static locals are handled below — see the note there).
+;;
+;; K's stack-frame push/pop captures/restores the RAW continuation on the
+;; SAME machine as the call site (K: sf(FName, K, ...); 'Return ... => ... ~>
+;; V ~> K). Per 4.00's architecture note, this is sound regardless of whether
+;; the call itself sits inside a Steps premise (evaluating a subexpression):
+;; the frame is always pushed and popped on whichever machine is actually
+;; running the call, be it the real one or a premise's scratch one — the
+;; unsoundness that rules out this trick for `throw` (4.13) only arises when
+;; a frame needs to be popped on a DIFFERENT machine than the one that pushed
+;; it, which never happens for call/return.
+;;
+;; K's function-declared static locals (makeStaticDecls, program-transformations.k)
+;; are a real compile-time AST rewrite deferred to M12 (top-level driver, which
+;; runs it before start); the STATICS field/FNSTATIC cell plumbing is already
+;; staged for that. The surface `static $x;` STATEMENT (DeclareStatic) has NO
+;; active K semantics at all — functions.k's handling of it is entirely commented
+;; out, and 'StaticVariable is declared-only in not-supported.k (never trapped
+;; by a rule) — so no Step rule is given for STATIC here either, faithfully
+;; leaving it stuck, exactly as K does.
+;;
+
+;;
+;;;; Pure helpers used by the rules below
+;;
+
+dec $has_typed_param(param*) : bool
+def $has_typed_param(eps) = false
+def $has_typed_param((PARAMTYPED text param) :: param_t*) = true
+def $has_typed_param(param_h :: param_t*) = $has_typed_param(param_t*)
+
+dec $expr_of_arg(arg) : expr
+def $expr_of_arg(ARG expr) = expr
+def $expr_of_arg(ARGREF expr) = expr
+
+dec $exprs_of_args(arg*) : expr*
+def $exprs_of_args(eps) = eps
+def $exprs_of_args(arg :: arg_t*) = $expr_of_arg(arg) :: $exprs_of_args(arg_t*)
+
+;;; a by-ref-declared function that ends up returning a plain value (not a
+;;; location) gets a runtime notice, exactly like a real reference downgrade
+;;; (K: *Cond((RefMode ==K @byRef) andBool (notBool isRetValueLoc(V)), NOTICE(...), .))
+dec $ref_return_notice(retMode, value) : kitem*
+def $ref_return_notice(BYREF, loc) = eps
+def $ref_return_notice(BYREF, value) = [ NOTICE "Only variable references should be returned by reference in %s on line %d\n" ]
+def $ref_return_notice(BYVALUE, value) = eps
+
+;;
+;;;; Function declaration (K: function-decl-ret-value / -ret-ref / make-function)
+;;
+
+rulegroup Step/fundecl {
+
+  rule Step/typehint-error:
+    `< ((FUNDECL bool id param* stmt*) :: kitem*) `; config > ~>
+    `< [ NOTSUPPORTED "Class type hint" ] `; config >
+    -- if $has_typed_param(param*)
+
+  rule Step/value:
+    `< ((FUNDECL false id param* stmt*) :: kitem*) `; config > ~>
+    `< kitem* `; config_2 >
+    -- if ~ $has_typed_param(param*)
+    -- if funcDef = $find_map<id, funcDef>(config.FUNCS, id)
+    -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc ] `; config_0 >
+    -- if config_1 = config_0[.HEAP = $inc_ref_count(config_0.HEAP, loc)]
+    -- if funcDef_new = { PARAMS param*, BODY stmt*, RET BYVALUE, STATICS loc }
+    -- if config_2 = config_1[.FUNCS = $add_map<id, funcDef>(config_1.FUNCS, id, funcDef_new)]
+
+  rule Step/ref:
+    `< ((FUNDECL true id param* stmt*) :: kitem*) `; config > ~>
+    `< kitem* `; config_2 >
+    -- if ~ $has_typed_param(param*)
+    -- if funcDef = $find_map<id, funcDef>(config.FUNCS, id)
+    -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc ] `; config_0 >
+    -- if config_1 = config_0[.HEAP = $inc_ref_count(config_0.HEAP, loc)]
+    -- if funcDef_new = { PARAMS param*, BODY stmt*, RET BYREF, STATICS loc }
+    -- if config_2 = config_1[.FUNCS = $add_map<id, funcDef>(config_1.FUNCS, id, funcDef_new)]
+
+}
+
+;;
+;;;; Function call (K: 'FunctionName + 'FunctionCall)
+;;
+
+rulegroup Step/call {
+
+  rule Step/found:
+    `< ((CALL id arg*) :: kitem*) `; config > ~>
+    `< ((RUNFUNC id funcDef ($exprs_of_args(arg*)) eps eps true) :: kitem*) `; config >
+    -- if funcDef = $find_map<id, funcDef>(config.FUNCS, id)
+
+  rule Step/not-found:
+    `< ((CALL id arg*) :: kitem*) `; config > ~>
+    `< [ NOTSUPPORTED ("'" ++ id ++ "' not defined!") ] `; config >
+    -- if funcDef = $find_map<id, funcDef>(config.FUNCS, id)
+
+}
+
+;;
+;;;; Return (K: 'Return; return-arg2Loc / return-arg2LangValue-not-compound / return)
+;;
+
+rulegroup Step/return {
+
+  rule Step/value:
+    `< ((RETURN expr) :: kitem*) `; config > ~>
+    `< [ RETURNV value ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ value ] `; config_1 >
+
+  rule Step/none:
+    `< ((RETURN eps) :: kitem*) `; config > ~>
+    `< [ RETURNV NULL ] `; config >
+
+}
+
+;;; marker propagation companions: a throw/fatal/exit inside the returned
+;;; expression (e.g. `return f();` where f() throws) aborts the return itself
+rulegroup Step/return-marker {
+
+  rule Step/expr:
+    `< ((RETURN expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/conv:
+    `< ((RETURN expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;; a returned loc whose zval is a compound value stays a loc (so callers like
+;;; foreach can use it by reference); a scalar/NULL loc is read out to its value
+;;; (K: return-arg2LangValue-not-compound, gated on the returning frame's RetMode
+;;; not mattering here — the compound-vs-scalar test alone decides the read)
+
+rule Step/returnv-read:
+  `< ((RETURNV loc) :: kitem*) `; config > ~>
+  `< ((RETURNV value) :: kitem*) `; config >
+  -- if zval = $find_heap(config.HEAP, loc)
+  -- if ~ $is_compound(zval.VAL)
+  -- if value = $read(config.HEAP, loc)
+
+rule Step/returnv-unwind:
+  `< ((RETURNV value) :: kitem*) `; config > ~>
+  `< (kitem_notice* ++ [ value ] ++ stackFrame_h.CONT) `; config_4 >
+  -- if stackFrame_h :: stackFrame_t* = config.CTRL.FUNSTACK
+  -- if kitem_notice* = $ref_return_notice(stackFrame_h.RET, value)
+  -- if config_1 = config[.CTRL.CLS = stackFrame_h.CLS]
+  -- if config_2 = config_1[.CTRL.THISOBJ = stackFrame_h.THISOBJ]
+  -- if config_3 = config_2[.HEAP = $dec_ref_count(config_2.HEAP, config_2.CRNT)]
+  -- if config_4 = config_3[.CRNT = stackFrame_h.SCOPE]
+       [.CTRL.FUNSTACK = stackFrame_t*]
+       [.CTRL.ARGDECL = stackFrame_h.ARGDECL]
+
+;;
+;;;; The global construct (K: 'DeclareGlobal)
+;;
+
+rulegroup Step/global {
+
+  rule Step/cons:
+    `< ((GLOBAL (id :: id_t*)) :: kitem*) `; config > ~>
+    `< ((EXPR (REFASSIGN (VAR id) (ARRACC (VAR "GLOBALS") (LITSTR id)))) :: POPV ::
+        (GLOBAL id_t*) :: kitem*) `; config >
+
+  rule Step/nil:
+    `< ((GLOBAL eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;
+;;;; Internal call machinery (K: runFunction / processFunArgs / CopyFunctionArgs)
+;;
+
+rule Step/runfunc:
+  `< ((RUNFUNC id ({ PARAMS param*, BODY stmt*, RET retMode, STATICS loc_static })
+               expr* id_cls? loc_obj? bool) :: kitem*) `; config > ~>
+  `< ((PROCESSARGS param* expr*) :: (RUNBODY stmt*) :: (RETURN eps) :: kitem*) `; config_2 >
+  -- if stackFrame_new =
+       { NAME id, CONT kitem*, SCOPE config.CRNT, CLS config.CTRL.CLS,
+         THISOBJ config.CTRL.THISOBJ, RET retMode, ARGDECL config.CTRL.ARGDECL }
+  -- if config_0 = config[.CTRL.FUNSTACK = stackFrame_new :: config.CTRL.FUNSTACK]
+       [.CTRL.ARGDECL = eps]
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config_0 > ~> `< [ loc_new ] `; config_1 >
+  -- if config_2 = config_1[.CRNT = loc_new]
+       [.CTRL.CLS = id_cls?]
+       [.CTRL.THISOBJ = loc_obj?]
+       [.HEAP = $inc_ref_count(config_1.HEAP, loc_new)]
+
+rulegroup Step/processargs {
+
+  rule Step/param:
+    `< ((PROCESSARGS ((PARAM id) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< ((PROCESSARGS param_t* expr_t*) :: kitem*) `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+    -- if config_2 = config_1[.CTRL.ARGDECL = config_1.CTRL.ARGDECL ++ [ ASSIGNKITEM (VAR id) value ]]
+
+  rule Step/paramref:
+    `< ((PROCESSARGS ((PARAMREF id) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< ((PROCESSARGS param_t* expr_t*) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_1_pre >
+    -- if config_1 = config_1_pre[.CTRL.ARGDECL = config_1_pre.CTRL.ARGDECL ++ [ REFASSIGNKITEM (VAR id) kResult ]]
+
+  rule Step/paramdefault-arg:
+    `< ((PROCESSARGS ((PARAMDEFAULT id expr_d) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< ((PROCESSARGS param_t* expr_t*) :: kitem*) `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+    -- if config_2 = config_1[.CTRL.ARGDECL = config_1.CTRL.ARGDECL ++ [ ASSIGNKITEM (VAR id) value ]]
+
+  rule Step/paramdefault-none:
+    `< ((PROCESSARGS ((PARAMDEFAULT id expr_d) :: param_t*) eps) :: kitem*) `; config > ~>
+    `< ((PROCESSARGS param_t* eps) :: kitem*) `; config_1 >
+    -- if config_1 = config[.CTRL.ARGDECL = config.CTRL.ARGDECL ++ [ EXPR (ASSIGN (VAR id) expr_d) ]]
+
+  rule Step/paramtyped:
+    `< ((PROCESSARGS ((PARAMTYPED text param) :: param_t*) expr*) :: kitem*) `; config > ~>
+    `< [ NOTSUPPORTED "Type hints" ] `; config >
+
+  rule Step/nil:
+    `< ((PROCESSARGS eps expr*) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;; marker propagation companions: a throw/fatal/exit inside any argument
+;;; expression (e.g. `f(g())` where g() throws) aborts argument processing —
+;;; and hence the whole call — at that point; later arguments never evaluate
+rulegroup Step/processargs-marker {
+
+  rule Step/param-arg:
+    `< ((PROCESSARGS ((PARAM id) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/param-tolv:
+    `< ((PROCESSARGS ((PARAM id) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+  rule Step/paramref-arg:
+    `< ((PROCESSARGS ((PARAMREF id) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1_pre >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_1_pre >
+
+  rule Step/paramdefault-arg-arg:
+    `< ((PROCESSARGS ((PARAMDEFAULT id expr_d) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/paramdefault-arg-tolv:
+    `< ((PROCESSARGS ((PARAMDEFAULT id expr_d) :: param_t*) (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}
+
+rule Step/runbody:
+  `< ((RUNBODY stmt*) :: kitem*) `; config > ~>
+  `< (config.CTRL.ARGDECL ++ $kitems(stmt*) ++ kitem*) `; config_1 >
+  -- if config_1 = config[.CTRL.ARGDECL = eps]

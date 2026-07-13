@@ -1,0 +1,44 @@
+;;
+;;;; Class-hierarchy auxiliaries
+;;
+;; K sources: objects.k (isVisible, isInPath, isSubclass, isSuperclass).
+;; K defines these as rewrite rules only because K functions cannot read the
+;; <classes> cell; they are effect-free, so they become pure defs taking the
+;; class table as an argument. The "ROOT" parent sentinel terminates the
+;; parent walk. Pulled forward from the objects.k port because Rget's
+;; protected-property rule (4.01) depends on $is_visible.
+;;
+
+var classes : map<id, classDef>
+
+;;; whether id_dest lies on the parent path of id_orig (K: isInPath; K's first
+;;; two rules overlap on (ROOT, ROOT) — resolved here by clause order, the
+;;; ROOT-origin rule first; kphp never asks that case)
+dec $is_in_path(map<id, classDef>, id, id) : bool
+def $is_in_path(classes, id_orig, id_dest) = false
+  -- if id_orig = "ROOT"
+def $is_in_path(classes, id_orig, id_dest) = true
+  -- if ~ (id_orig = "ROOT") /\ id_dest = "ROOT"
+def $is_in_path(classes, id_orig, id_dest) = true
+  -- if ~ (id_orig = "ROOT") /\ ~ (id_dest = "ROOT") /\ id_orig = id_dest
+def $is_in_path(classes, id_orig, id_dest) = $is_in_path(classes, classDef.PARENT, id_dest)
+  -- if ~ (id_orig = "ROOT") /\ ~ (id_dest = "ROOT") /\ ~ (id_orig = id_dest)
+  -- if classDef = $find_map<id, classDef>(classes, id_orig)
+
+;;; (K: isSubclass / isSuperclass)
+dec $is_subclass(map<id, classDef>, id, id) : bool
+def $is_subclass(classes, id_orig, id_dest) = $is_in_path(classes, id_orig, id_dest)
+
+dec $is_superclass(map<id, classDef>, id, id) : bool
+def $is_superclass(classes, id_orig, id_dest) = $is_in_path(classes, id_dest, id_orig)
+
+;;; property visibility from a class context (K: isVisible(ObjClass, Context,
+;;; Vis); the context is none outside any class; K's two private rules — equal
+;;; context is visible, different is not — fold into one equality clause)
+dec $is_visible(map<id, classDef>, id, id?, visibility) : bool
+def $is_visible(classes, id_obj, id_ctx?, PUB) = true
+def $is_visible(classes, id_obj, eps, PROT) = false
+def $is_visible(classes, id_obj, eps, PRIV id_p) = false
+def $is_visible(classes, id_obj, id_ctx, PRIV id_p) = id_obj = id_ctx
+def $is_visible(classes, id_obj, id_ctx, PROT) =
+  $is_superclass(classes, id_ctx, id_obj) \/ $is_subclass(classes, id_ctx, id_obj)

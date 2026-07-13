@@ -1,0 +1,161 @@
+;;
+;;;; Strings (K: strings.k)
+;;
+;; Concatenation (the CONCAT binop) and double-quoted string interpolation.
+;;
+;; Folded away relative to K:
+;;   - 'ConstantEncapsedString / 'SingleQuoted / 'DoubleQuoted(String): plain
+;;     string literals became LITSTR at AST folding;
+;;   - 'StringAccess => 'ArrayAccess: string indexing is ARRACC already;
+;;   - 'Braced / 'Variable('Braced(...)): braced-variable interpolation folds
+;;     into an ordinary EXPR part of the DQSTR;
+;;   - 'DQContent's ternary chunking: a double-quoted string is the flat list
+;;     DQSTR dqPart*, evaluated left-to-right and concatenated (same result).
+;;
+;; K's 'Concat is strict in both operands and *toString's them before joining;
+;; here CONCAT (a binop) evaluates both operands, converts each to string via the
+;; CSTRING cast (4.04), and joins. The per-part conversion of a DQSTR reuses the
+;; same CONCAT machinery so object-in-interpolation errors surface identically.
+;;
+
+;;
+;;;; String concatenation — CONCAT binop (K: 'Concat)
+;;
+
+rulegroup Step/concat {
+
+  ;;; evaluate both operands (K: 'Concat strict contexts), then join on CONCATV
+  rule Step/args:
+    `< ((BINOP CONCAT expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((CONCATV kResult_1 kResult_2) :: kitem*) `; config_2 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+    -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ kResult_2 ] `; config_2 >
+
+  ;;; marker propagation companions (throw/fatal/exit inside either operand
+  ;;; aborts the whole concatenation)
+  rule Step/args-marker-lhs:
+    `< ((BINOP CONCAT expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/args-marker-rhs:
+    `< ((BINOP CONCAT expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_2 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+    -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+  ;;; read/convert operands to language values (K: concat-LHS/RHS2LangValue)
+  rule Step/lhs2val:
+    `< ((CONCATV convertibleToLangValue kResult) :: kitem*) `; config > ~>
+    `< ((CONCATV value kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; marker propagation companion: reading the LHS operand can itself invoke
+  ;;; a to-string cast that reaches user code (K: convertToLanguageValue can
+  ;;; recurse through CASTV CSTRING on an object)
+  rule Step/lhs2val-marker:
+    `< ((CONCATV convertibleToLangValue kResult) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/rhs2val:
+    `< ((CONCATV value convertibleToLangValue) :: kitem*) `; config > ~>
+    `< ((CONCATV value value_1) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ value_1 ] `; config_1 >
+
+  ;;; marker propagation companion (RHS-read variant of the above)
+  rule Step/rhs2val-marker:
+    `< ((CONCATV value convertibleToLangValue) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; both strings: join them (K: concat-string)
+  rule Step/string:
+    `< ((CONCATV (STR t_1) (STR t_2)) :: kitem*) `; config > ~>
+    `< ((STR (t_1 ++ t_2)) :: kitem*) `; config >
+
+  ;;; a non-string operand is cast to string first (K: concat-toString; the cast
+  ;;; runs through 4.04, so an object operand raises the to-string fatal error)
+  rule Step/tostring-lhs:
+    `< ((CONCATV value_1 value_2) :: kitem*) `; config > ~>
+    `< ((CASTV CSTRING value_1) :: (CONCATTOSTR value_2) :: kitem*) `; config >
+    -- if ~ ($type_of(value_1) = STRING)
+
+  rule Step/tostring-rhs:
+    `< ((CONCATV (STR t_1) value_2) :: kitem*) `; config > ~>
+    `< ((CASTV CSTRING value_2) :: (CONCATFROM (STR t_1)) :: kitem*) `; config >
+    -- if ~ ($type_of(value_2) = STRING)
+
+}
+
+;;; re-collect a to-string cast result back into the pending CONCATV
+;;; (CONCATTOSTR value_r holds the still-unconverted RHS; CONCATFROM t_l holds
+;;; the already-string LHS) — plumbing for the two-sided *toString of K's
+;;; concat-toString, which we do one operand at a time
+rulegroup Step/concat-collect {
+
+  rule Step/lhs-done:
+    `< ((STR t_1) :: (CONCATTOSTR value_2) :: kitem*) `; config > ~>
+    `< ((CONCATV (STR t_1) value_2) :: kitem*) `; config >
+
+  rule Step/rhs-done:
+    `< ((STR t_2) :: (CONCATFROM (STR t_1)) :: kitem*) `; config > ~>
+    `< ((CONCATV (STR t_1) (STR t_2)) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Double-quoted string interpolation (K: 'DoubleQuoted / 'DQContent / 'Escape)
+;;
+;; DQSTR dqPart* is desugared to a left-nested CONCAT of its parts: literal
+;; chunks become LITSTR, escape sequences are decoded, and embedded expressions
+;; are concatenated (their to-string conversion happening inside CONCAT).
+;;
+
+;;; decode a single escape sequence (K: 'Escape(N) with N the escaped char code);
+;;; the sequence text is the character after the backslash
+dec $decode_escape(text) : text
+def $decode_escape("\"") = "\""     ;; K: escape-34
+def $decode_escape("$") = "$"       ;; K: escape-36
+def $decode_escape("'") = "'"       ;; K: escape-39
+def $decode_escape("\\") = "\\"     ;; K: escape-92
+def $decode_escape("n") = "\n"      ;; K: escape-110
+def $decode_escape("t") = "\t"      ;; K: escape-116
+def $decode_escape("r") = "\r"      ;; K: escape-114
+
+rulegroup Step/dqstr {
+
+  ;;; empty string (K: dq-content-empty / double-quoted of "")
+  rule Step/empty:
+    `< ((DQSTR eps) :: kitem*) `; config > ~>
+    `< ((STR "") :: kitem*) `; config >
+
+    ;;; a single literal chunk is that string (K: double-quoted(S))
+  rule Step/one-lit:
+    `< ((DQSTR ([ LIT t ])) :: kitem*) `; config > ~>
+    `< ((STR t) :: kitem*) `; config >
+
+  ;;; peel the first part off, concatenating it with the rest (K: dq-content-concat)
+  rule Step/lit-cons:
+    `< ((DQSTR ((LIT t) :: dqPart_h :: dqPart_t*)) :: kitem*) `; config > ~>
+    `< ((BINOP CONCAT (LITSTR t) (DQSTR (dqPart_h :: dqPart_t*))) :: kitem*) `; config >
+
+  ;;; an escape decodes to its character, then concatenates (K: 'Escape)
+  rule Step/esc-cons:
+    `< ((DQSTR ((ESC t) :: dqPart*)) :: kitem*) `; config > ~>
+    `< ((BINOP CONCAT (LITSTR $decode_escape(t)) (DQSTR dqPart*)) :: kitem*) `; config >
+
+  rule Step/esc-one:
+    `< ((DQSTR ([ ESC t ])) :: kitem*) `; config > ~>
+    `< ((STR $decode_escape(t)) :: kitem*) `; config >
+
+  ;;; an embedded expression concatenates (its CSTRING cast happens in CONCAT)
+  rule Step/expr-cons:
+    `< ((DQSTR ((EXPR expr) :: dqPart*)) :: kitem*) `; config > ~>
+    `< ((BINOP CONCAT expr (DQSTR dqPart*)) :: kitem*) `; config >
+
+  rule Step/expr-one:
+    `< ((DQSTR ([ EXPR expr ])) :: kitem*) `; config > ~>
+    `< ((BINOP CONCAT (LITSTR "") expr) :: kitem*) `; config >
+
+}

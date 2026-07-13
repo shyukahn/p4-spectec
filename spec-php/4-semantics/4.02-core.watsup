@@ -1,0 +1,723 @@
+;;
+;;;; Core (K: core.k, plus shared.k's convertToLanguageValue)
+;;
+;; Documents, literals, blocks, statement sequencing, variable lookup,
+;; variable variables, array access, assignment (by value, by reference,
+;; list()), isset and unset.
+;;
+;; Folded away relative to K:
+;;   - var2Id, literal string-to-value parsing ('LNumber('Deci(Str)) etc.):
+;;     done by the AST folding (1-surface);
+;;   - seq-cons / seq-empty ('ListWrap scheduling): statement lists are spliced
+;;     into the continuation directly ($kitems below);
+;;   - shared.k's 'Some(HOLE) heating and the isKResult declarations for
+;;     'List/'Some/'None: absorbed by the typed list()-pattern (listElem).
+;;
+;; Where K rewrites an evaluated subterm IN PLACE inside an AST slot (the
+;; [intermediate] staging rules), a typed AST cannot hold the value, so each
+;; staged construct becomes an internal kitem holding KResults — ASSIGNTO,
+;; REFASSIGNTO, LISTASSIGNTO/ASSIGNSEQ, TOKEY, ISSETV, UNSETV (declared in
+;; 2.5) — with one Step rule per K staging rule.
+;;
+;; Evaluation-order choices (K's contexts are unordered where noted; krun's
+;; eager-heating strategy is followed):
+;;   - 'ArrayAccess, 'Assign, 'ReferenceAssign: base/LHS before key/RHS, and
+;;     both before the LHS-to-Loc / RHS-to-Loc conversions;
+;;   - list() targets: depth-first, left-to-right (K's 'Some(HOLE) context
+;;     picks any element).
+;;
+
+;;; splice a statement list into the continuation (K: seq-cons/seq-empty)
+dec $kitems(stmt*) : k
+def $kitems(eps) = eps
+def $kitems(stmt :: stmt_t*) = stmt :: $kitems(stmt_t*)
+
+;;
+;;;; Documents (K: core.k §Documents; runScript's own rules are in 4.19)
+;;
+
+rulegroup Step/document {
+
+  ;;; no closing HTML: just run the script; K's document-2 discards the
+  ;;; pre-HTML without echoing it (K: document-1 / document-2)
+  rule Step/no-post:
+    `< ((DOCUMENT text_pre? `{ stmt* } eps) :: kitem*) `; config > ~>
+    `< ((RUNSCRIPT stmt*) :: kitem*) `; config >
+
+  ;;; surrounding HTML is echoed verbatim (K: document-3)
+  rule Step/pre:
+    `< ((DOCUMENT text_pre `{ stmt* } text_post) :: kitem*) `; config > ~>
+    `< ((ECHO ([ LITSTR text_pre ])) :: (RUNSCRIPT stmt*)
+       :: (ECHO ([ LITSTR text_post ])) :: kitem*) `; config >
+
+  rule Step/no-pre:
+    `< ((DOCUMENT eps `{ stmt* } text_post) :: kitem*) `; config > ~>
+    `< ((RUNSCRIPT stmt*) :: (ECHO ([ LITSTR text_post ])) :: kitem*) `; config >
+
+}
+
+;;; (K: inline-html)
+rule Step/inline-html:
+  `< ((INLINEHTML t) :: kitem*) `; config > ~>
+  `< ((ECHO ([ LITSTR t ])) :: kitem*) `; config >
+
+rulegroup Step/template-document {
+
+  ;;; template documents run their pieces directly, without runScript's
+  ;;; refactoring pass (K: template-document-empty/-literal/-echo; the inline
+  ;;; echo piece already folds io.k's 'InlineEcho => 'Echo rule)
+  rule Step/empty:
+    `< ((TEMPLATEDOC eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+  rule Step/literal:
+    `< ((TEMPLATEDOC ((LIT t) :: tmplPiece*)) :: kitem*) `; config > ~>
+    `< ((ECHO ([ LITSTR t ])) :: (TEMPLATEDOC tmplPiece*) :: kitem*) `; config >
+
+  rule Step/echo:
+    `< ((TEMPLATEDOC ((INLINEECHO expr) :: tmplPiece*)) :: kitem*) `; config > ~>
+    `< ((ECHO ([ expr ])) :: (TEMPLATEDOC tmplPiece*) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Literals (K: core.k §Literals; the string-to-number parsing of
+;;;; 'LNumber('Deci(Str)) / 'DNumber(Str) happened at AST folding)
+;;
+
+rulegroup Step/literal {
+
+  rule Step/integer:
+    `< ((LITINT i) :: kitem*) `; config > ~> `< ((INT i) :: kitem*) `; config >
+
+  rule Step/float:
+    `< ((LITFLOAT float) :: kitem*) `; config > ~> `< ((FLOAT float) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((LITSTR t) :: kitem*) `; config > ~> `< ((STR t) :: kitem*) `; config >
+
+  ;;; (K: literal-true / literal-false)
+  rule Step/boolean:
+    `< ((LITBOOL b) :: kitem*) `; config > ~> `< ((BOOL b) :: kitem*) `; config >
+
+  rule Step/null:
+    `< (LITNULL :: kitem*) `; config > ~> `< (NULL :: kitem*) `; config >
+
+}
+
+;;
+;;;; Blocks, empty statement (K: core.k §Blocks, §Sequential composition)
+;;
+
+rule Step/block:
+  `< ((BLOCK stmt*) :: kitem*) `; config > ~>
+  `< ($kitems(stmt*) ++ kitem*) `; config >
+
+;;; (K: empty)
+rule Step/skip:
+  `< (SKIP :: kitem*) `; config > ~> `< kitem* `; config >
+
+;;
+;;;; Expression as a statement (K: core.k §Expression as a statement)
+;;
+;; The expression runs on the same continuation, followed by POPV, which
+;; drops its result — the same-k analogue of K's 'Expr(HOLE) heating.
+;;
+
+rulegroup Step/expr {
+
+  rule Step/stmt:
+    `< ((EXPR expr) :: kitem*) `; config > ~>
+    `< (expr :: POPV :: kitem*) `; config >
+
+  ;;; (K: expr — V:Value only: K is stuck on 'Expr(thisTag), and so are we)
+  rule Step/done:
+    `< (value :: POPV :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;
+;;;; Variable lookup (K: core.k §Variable lookup)
+;;
+
+;;; $this is handled by the object rules (4.10) (K: var)
+rule Step/variable:
+  `< ((VAR id) :: kitem*) `; config > ~>
+  `< (phpRef :: kitem*) `; config >
+  -- if ~ $is_special_var(id)
+  -- if phpRef = $ite<phpRef>($is_superglobal(id),
+                              REF config.SUPERGLOB (STR id),
+                              REF config.CRNT (STR id))
+
+;;
+;;;; convertToLanguageValue (K: shared.k) — the TOLV kitem
+;;
+
+rulegroup Step/tolv {
+
+  ;;; (K: convertToLanguageValue(L:Loc) => read(L))
+  rule Step/loc:
+    `< ((TOLV loc) :: kitem*) `; config > ~>
+    `< (($read(config.HEAP, loc)) :: kitem*) `; config >
+
+  ;;; (K: convertToLanguageValue(V:ConvertibleToLoc) => read(convertToLoc(V,r));
+  ;;; Rget can also leave a one-character string, which read passes through)
+  rule Step/ref:
+    `< ((TOLV phpRef) :: kitem*) `; config > ~>
+    `< (($read(config_1.HEAP, value)) :: kitem*) `; config_1 >
+    -- Steps: `< [ RGET phpRef ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; (K: read(allocValue(V)) for a literal)
+  rule Step/literal:
+    `< ((TOLV literalValue) :: kitem*) `; config > ~>
+    `< (($read(config_1.HEAP, loc)) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(literalValue, RMODE) ] `; config > ~>
+              `< [ loc ] `; config_1 >
+
+  ;;; (K: read(convertToLoc(thisTag(L), r)) = read(L))
+  rule Step/this:
+    `< ((TOLV (THIS loc)) :: kitem*) `; config > ~>
+    `< (($read(config.HEAP, loc)) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Variable variables (K: core.k §Variable variables)
+;;
+
+rulegroup Step/variable-variable {
+
+  ;;; the argument evaluates directly to a string (K: variable-variable)
+  rule Step/direct:
+    `< ((VARVAR expr) :: kitem*) `; config > ~>
+    `< ((VAR t) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ STR t ] `; config_1 >
+
+  ;;; the argument evaluates to a reference/location and is read back; a
+  ;;; non-string result leaves the rule inapplicable — stuck, as in K
+  ;;; (K: variable-variable-arg2Value + variable-variable)
+  rule Step/conv:
+    `< ((VARVAR expr) :: kitem*) `; config > ~>
+    `< ((VAR t) :: kitem*) `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_1 > ~>
+              `< [ STR t ] `; config_2 >
+
+}
+
+;;
+;;;; Array access (K: core.k §Array access)
+;;
+;; The evaluated key value is normalized by the TOKEY machine rules below,
+;; mirroring K's in-place staging on the 'ArrayAccess RHS slot.
+;;
+
+rulegroup Step/array-access {
+
+  ;;; evaluated base is a location (K: array-access-simple + both strict
+  ;;; contexts + the key staging)
+  rule Step/simple:
+    `< ((ARRACC expr expr_k) :: kitem*) `; config > ~>
+    `< ((REF loc key) :: kitem*) `; config_3 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ loc ] `; config_1 >
+    -- Steps: `< [ expr_k ] `; config_1 > ~> `< [ kResult ] `; config_2 >
+    -- Steps: `< [ TOKEY kResult ] `; config_2 > ~> `< [ value_k ] `; config_3 >
+    -- if key = $key_of(value_k)
+
+  ;;; (K: array-access-no-key — 'None(.KList) => NULL)
+  rule Step/simple-no-key:
+    `< ((ARRACC expr eps) :: kitem*) `; config > ~>
+    `< ((REF loc NULL) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; evaluated base is itself a reference: chain an lref (K: array-access-nested)
+  rule Step/nested:
+    `< ((ARRACC expr expr_k) :: kitem*) `; config > ~>
+    `< ((LREF phpRef key ARR) :: kitem*) `; config_3 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ phpRef ] `; config_1 >
+    -- Steps: `< [ expr_k ] `; config_1 > ~> `< [ kResult ] `; config_2 >
+    -- Steps: `< [ TOKEY kResult ] `; config_2 > ~> `< [ value_k ] `; config_3 >
+    -- if key = $key_of(value_k)
+
+  rule Step/nested-no-key:
+    `< ((ARRACC expr eps) :: kitem*) `; config > ~>
+    `< ((LREF phpRef NULL ARR) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ phpRef ] `; config_1 >
+
+  ;;; kphp's trap for an external-parser bug: a string base aborts, discarding
+  ;;; the continuation, with error code 4 (K: array-access-parsing-error)
+  rule Step/parsing-error:
+    `< ((ARRACC expr expr_k?) :: kitem*) `; config > ~>
+    `< [ PRINTV (STR "PARSING BUG") ] `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ STR t ] `; config_1 >
+    -- if config_2 = config_1[.ERRCODE = 4]
+
+}
+
+;;
+;;;; Array-key normalization — the TOKEY kitem
+;;
+;; K stages these rewrites in place on the 'ArrayAccess key slot; Int, String
+;; and NULL are already Keys in K, so their TOKEY rules just unwrap.
+;;
+
+rulegroup Step/tokey {
+
+  ;;; a reference/location key is read back, then re-normalized
+  ;;; (K: array-access-LHS2LangValue — the label says LHS, the rule acts on the
+  ;;; key slot)
+  rule Step/conv:
+    `< ((TOKEY convertibleToLangValue) :: kitem*) `; config > ~>
+    `< ((TOKEY value) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; (K: array-access-key-cast-float; the cast runs through 4.04's rules)
+  rule Step/float:
+    `< ((TOKEY (FLOAT float)) :: kitem*) `; config > ~>
+    `< (value :: kitem*) `; config_1 >
+    -- Steps: `< [ CAST CINT (LITFLOAT float) ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; (K: array-access-key-cast-bool)
+  rule Step/boolean:
+    `< ((TOKEY (BOOL b)) :: kitem*) `; config > ~>
+    `< (value :: kitem*) `; config_1 >
+    -- Steps: `< [ CAST CINT (LITBOOL b) ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; (K: array-access-key-cast-string)
+  rule Step/string-cast:
+    `< ((TOKEY (STR t)) :: kitem*) `; config > ~>
+    `< (value :: kitem*) `; config_1 >
+    -- if $is_int_text(t)
+    -- Steps: `< [ CAST CINT (LITSTR t) ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; Int, non-numeric String and NULL are Keys already (K: the Key sort)
+  rule Step/integer:
+    `< ((TOKEY (INT i)) :: kitem*) `; config > ~> `< ((INT i) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((TOKEY (STR t)) :: kitem*) `; config > ~> `< ((STR t) :: kitem*) `; config >
+    -- if ~ $is_int_text(t)
+
+  rule Step/null:
+    `< ((TOKEY NULL) :: kitem*) `; config > ~> `< (NULL :: kitem*) `; config >
+
+}
+
+;;
+;;;; Assignment by value (K: core.k §Assignment by value)
+;;
+;; Both sides are evaluated (K: assign-strict-LHS/RHS), then the staging
+;; runs on the ASSIGNTO kitem, one rule per K staging rule.
+;;
+
+rule Step/assign:
+  `< ((ASSIGN expr_1 expr_2) :: kitem*) `; config > ~>
+  `< ((ASSIGNTO kResult_1 kResult_2) :: kitem*) `; config_2 >
+  -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+  -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ kResult_2 ] `; config_2 >
+
+;;; marker propagation companions (throw/fatal/exit inside either operand
+;;; aborts the whole assignment — 4.00/4.13 architecture note)
+rule Step/assign-marker-lhs:
+  `< ((ASSIGN expr_1 expr_2) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr_1 ] `; config > ~> `< [ marker ] `; config_1 >
+
+rule Step/assign-marker-rhs:
+  `< ((ASSIGN expr_1 expr_2) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_2 >
+  -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+  -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+rulegroup Step/assign-to {
+
+  ;;; (K: assign-error)
+  rule Step/error:
+    `< ((ASSIGNTO (THIS loc) kResult) :: kitem*) `; config > ~>
+    `< ((ERROR "Cannot re-assign $this in %s on line %d") :: kitem*) `; config >
+
+  ;;; the LHS reference resolves to a location, vivifying (K: assign-LHS2Loc,
+  ;;; convertToLoc(R, l))
+  rule Step/lhs2loc:
+    `< ((ASSIGNTO phpRef kResult) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO loc kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(phpRef, LMODE) ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; a reference RHS resolves to a location, read-only; Rget may also leave a
+  ;;; one-character string, which then hits the plain-value rule below
+  ;;; (K: assign-RHS2Loc-NonLiteral, convertToLoc(V, r))
+  rule Step/rhs2loc-ref:
+    `< ((ASSIGNTO loc phpRef) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO loc kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(phpRef, RMODE) ] `; config > ~> `< [ kResult ] `; config_1 >
+
+  ;;; (K: assign-RHS2Loc-NonLiteral via convertToLoc(thisTag(L), _) = L)
+  rule Step/rhs2loc-this:
+    `< ((ASSIGNTO loc (THIS loc_1)) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO loc loc_1) :: kitem*) `; config >
+
+  ;;; assigning an array whose internal cursor has overflowed resets the
+  ;;; cursor of the COPY; the copy runs to completion on a scratch state — it
+  ;;; involves no user code — then the cursor write and the result read are
+  ;;; done in place, inlining K's scheduled 'Expr('Assign(L, read(L1))) ~>
+  ;;; 'Expr(reset(L)) ~> read(L) with the same effects in the same order
+  ;;; (K: assign-RHS2LangValue-overflow)
+  rule Step/rhs-overflow:
+    `< ((ASSIGNTO loc loc_1) :: kitem*) `; config > ~>
+    `< (value_2 :: kitem*) `; config_2 >
+    -- if $current_overflow(config.HEAP, loc_1)
+    -- if value_1 = $read(config.HEAP, loc_1)
+    -- Steps: `< [ COPYVAL value_1 loc ] `; config > ~> `< eps `; config_1 >
+    -- if zval = $find_heap(config_1.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if heap_2 = $array_write_crnt(config_1.HEAP, loc, $head_entry(arrayEntry*))
+    -- if value_2 = $read(heap_2, loc)
+    -- if config_2 = config_1[.HEAP = heap_2]
+
+  ;;; (K: assign-RHS2LangValue-no-overflow, convertToLanguageValue(L1) = read(L1))
+  rule Step/rhs-no-overflow:
+    `< ((ASSIGNTO loc loc_1) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO loc ($read(config.HEAP, loc_1))) :: kitem*) `; config >
+    -- if ~ $current_overflow(config.HEAP, loc_1)
+
+  ;;; locNull is not mapped, so the overflow guards above are undefined on it
+  ;;; and only this rule applies (K: assign-RHS2LangValue-locNull)
+  rule Step/rhs-locnull:
+    `< ((ASSIGNTO loc LOCNULL) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO loc NULL) :: kitem*) `; config >
+
+  ;;; the copy; literal RHSs (array literals, new) reach this directly and are
+  ;;; expanded by copyValueToLoc; the assignment's value is the pre-copy V
+  ;;; (K: assign)
+  rule Step/copy:
+    `< ((ASSIGNTO loc languageValue) :: kitem*) `; config > ~>
+    `< ((COPYVAL languageValue loc) :: languageValue :: kitem*) `; config >
+
+}
+
+;;
+;;;; Compound-assignment shortcuts (K: core.k §Shortcuts)
+;;
+;; One rule for kphp's eight desugarings (concat-assign, div-assign,
+;; min-assign, mod-assign, plus-assign, and-assign, or-assign, xor-assign);
+;; kphp defines no other <op>= forms, hence the membership guard.
+;;
+
+rule Step/assign-op:
+  `< ((ASSIGNOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+  `< ((ASSIGN expr_1 (BINOP binop expr_1 expr_2)) :: kitem*) `; config >
+  -- if binop <- [ ADD, SUB, DIV, MOD, CONCAT, LAND, LOR, LXOR ]
+
+;;
+;;;; Assignment by reference (K: core.k §Assignment by reference)
+;;
+
+rule Step/ref-assign:
+  `< ((REFASSIGN expr_1 expr_2) :: kitem*) `; config > ~>
+  `< ((REFASSIGNTO kResult_1 kResult_2) :: kitem*) `; config_2 >
+  -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+  -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ kResult_2 ] `; config_2 >
+
+rulegroup Step/ref-assign-to {
+
+  ;;; (K: ref-assign-LHS2BasicRef, toBasicRef(lref(R,X,T)) = ref(LgetRef(R,T), X))
+  rule Step/lhs2basicref:
+    `< ((REFASSIGNTO (LREF phpRef key refType) kResult) :: kitem*) `; config > ~>
+    `< ((REFASSIGNTO (REF loc key) kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ LGETREF phpRef refType ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; the RHS resolves in l-mode — it vivifies (K: ref-assign-RHS2Loc,
+  ;;; convertToLoc(V, l))
+  rule Step/rhs2loc:
+    `< ((REFASSIGNTO kResult convertibleToLoc) :: kitem*) `; config > ~>
+    `< ((REFASSIGNTO kResult kResult_1) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, LMODE) ] `; config > ~>
+              `< [ kResult_1 ] `; config_1 >
+
+  ;;; a missing object property: descend to the property array
+  ;;; (K: ref-assign-fresh-obj-prop)
+  rule Step/fresh-obj-prop:
+    `< ((REFASSIGNTO (REF loc key) loc_1) :: kitem*) `; config > ~>
+    `< ((REFASSIGNTO (REF loc_2 key) loc_1) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_2 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_2.VAL
+    -- if ~ $has_key(arrayEntry*, key)
+
+  ;;; (K: ref-assign-fresh-array-elem; ArrayUpdateElem creates the item and
+  ;;; bumps the refcount of the shared location)
+  rule Step/fresh-array-elem:
+    `< ((REFASSIGNTO (REF loc key) loc_1) :: kitem*) `; config > ~>
+    `< ((REF loc key) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if ~ $has_key(arrayEntry*, key)
+    -- if config_1 = config[.HEAP = $array_update_elem(config.HEAP, loc, key, loc_1)]
+
+  ;;; (K: ref-assign-existent-array-elem; the old location's refcount drops,
+  ;;; the new one's rises — both inside ArrayUpdateElem)
+  rule Step/existent-array-elem:
+    `< ((REFASSIGNTO (REF loc key) loc_1) :: kitem*) `; config > ~>
+    `< ((REF loc key) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (`[ key_f `, visibility_f `, loc_2 ]) = $find_entry(arrayEntry*, key)
+    -- if ~ (loc_1 = loc_2)
+    -- if config_1 = config[.HEAP = $array_update_elem(config.HEAP, loc, key, loc_1)]
+
+  ;;; (K: ref-assign-existent-array-elem-same)
+  rule Step/existent-array-elem-same:
+    `< ((REFASSIGNTO (REF loc key) loc_1) :: kitem*) `; config > ~>
+    `< ((REF loc key) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (`[ key_f `, visibility_f `, loc_1 ]) = $find_entry(arrayEntry*, key)
+
+  ;;; a plain value on the RHS warns and degrades to assignment by value
+  ;;; (K: ref-assign-language-value)
+  rule Step/language-value:
+    `< ((REFASSIGNTO (REF loc key) plainValue) :: kitem*) `; config > ~>
+    `< ((WARNING "Only variables should be assigned by reference in %s on line %d\n")
+       :: (ASSIGNTO (REF loc key) plainValue) :: kitem*) `; config >
+
+}
+
+;;
+;;;; List assignment (K: core.k §List Assignment)
+;;
+
+;;; the pattern's targets evaluate first (depth-first, left-to-right), then
+;;; the RHS (K: list-elems-strict + list-assign-strict-LHS/RHS)
+rule Step/list-assign:
+  `< ((LISTASSIGN (LIST listElem*) expr) :: kitem*) `; config > ~>
+  `< ((LISTASSIGNTO rtListElem* kResult) :: kitem*) `; config_2 >
+  -- Steps: `< [ EVALPAT listElem* eps ] `; config > ~>
+            `< [ PAT rtListElem* ] `; config_1 >
+  -- Steps: `< [ expr ] `; config_1 > ~> `< [ kResult ] `; config_2 >
+
+rulegroup Step/evalpat {
+
+  ;;; EVALPAT: heat the next target, accumulate the KResults in order
+  rule Step/elem:
+    `< ((EVALPAT ((ELEM expr) :: listElem*) rtListElem*) :: kitem*) `; config > ~>
+    `< ((EVALPAT listElem* (rtListElem* ++ [ RTELEM kResult ])) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_1 >
+
+  rule Step/blank:
+    `< ((EVALPAT (BLANK :: listElem*) rtListElem*) :: kitem*) `; config > ~>
+    `< ((EVALPAT listElem* (rtListElem* ++ [ RTBLANK ])) :: kitem*) `; config >
+
+  rule Step/nest:
+    `< ((EVALPAT ((NEST (LIST listElem_1*)) :: listElem*) rtListElem*) :: kitem*) `; config > ~>
+    `< ((EVALPAT listElem* (rtListElem* ++ [ RTNEST rtListElem_1* ])) :: kitem*) `; config_1 >
+    -- Steps: `< [ EVALPAT listElem_1* eps ] `; config > ~>
+              `< [ PAT rtListElem_1* ] `; config_1 >
+
+  rule Step/done:
+    `< ((EVALPAT eps rtListElem*) :: kitem*) `; config > ~>
+    `< ((PAT rtListElem*) :: kitem*) `; config >
+
+}
+
+rulegroup Step/list-assign-to {
+
+  ;;; the RHS resolves to a location, read-only; K's literal RHS is also
+  ;;; ConvertibleToLoc, so list() = array(...) allocates and proceeds
+  ;;; (K: list-assign-RHS2Loc, convertToLoc(R, r))
+  rule Step/rhs2loc:
+    `< ((LISTASSIGNTO rtListElem* convertibleToLoc) :: kitem*) `; config > ~>
+    `< ((LISTASSIGNTO rtListElem* kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config > ~>
+              `< [ kResult ] `; config_1 >
+
+  ;;; the location is the list()'s own value (K: list-assign)
+  rule Step/loc:
+    `< ((LISTASSIGNTO rtListElem* loc) :: kitem*) `; config > ~>
+    `< ((ASSIGNSEQ rtListElem* loc 0) :: loc :: kitem*) `; config >
+
+  ;;; a plain RHS value yields false; K's literal RHS matches both this and the
+  ;;; conversion above nondeterministically — resolved here to the conversion
+  ;;; (K: assign-seq-not-a-loc)
+  rule Step/plain:
+    `< ((LISTASSIGNTO rtListElem* plainValue) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+
+}
+
+rulegroup Step/assign-seq {
+
+  ;;; ASSIGNSEQ schedules the remaining pattern BEFORE this element's
+  ;;; assignment, so the assignments execute right-to-left, as in K; each
+  ;;; assignment is discarded by POPV (K's 'Expr wrapper)
+  ;;; (K: assign-seq-some-non-list)
+  rule Step/some-non-list:
+    `< ((ASSIGNSEQ ((RTELEM kResult) :: rtListElem*) loc i) :: kitem*) `; config > ~>
+    `< ((ASSIGNSEQ rtListElem* loc $(i + 1))
+       :: (ASSIGNTO kResult (REF loc (INT i))) :: POPV :: kitem*) `; config >
+
+  ;;; (K: assign-seq-some-list — 'ListAssign('List(X), 'ArrayAccess(L, I)))
+  rule Step/some-list:
+    `< ((ASSIGNSEQ ((RTNEST rtListElem_1*) :: rtListElem*) loc i) :: kitem*) `; config > ~>
+    `< ((ASSIGNSEQ rtListElem* loc $(i + 1))
+       :: (LISTASSIGNTO rtListElem_1* (REF loc (INT i))) :: POPV :: kitem*) `; config >
+
+  ;;; (K: assign-seq-skip)
+  rule Step/skip:
+    `< ((ASSIGNSEQ (RTBLANK :: rtListElem*) loc i) :: kitem*) `; config > ~>
+    `< ((ASSIGNSEQ rtListElem* loc $(i + 1)) :: kitem*) `; config >
+
+  ;;; (K: assign-seq-nil)
+  rule Step/nil:
+    `< ((ASSIGNSEQ eps loc i) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;
+;;;; IsSet (K: core.k §IsSet)
+;;
+;; kphp only gives semantics to single-argument isset ('Isset('ListWrap(Arg))
+;; with exactly one member); multi-argument isset is stuck there and here
+;; (K heats the extra arguments before sticking; here the rule never fires).
+;;
+
+;;; (K: internal-fun-isset-args-strict + internal-fun-isset-2-spec)
+rule Step/isset:
+  `< ((ISSET ([ expr ])) :: kitem*) `; config > ~>
+  `< ((ISSETV kResult) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_1 >
+
+rulegroup Step/issetv {
+
+  ;;; isset never vivifies: the chain resolves through RgetRef
+  ;;; (K: isset-arg2BasicRef, readBasicRef(lref(R,X,T)) = ref(RgetRef(R,T), X))
+  rule Step/arg2basicref:
+    `< ((ISSETV (LREF phpRef key refType)) :: kitem*) `; config > ~>
+    `< ((ISSETV (REF loc key)) :: kitem*) `; config_1 >
+    -- Steps: `< [ RGETREF phpRef refType ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; a public entry with the key exists (K: isset-true)
+  rule Step/true:
+    `< ((ISSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< ((BOOL true) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if loc_1 = $find_entry_vis(arrayEntry*, key, PUB)
+
+  ;;; (K: isset-false)
+  rule Step/false:
+    `< ((ISSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, key)
+
+  ;;; dead code in kphp (RgetRef never leaves a locNull-based basic ref), kept
+  ;;; as K keeps it (K: isset-null)
+  rule Step/null:
+    `< ((ISSETV (REF LOCNULL key)) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+
+  ;;; (K: isset-scalar)
+  rule Step/scalar:
+    `< ((ISSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+}
+
+;;
+;;;; Unset (K: core.k §Unset)
+;;
+
+rulegroup Step/unset {
+
+  ;;; each argument is unset completely before the next one evaluates
+  ;;; (K: unset-cons + unset-strict)
+  rule Step/cons:
+    `< ((UNSET (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< ((UNSETV kResult) :: (UNSET expr_t*) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_1 >
+
+  ;;; (K: unset-nil)
+  rule Step/nil:
+    `< ((UNSET eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+rulegroup Step/unsetv {
+
+  ;;; unset never vivifies either (K: unset-arg2BasicRef, readBasicRef)
+  rule Step/arg2basicref:
+    `< ((UNSETV (LREF phpRef key refType)) :: kitem*) `; config > ~>
+    `< ((UNSETV (REF loc key)) :: kitem*) `; config_1 >
+    -- Steps: `< [ RGETREF phpRef refType ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; (K: unset-obj-prop)
+  rule Step/obj-prop:
+    `< ((UNSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< ((UNSETV (REF loc_1 key)) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+
+  ;;; (K: unset-null-ref)
+  rule Step/null-ref:
+    `< ((UNSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, key)
+
+  ;;; the cursor does not sit on the removed entry (K: unset-non-current)
+  rule Step/non-current:
+    `< ((UNSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor `{ arrayEntry* }) = zval.VAL
+    -- if (`[ key_c `, visibility_c ]) = arrayCursor
+    -- if (`[ key_f `, visibility_f `, loc_1 ]) = $find_entry(arrayEntry*, key)
+    -- if ~ (key_c = key /\ visibility_c = visibility_f)
+    -- if heap_1 = $update_heap(config.HEAP, loc,
+         zval[.VAL = ARR arrayCursor `{ $remove_entry(arrayEntry*, key) }])
+    -- if config_1 = config[.HEAP = $dec_ref_count(heap_1, loc_1)]
+
+  ;;; no cursor at all (K: unset-current-none)
+  rule Step/current-none:
+    `< ((UNSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+    -- if (`[ key_f `, visibility_f `, loc_1 ]) = $find_entry(arrayEntry*, key)
+    -- if heap_1 = $update_heap(config.HEAP, loc,
+         zval[.VAL = ARR eps `{ $remove_entry(arrayEntry*, key) }])
+    -- if config_1 = config[.HEAP = $dec_ref_count(heap_1, loc_1)]
+
+  ;;; the cursor sits on the removed entry and advances to the next one, or to
+  ;;; none if the entry was last (K: unset-current-not-last / unset-current-last,
+  ;;; merged via $next_cursor)
+  rule Step/current:
+    `< ((UNSETV (REF loc key)) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor `{ arrayEntry* }) = zval.VAL
+    -- if (`[ key_c `, visibility_c ]) = arrayCursor
+    -- if (`[ key_f `, visibility_f `, loc_1 ]) = $find_entry(arrayEntry*, key)
+    -- if key_c = key /\ visibility_c = visibility_f
+    -- if heap_1 = $update_heap(config.HEAP, loc,
+         zval[.VAL = ARR $next_cursor(arrayEntry*, key) `{ $remove_entry(arrayEntry*, key) }])
+    -- if config_1 = config[.HEAP = $dec_ref_count(heap_1, loc_1)]
+
+  ;;; (K: unset-refNull)
+  rule Step/refnull:
+    `< ((UNSETV (REF LOCNULL key)) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}

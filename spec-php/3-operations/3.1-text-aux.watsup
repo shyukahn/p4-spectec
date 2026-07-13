@@ -1,0 +1,42 @@
+;;
+;;;; Pure text auxiliaries
+;;
+;; Digit test used by numeric-string parsing (K: the #isDigit hook).
+;; Escape decoding for double-quoted strings is added when strings.k is ported.
+;;
+
+dec $is_digit(text) : bool
+def $is_digit(t) =
+  t <- [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" ]
+
+;;; one-character substring at an int position (K: substrString(S, I, I +Int 1),
+;;; a hooked String builtin; undefined out of range, as in K)
+builtin dec $text_at(text, int) : text
+
+;;; lexicographic string comparison (K: <String / >String / <=String / >=String,
+;;; hooked byte-order comparison used by the string comparison operators)
+builtin dec $text_lt(text, text) : bool
+builtin dec $text_gt(text, text) : bool
+builtin dec $text_le(text, text) : bool
+builtin dec $text_ge(text, text) : bool
+
+;;; all characters from position n on are digits
+dec $is_digits_from(text, nat) : bool
+def $is_digits_from(t, n) = true
+  -- if $(n >= |t|)
+def $is_digits_from(t, n) = $is_digit(t[n]) /\ $is_digits_from(t, $(n + 1))
+  -- otherwise
+
+;;; non-empty all-digit text
+dec $is_digits(text) : bool
+def $is_digits("") = false
+def $is_digits(t) = $is_digits_from(t, 0)
+  -- otherwise
+
+;;; exact integer-literal test (K: isIntType(String2Int(S)) — String2Int is K's
+;;; strict parse, so this holds only for an optional minus followed by digits)
+dec $is_int_text(text) : bool
+def $is_int_text("") = false
+def $is_int_text(t) = $is_digits(t) \/
+  (t[0] = "-" /\ $(|t| > 1) /\ $is_digits_from(t, 1))
+  -- otherwise

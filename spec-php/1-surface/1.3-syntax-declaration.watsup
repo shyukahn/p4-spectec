@@ -1,0 +1,49 @@
+;;
+;;;; Declarations: parameters, modifiers, class members
+;;
+;; K constructors folded here:
+;;   'Param('Variable('Simple x))          -> PARAM id
+;;   'ParamRef('Variable('Simple x))       -> PARAMREF id
+;;   'ParamDefault('Variable('Simple x),e) -> PARAMDEFAULT id expr
+;;   type-hinted parameters                -> PARAMTYPED (trapped NOT-SUPPORTED,
+;;                                            K: process-fun-args-error)
+;;   'Modifiers('ListWrap('Public/'Protected/'Private/'Static ...))
+;;                                         -> MODS visMod bool  (bool = static)
+;;      (members without modifiers are folded to MODS PUB false, replicating
+;;       K's defaulting rules init-class-member-decl-no-modifier / -meth-no-modifiers)
+;;   'InstanceVariable(Mods, 'ListWrap('Normal v | 'Default v e ...))
+;;                                         -> PROPS modifiers propDecl*
+;;   'FunctionDecl/'FunctionDeclRef(Mods, name, params, body) as class member
+;;                                         -> METHOD modifiers bool id param* stmt*
+;;   'ClassConstantDeclList                -> CONSTS (trapped NOT-SUPPORTED,
+;;                                            K: init-class-member-constant-decl-list)
+;;
+
+;;; function/method parameters
+syntax param =
+  | PARAM id                     ;; $x
+  | PARAMREF id                  ;; &$x
+  | PARAMDEFAULT id expr         ;; $x = default
+  | PARAMTYPED text param        ;; TypeHint $x ... (unsupported, trapped)
+
+;;; surface visibility modifier (runtime visibility, which tags private with its
+;;; declaring class, lives in the runtime domain)
+syntax visMod =
+  | PUB
+  | PROT
+  | PRIV
+
+;;; modifiers: visibility + staticness
+syntax modifiers = MODS visMod bool
+
+;;; property declaration inside a class ('Normal = no default, 'Default = with)
+syntax propDecl = PDECL id expr?
+
+;;; class constant declaration (unsupported in kphp; shape per PHP5 `const A = e`)
+syntax clsConstDecl = CCONST id expr
+
+;;; class members
+syntax classMember =
+  | PROPS modifiers propDecl*              ;; property declaration group
+  | METHOD modifiers bool id param* stmt*  ;; bool = returns by reference
+  | CONSTS clsConstDecl*                   ;; trapped NOT-SUPPORTED

@@ -1,0 +1,220 @@
+;;
+;;;; Pure value and array auxiliaries
+;;
+;; K sources: memory.k (typeOf, is*Type, hasProperty, biggestIntKey, ArrayIndexOf,
+;; ArrayGetElemAtIndex, head, locHolds*), shared.k (visibility2String),
+;; core.k (isSuperGlobal, isSpecialVar), type-conversions.k (arrayCurrentOverflow).
+;; K's sort-membership side conditions (V:ScalarValue etc.) are expressed with
+;; `<:` case tests; the K is*Type functions used explicitly in rules are kept as defs.
+;;
+
+;;; runtime type of a value (K: typeOf; partial — literal/semantic values have none)
+dec $type_of(value) : phpType
+def $type_of(BOOL b) = BOOL
+def $type_of(INT i) = INT
+def $type_of(FLOAT float) = FLOAT
+def $type_of(STR t) = STRING
+def $type_of(OID loc id n) = OBJECT
+def $type_of(ARR arrayCursor? `{ arrayEntry* }) = ARRAY
+def $type_of(NULL) = UNSET
+
+;;; sort predicates (K: isNumeric, isCompoundValue, isScalar, isLiteral, hasSameType)
+dec $is_numeric(value) : bool
+def $is_numeric(INT i) = true
+def $is_numeric(FLOAT float) = true
+def $is_numeric(value) = false
+  -- otherwise
+
+dec $is_compound(value) : bool
+def $is_compound(value) = value <: compoundValue
+
+dec $is_scalar(value) : bool
+def $is_scalar(value) = value <: scalarValue
+
+dec $is_literal(value) : bool
+def $is_literal(value) = value <: literalValue
+
+dec $has_same_type(value, value) : bool
+def $has_same_type(value_a, value_b) = $type_of(value_a) = $type_of(value_b)
+
+;;; heap-classification predicates (K: locHoldsArray/locHoldsObject/locsHoldSameCompound)
+dec $loc_holds_array(heap, loc) : bool
+def $loc_holds_array(heap, loc) = zval.VAL <: array
+  -- if zval = $find_heap(heap, loc)
+
+dec $loc_holds_object(heap, loc) : bool
+def $loc_holds_object(heap, loc) = zval.VAL <: object
+  -- if zval = $find_heap(heap, loc)
+
+dec $locs_hold_same_compound(heap, loc, loc) : bool
+def $locs_hold_same_compound(heap, loc_a, loc_b) =
+  ($loc_holds_array(heap, loc_a) /\ $loc_holds_array(heap, loc_b)) \/
+  ($loc_holds_object(heap, loc_a) /\ $loc_holds_object(heap, loc_b))
+
+;;; the empty array (K: emptyArray)
+dec $empty_array : array
+def $empty_array = ARR eps `{ eps }
+
+;;; key membership in an array's entries (K: hasProperty)
+dec $has_key(arrayEntry*, key) : bool
+def $has_key(eps, key) = false
+def $has_key((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key) =
+  key = key_h \/ $has_key(arrayEntry_t*, key)
+
+;;; private-property membership for a given class context (K: hasPrivateProperty
+;;; ... for; K passes the possibly-empty <class> cell, hence the id? context —
+;;; no context matches no private entry)
+dec $has_private_key(arrayEntry*, key, id?) : bool
+def $has_private_key(arrayEntry*, key, eps) = false
+def $has_private_key(eps, key, id) = false
+def $has_private_key((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key, id) =
+  (key_h = key /\ visibility_h = PRIV id) \/ $has_private_key(arrayEntry_t*, key, id)
+
+;;; first entry with the given key, any visibility (K's associative list
+;;; matching ListItem([X, _, L]) in array rules)
+dec $find_entry(arrayEntry*, key) : arrayEntry?
+def $find_entry(eps, key) = eps
+def $find_entry((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key) =
+  `[ key_h `, visibility_h `, loc_h ]
+  -- if key_h = key
+def $find_entry((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key) =
+  $find_entry(arrayEntry_t*, key)
+  -- if ~ (key_h = key)
+
+;;; location of the first entry with the given key and exact visibility
+;;; (K's ListItem([X, Vis, L]) matching in the Rget property rules)
+dec $find_entry_vis(arrayEntry*, key, visibility) : loc?
+def $find_entry_vis(eps, key, visibility) = eps
+def $find_entry_vis((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key, visibility) = loc_h
+  -- if key_h = key /\ visibility_h = visibility
+def $find_entry_vis((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key, visibility) =
+  $find_entry_vis(arrayEntry_t*, key, visibility)
+  -- if ~ (key_h = key /\ visibility_h = visibility)
+
+;;; remove the first entry with the given key (K: the (ListItem([X,_,_]) => .)
+;;; rewrites in the unset rules; K matches any occurrence nondeterministically,
+;;; here deterministically the first — consistent with $find_entry)
+dec $remove_entry(arrayEntry*, key) : arrayEntry*
+def $remove_entry(eps, key) = eps
+def $remove_entry((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key) =
+  arrayEntry_t*
+  -- if key_h = key
+def $remove_entry((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key) =
+  (`[ key_h `, visibility_h `, loc_h ]) :: $remove_entry(arrayEntry_t*, key)
+  -- if ~ (key_h = key)
+
+;;; cursor at the entry following the first entry with the given key; none if
+;;; that entry is last (K: unset-current-not-last / unset-current-last)
+dec $next_cursor(arrayEntry*, key) : arrayCursor?
+def $next_cursor(eps, key) = eps
+def $next_cursor((`[ key_h `, visibility_h `, loc_h ]) :: eps, key) = eps
+  -- if key_h = key
+def $next_cursor((`[ key_h `, visibility_h `, loc_h ]) ::
+                 (`[ key_1 `, visibility_1 `, loc_1 ]) :: arrayEntry_t*, key) =
+  `[ key_1 `, visibility_1 ]
+  -- if key_h = key
+def $next_cursor(arrayEntry_h :: arrayEntry_t*, key) = $next_cursor(arrayEntry_t*, key)
+  -- if (`[ key_h `, visibility_h `, loc_h ]) = arrayEntry_h
+  -- if ~ (key_h = key)
+
+;;; replace the location of the first entry with the given key, keeping its
+;;; visibility (K: array-update-elem-update's in-place [X, _, L3 => L2])
+dec $replace_entry_loc(arrayEntry*, key, loc) : arrayEntry*
+def $replace_entry_loc(eps, key, loc) = eps
+def $replace_entry_loc((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key, loc) =
+  (`[ key_h `, visibility_h `, loc ]) :: arrayEntry_t*
+  -- if key_h = key
+def $replace_entry_loc((`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*, key, loc) =
+  (`[ key_h `, visibility_h `, loc_h ]) :: $replace_entry_loc(arrayEntry_t*, key, loc)
+  -- if ~ (key_h = key)
+
+;;; cursor at a numeric index; -1 yields none (K: ArrayGetElemAtIndex)
+dec $entry_at(int, arrayEntry*) : arrayCursor?
+def $entry_at(i, arrayEntry*) = eps
+  -- if i = -1
+def $entry_at(i, (`[ key `, visibility `, loc ]) :: arrayEntry_t*) = `[ key `, visibility ]
+  -- if i = 0
+def $entry_at(i, arrayEntry_h :: arrayEntry_t*) = $entry_at($(i - 1), arrayEntry_t*)
+  -- if $(i > 0)
+
+;;; numeric index of a cursor; none yields -1 (K: ArrayIndexOf; K's recursive
+;;; clause pattern-matches a 2-component item in the entries list — an apparent
+;;; typo for the 3-component item — transcribed here by intent)
+dec $index_of(arrayCursor?, arrayEntry*) : int
+def $index_of(eps, arrayEntry*) = -1
+def $index_of(`[ key_c `, visibility_c ], (`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*) = 0
+  -- if key_c = key_h /\ visibility_c = visibility_h
+def $index_of(`[ key_c `, visibility_c ], (`[ key_h `, visibility_h `, loc_h ]) :: arrayEntry_t*)
+  = $(1 + $index_of(`[ key_c `, visibility_c ], arrayEntry_t*))
+  -- if ~ (key_c = key_h /\ visibility_c = visibility_h)
+
+;;; first entry as a cursor (K: head)
+dec $head_entry(arrayEntry*) : arrayCursor?
+def $head_entry(eps) = eps
+def $head_entry((`[ key `, visibility `, loc ]) :: arrayEntry_t*) = `[ key `, visibility ]
+
+;;; biggest integer key, -1 if none (K: biggestIntKey; string keys are skipped;
+;;; NULL keys are never stored in arrays)
+dec $biggest_int_key(arrayEntry*) : int
+def $biggest_int_key(eps) = -1
+def $biggest_int_key((`[ (STR t) `, visibility `, loc ]) :: arrayEntry_t*) =
+  $biggest_int_key(arrayEntry_t*)
+def $biggest_int_key((`[ (INT i) `, visibility `, loc ]) :: arrayEntry_t*) =
+  $ite<int>($(i >= i_rest), i, i_rest)
+  -- if i_rest = $biggest_int_key(arrayEntry_t*)
+
+;;; cursor-overflow test: cursor is none but the array is non-empty
+;;; (K: arrayCurrentOverflow, type-conversions.k)
+dec $array_current_overflow(array) : bool
+def $array_current_overflow(ARR eps `{ arrayEntry_h :: arrayEntry_t* }) = true
+def $array_current_overflow(ARR eps `{ eps }) = false
+def $array_current_overflow(ARR arrayCursor `{ arrayEntry* }) = false
+
+;;; heap-level cursor-overflow test used by assignment (K: currentOverflow,
+;;; shared.k — NOT the same as arrayCurrentOverflow above: here an EMPTY array
+;;; with no cursor also overflows, and a non-array holds false; undefined for
+;;; unmapped locations, as in K)
+dec $current_overflow(heap, loc) : bool
+def $current_overflow(heap, loc) = true
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+def $current_overflow(heap, loc) = false
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor `{ arrayEntry* }) = zval.VAL
+def $current_overflow(heap, loc) = false
+  -- if zval = $find_heap(heap, loc)
+  -- if ~ (zval.VAL <: array)
+
+;;; project an evaluated key value into a key; doubles as K's "is a Key" sort
+;;; test on the result of the 'ArrayAccess key staging (partial: compounds and
+;;; floats never make it here)
+dec $key_of(value) : key
+def $key_of(INT i) = INT i
+def $key_of(STR t) = STR t
+def $key_of(NULL) = NULL
+
+;;; superglobal / special variable tests (K: core.k isSuperGlobal, isSpecialVar)
+dec $is_superglobal(id) : bool
+def $is_superglobal(id) = id = "_GET" \/ id = "_POST" \/ id = "GLOBALS"
+
+dec $is_special_var(id) : bool
+def $is_special_var(id) = id = "this"
+
+;;; visibility printing (K: shared.k visibility2String)
+dec $visibility_to_text(visibility) : text
+def $visibility_to_text(PUB) = "public"
+def $visibility_to_text(PROT) = "protected"
+def $visibility_to_text(PRIV id) = "private"
+
+;;; reification of runtime scalars/keys back into literal expressions — used
+;;; where K injects values directly into AST terms (e.g. makeArrayFromScalar)
+dec $expr_of_scalar(scalarValue) : expr
+def $expr_of_scalar(INT i) = LITINT i
+def $expr_of_scalar(FLOAT float) = LITFLOAT float
+def $expr_of_scalar(BOOL b) = LITBOOL b
+def $expr_of_scalar(STR t) = LITSTR t
+
+dec $expr_of_key(key) : expr
+def $expr_of_key(INT i) = LITINT i
+def $expr_of_key(STR t) = LITSTR t
+def $expr_of_key(NULL) = LITNULL

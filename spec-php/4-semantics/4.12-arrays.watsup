@@ -1,0 +1,131 @@
+;;
+;;;; Arrays (K: arrays.k)
+;;
+;; Array literals (allocated lazily as a LITERAL thunk, expanded by
+;; copyValueToLoc's loc-array-literal rule into MKARRLIT — 2.5/4.01) and the
+;; empty() internal function.
+;;
+;; K's array-literal elements are strict (heated to KResults before
+;; makeArrayLiteral runs) and by-reference values ('RefValue) are supported;
+;; here ARRLIT's items (arrItem = ITEM expr? expr) only model by-value
+;; elements — kphp's parser rarely exercises `array(&$x)` and the surface
+;; syntax was folded without a ref-item variant, so that form is out of AST
+;; scope, matching the plan's "only what's actively used" principle. Each
+;; item's key/value evaluate left-to-right, same order as K's strict heating,
+;; then the item is written directly via the internal assignment machinery
+;; (ASSIGNTO) rather than through surface AST — the target loc here is a raw
+;; runtime value, not something a surface 'ArrayAccess node could hold, so
+;; this bypasses the surface round-trip the same way 4.06's ASSIGNKITEM does.
+;;
+
+;;
+;;;; Surface syntax (K: array-literal)
+;;
+
+rule Step/arraylit:
+  `< ((ARRLIT arrItem*) :: kitem*) `; config > ~>
+  `< ((LITERAL (ARRLIT arrItem*)) :: kitem*) `; config >
+
+;;; the array literal is expanded by copyValueToLoc's loc-array-literal rule
+;;; into MKARRLIT (2.5/4.01); this is that expansion (K: makeArrayLiteral)
+rule Step/mkarrlit:
+  `< ((MKARRLIT loc arrItem*) :: kitem*) `; config > ~>
+  `< ((ARRAYINITPROPS loc arrItem*) :: kitem*) `; config_1 >
+  -- if config_1 = config[.HEAP = $array_create_empty(config.HEAP, loc)]
+
+rulegroup Step/arrayinitprops {
+
+  rule Step/cons:
+    `< ((ARRAYINITPROPS loc (arrItem_h :: arrItem_t*)) :: kitem*) `; config > ~>
+    `< ((ARRAYINITPROP loc arrItem_h) :: (ARRAYINITPROPS loc arrItem_t*) :: kitem*) `; config >
+
+  rule Step/nil:
+    `< ((ARRAYINITPROPS loc eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;
+;;;; Initialize a single array-literal item (K: ArrayInitProp)
+;;
+;; The key evaluates first (when present), then the value; a missing key
+;; defaults to biggestIntKey(Elems) + 1, read from the array's current state
+;; at the moment this item is written (K: array-init-prop-def-key).
+;;
+
+rulegroup Step/arrayinitprop {
+
+  ;;; keyed item (K: array-init-prop-key)
+  rule Step/key:
+    `< ((ARRAYINITPROP loc (ITEM expr_k expr_v)) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO (REF loc ($key_of(value_k))) kResult_v) :: POPV :: kitem*) `; config_2 >
+    -- Steps: `< [ expr_k ] `; config > ~> `< [ kResult_k ] `; config_0 >
+    -- Steps: `< [ TOKEY kResult_k ] `; config_0 > ~> `< [ value_k ] `; config_1 >
+    -- Steps: `< [ expr_v ] `; config_1 > ~> `< [ kResult_v ] `; config_2 >
+
+  ;;; marker propagation companions (throw/fatal/exit inside the key or value
+  ;;; expr aborts the whole array-literal item write; TOKEY itself is a pure
+  ;;; internal cast with no user-code hook, so it needs no companion of its own)
+  rule Step/key-marker-key:
+    `< ((ARRAYINITPROP loc (ITEM expr_k expr_v)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr_k ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/key-marker-value:
+    `< ((ARRAYINITPROP loc (ITEM expr_k expr_v)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_2 >
+    -- Steps: `< [ expr_k ] `; config > ~> `< [ kResult_k ] `; config_0 >
+    -- Steps: `< [ TOKEY kResult_k ] `; config_0 > ~> `< [ value_k ] `; config_1 >
+    -- Steps: `< [ expr_v ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+  ;;; item with no explicit key: default to biggestIntKey + 1
+  ;;; (K: array-init-prop-def-key)
+  rule Step/nokey:
+    `< ((ARRAYINITPROP loc (ITEM eps expr_v)) :: kitem*) `; config > ~>
+    `< ((ASSIGNTO (REF loc (INT i)) kResult_v) :: POPV :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if i = $(1 + $biggest_int_key(arrayEntry*))
+    -- Steps: `< [ expr_v ] `; config > ~> `< [ kResult_v ] `; config_1 >
+
+  ;;; marker propagation companion (throw/fatal/exit inside the value expr
+  ;;; aborts the whole array-literal item write)
+  rule Step/nokey-marker:
+    `< ((ARRAYINITPROP loc (ITEM eps expr_v)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if i = $(1 + $biggest_int_key(arrayEntry*))
+    -- Steps: `< [ expr_v ] `; config > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;
+;;;; Arrays internal functions (K: 'InternalFunction('Empty(...)))
+;;
+;; PHP's empty() truthiness matches !$to_bool, computed directly on the
+;; already-folded castKind-style rules of 3.2/4.04 rather than kphp's own
+;; per-type rule matrix (K: empty-int-* / -float-* / -bool-* / -string-* /
+;; -array-* / -object / -null — the whole matrix is exactly $to_bool negated,
+;; kphp just spells it out type by type).
+;;
+
+rule Step/empty:
+  `< ((EMPTY expr) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if b = ~ $to_bool(config_1.HEAP, value)
+
+;;; marker propagation companions (throw/fatal/exit inside the tested
+;;; expression or its languageValue conversion aborts the whole empty() call)
+rule Step/empty-marker-expr:
+  `< ((EMPTY expr) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/empty-marker-tolv:
+  `< ((EMPTY expr) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >

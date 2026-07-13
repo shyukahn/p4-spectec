@@ -1,0 +1,114 @@
+;;
+;;;; Input and Output (K: io.k)
+;;
+;; die/exit share one surface form (EXIT expr?; K's 'Die desugars to 'Exit at
+;; parse time, so there is nothing to port for die-desugar). print/echo cast
+;; their arguments to LanguageValue and funnel through the same internal
+;; print cascade (PRINTV), which appends the final string representation to
+;; <out>. exit additionally records the (possibly non-string) exit value in
+;; EXITCODE and — like K's `~> _ => print(V)` — discards the rest of the
+;; continuation.
+;;
+
+dec $exit_arg(expr?) : expr
+def $exit_arg(eps) = LITNULL
+def $exit_arg(expr) = expr
+
+;;; K's exitStatus cell only ever observes an int in practice (kphp callers
+;;; pass ints/strings; a non-numeric value degrades to 0, matching $to_int)
+dec $exit_code(value) : int
+def $exit_code(value) = $to_int(value)
+
+;;;; Exit, Die (K: 'Exit / 'Die — 'Die desugars to 'Exit in the parser)
+;;
+;; exit prints its (converted) argument, then discards the rest of the
+;; continuation (K: `~> _ => print(V)`) — reified here as the EXITED marker,
+;; which nothing ever consumes, so the machine simply halts once it is
+;; reached (Steps/refl). Marker propagation companion rules (one per Steps
+;; premise site elsewhere in 4.01-4.12) re-emit EXITED outward whenever a
+;; premise's sub-evaluation hits it instead of the expected result shape,
+;; exactly as for THROWN (4.13's header has the full rationale).
+;;
+
+rule Step/exit:
+  `< ((EXIT expr?) :: kitem*) `; config > ~>
+  `< ((PRINTV value) :: EXITED :: eps) `; config_2 >
+  -- Steps: `< [ $exit_arg(expr?) ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if config_2 = config_1[.EXITCODE = $exit_code(value)]
+
+;;; marker propagation companions: a throw/fatal (uncaught inside the exit
+;;; argument's own evaluation, e.g. exit(f()) where f() throws) aborts the
+;;; exit itself, re-emitting that marker instead
+rule Step/exit-marker-arg:
+  `< ((EXIT expr?) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ $exit_arg(expr?) ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/exit-marker-tolv:
+  `< ((EXIT expr?) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ $exit_arg(expr?) ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+;;;; Auxiliary: print (K: print(V), internal-print cascade)
+
+;;; K's internal-print cascade, collapsed to one pure def: an integral float
+;;; prints via its int cast (avoids ".0"), a fractional float and anything
+;;; else print via their text conversion, and a plain string prints as-is
+dec $print_float(float) : text
+def $print_float(float) = $int_to_text($float_to_int(float))
+  -- if $has_no_decimal(float)
+def $print_float(float) = $float_to_text(float)
+  -- if ~ $has_no_decimal(float)
+
+dec $print_text(value) : text
+def $print_text(FLOAT float) = $print_float(float)
+def $print_text(STR text) = text
+def $print_text(value) = $to_text(value)
+  -- otherwise
+
+rule Step/printv:
+  `< ((PRINTV value) :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config_1 = config[.OUT = config.OUT ++ [ $print_text(value) ]]
+
+;;;; Echo (K: 'Echo('ListWrap(...)))
+
+rulegroup Step/echo {
+
+  rule Step/cons:
+    `< ((ECHO (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< ((PRINTV value) :: (ECHO expr_t*) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+
+  rule Step/nil:
+    `< ((ECHO eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;; marker propagation companions: a throw/fatal inside one echo item aborts
+;;; the whole echo list (later items never run)
+rulegroup Step/echo-marker {
+
+  rule Step/arg:
+    `< ((ECHO (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/tolv:
+    `< ((ECHO (expr :: expr_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;;; Print (K: 'Print(Item) => 'Echo('ListWrap(Item)) ~> 1 — same as Echo, but
+;;;; also yields the integer 1 as the expression's value)
+
+rule Step/print:
+  `< ((PRINT expr) :: kitem*) `; config > ~>
+  `< ((ECHO ([ expr ])) :: (INT 1) :: kitem*) `; config >

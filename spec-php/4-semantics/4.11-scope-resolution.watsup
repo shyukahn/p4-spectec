@@ -1,0 +1,34 @@
+;;
+;;;; Scope resolution (K: scope-resolution.k)
+;;
+;; self/parent resolution ($classref_to_id, pulled forward to 4.09 since
+;; 4.10's method-call rules need it too), static method call (surface rules
+;; are in 4.10, next to the ordinary method-call machinery they share), class
+;; constants and static properties.
+;;
+
+;;
+;;;; Access to class static properties (K: 'ScopeResolution on a $prop)
+;;
+
+;;; a static property lives in the class's static-scope array — walking up
+;;; through the parent chain the same way class constants do below (kphp's
+;;; parser only reaches SPROP at the class where it is declared, but the
+;;; lookup itself is not restricted to it; ported for the general case)
+rule Step/sprop:
+  `< ((SPROP classRef id_prop) :: kitem*) `; config > ~>
+  `< ((REF loc (STR id_prop)) :: kitem*) `; config >
+  -- if id_cls = $classref_to_id(config.CTRL.CLS, config.CLASSES, classRef)
+  -- if classDef = $find_map<id, classDef>(config.CLASSES, id_cls)
+  -- if loc = classDef.STATICS
+
+;;
+;;;; Class constants (K: 'ClassConstant)
+;;
+;; kphp's class constants are not supported (classes.k traps
+;; ClassConstantDeclList at declaration), so CLSCONST is unreachable through
+;; any class actually declared by this semantics — kept stuck, as in K (no
+;; class ever populates a constant entry in its static-scope array for a
+;; genuine `const` declaration; 4.09's CONSTS case already traps the surface
+;; declaration as NOT-SUPPORTED before any CLSCONST could observe it).
+;;

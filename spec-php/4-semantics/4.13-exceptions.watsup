@@ -1,0 +1,103 @@
+;;
+;;;; Exceptions (K: exceptions.k)
+;;
+;; K models exceptions KOOL-style: try pushes an exception-stack frame and
+;; schedules `TryBody ~> popx ~> K`; throw pops the top frame and splices in
+;; `Assign(Var,V) ~> CatchBody ~> K`, restoring the control-record snapshot
+;; taken at push time. K's `K` there is the captured continuation after the
+;; try/catch — safe for K because K's own heating strategy never evaluates a
+;; statement inside a "scratch" copy of the machine.
+;;
+;; That continuation-capture trick is exactly what 4.00's header rules out for
+;; throw: unlike call/return and loop/break (which always execute their body
+;; on the very machine that pushed the frame), a throw can happen INSIDE a
+;; Steps premise evaluating a subexpression (e.g. `f()` in `$x = f() + 1`) —
+;; and a Steps premise matches against any reachable state, so splicing a
+;; captured outer continuation into that inner scratch machine would let the
+;; thrown value's resumption silently skip whatever the outer rule meant to
+;; do with the premise's result. So excFrame carries no continuation (2.6);
+;; instead:
+;;
+;;   - `try` leaves K's own `popx` kitem on the continuation as the resume
+;;     marker, exactly where K puts it (`TryBody ~> popx ~> K`) — so `K`
+;;     (whatever follows the try/catch) is already sitting right after popx
+;;     on the SAME continuation, with no separate capture needed;
+;;   - `throw` (and fatal errors, 4.14) drain the LOCAL continuation down to
+;;     a `THROWN value` head — discarding everything queued after the throw
+;;     on that machine, matching K's `'Throw(V) ~> _ => ...`;
+;;   - every Step rule with a Steps premise gets a companion rule: if the
+;;     premise's sub-evaluation reaches a `THROWN`/`EXITED` marker instead of
+;;     its expected result shape, the outer rule re-drains to that same
+;;     marker one level out, instead of firing normally. This is the operant
+;;     analogue of K's context never cooling once its hole contains a stuck
+;;     'Throw — propagation happens by construction, one Steps premise at a
+;;     time, all the way out to the main continuation;
+;;   - once `THROWN value` reaches the main continuation, it walks outward
+;;     kitem by kitem (Step/thrown-skip) until it meets a `POPX` marker,
+;;     discarding everything in between (uncaught statements, other markers)
+;;     — exactly as K's frame-popping walk would, since nothing between the
+;;     throw site and the enclosing try's popx is reachable once thrown;
+;;   - meeting `POPX` pops the top exception frame and runs the catch body
+;;     with the variable bound and the control record restored to its
+;;     pre-try snapshot.
+;;
+;; NOTE on class filtering: kphp's own throw-no-loop rule binds `XClass` from
+;; the popped frame but never actually compares it against the thrown
+;; object's class anywhere — every throw is caught unconditionally by the
+;; nearest enclosing try, regardless of the `catch (SomeClass $e)` clause's
+;; named class. This looks like a simplification/gap in kphp itself (the K
+;; source even leaves a TODO comment nearby about the loopStack/'sync
+;; current' interaction being fragile), not an oversight in this port —
+;; ported faithfully rather than "fixed", since the goal is a faithful
+;; transcription of kphp's actual semantics, warts included.
+;;
+
+;;
+;;;; Try-catch (K: try-catch, pop-exception-frame)
+;;
+
+rule Step/try:
+  `< ((TRY stmt* (CATCH id_cls id_var stmt_catch*)) :: kitem*) `; config > ~>
+  `< ($kitems(stmt*) ++ [ POPX ] ++ kitem*) `; config_1 >
+  -- if excFrame_new = { CLASS id_cls, CVAR id_var, CBODY stmt_catch*, CTRL config.CTRL }
+  -- if config_1 = config[.CTRL.EXCSTACK = excFrame_new :: config.CTRL.EXCSTACK]
+
+;;; the try body ran to completion without throwing: dissolve the frame
+;;; (K: pop-exception-frame)
+rule Step/popx:
+  `< (POPX :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if excFrame_h :: excFrame_t* = config.CTRL.EXCSTACK
+  -- if config_1 = config[.CTRL.EXCSTACK = excFrame_t*]
+
+;;
+;;;; Throw (K: 'Throw)
+;;
+
+;;; the argument evaluates to an object, then drains the continuation
+;;; (K: throw-arg2LangValue, throw-no-loop)
+rule Step/throw:
+  `< ((THROW expr) :: kitem*) `; config > ~>
+  `< [ THROWN value ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if $is_object(value)
+
+;;
+;;;; Propagation to the enclosing popx (K: the implicit frame-popping walk)
+;;
+
+;;; skip over anything that is not the matching resume marker
+rule Step/thrown-skip:
+  `< ((THROWN value) :: kitem_h :: kitem_t*) `; config > ~>
+  `< ((THROWN value) :: kitem_t*) `; config >
+  -- if ~ (kitem_h = POPX)
+
+;;; meets the enclosing try's popx: bind the catch variable and run the
+;;; catch body, with the control record restored to its pre-try snapshot
+;;; (K: throw-no-loop — caught unconditionally, see the header note)
+rule Step/thrown-catch:
+  `< ((THROWN value) :: POPX :: kitem*) `; config > ~>
+  `< ((ASSIGNKITEM (VAR excFrame_h.CVAR) value) :: POPV :: $kitems(excFrame_h.CBODY) ++ kitem*) `; config_1 >
+  -- if excFrame_h :: excFrame_t* = config.CTRL.EXCSTACK
+  -- if config_1 = config[.CTRL = excFrame_h.CTRL]

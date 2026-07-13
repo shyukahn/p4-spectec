@@ -1,0 +1,464 @@
+;;
+;;;; Memory operations
+;;
+;; K sources: memory.k (zvalues, refcounting, array operations, macros,
+;; Rget/Lget), shared.k (reference-solving macros).
+;;
+;; K's low-level operations split by nature:
+;;   - heap-only operations (zval creation, refcounting, read/write, array
+;;     item create/update, cursor writes) become pure defs heap -> heap;
+;;     K's zvalRead/zvalWrite rules are absorbed into record field access;
+;;   - operations that allocate fresh locations, emit notices/warnings, or
+;;     recurse through the machine (allocValue, copyValueToLoc, Rget, Lget)
+;;     are Step rules over the internal kitems of 2.5.
+;;
+;; Not ported: zvalDestroy (declared in K, never invoked — gc is disabled);
+;; the LError sentinel location and the `L =/= LError` side conditions (K
+;; never constructs LError).
+;;
+
+;;
+;;;; Zval macros (K: zval-create; zvalRead/zvalWrite absorbed)
+;;
+
+dec $zval_create(heap, loc, value, phpType, int, bool) : heap
+def $zval_create(heap, loc, value, phpType, i, b) =
+  $add_heap(heap, loc, { VAL value, TYPE phpType, REFS i, ISREF b })
+
+;;
+;;;; Reference counting (K: incRefCount / decRefCount)
+;;
+
+;;; increment; a second reference flips isRef on (K: inc-refCount-1/2/3;
+;;; K has no rule for refs = 0/1 with isRef already true, nor refs > 1 with
+;;; isRef false — undefined here as well)
+dec $inc_ref_count(heap, loc) : heap
+def $inc_ref_count(heap, loc) = $update_heap(heap, loc, zval[.REFS = $(zval.REFS + 1)])
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = false /\ zval.REFS = 0                    ;; K: inc-refCount-1
+def $inc_ref_count(heap, loc) =
+  $update_heap(heap, loc, zval[.REFS = $(zval.REFS + 1)][.ISREF = true])
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = false /\ zval.REFS = 1                    ;; K: inc-refCount-2
+def $inc_ref_count(heap, loc) = $update_heap(heap, loc, zval[.REFS = $(zval.REFS + 1)])
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = true /\ $(zval.REFS > 1)                  ;; K: inc-refCount-3
+
+;;; decrement; dropping to one reference clears isRef, and dropping the last
+;;; reference of a compound recurses into its members (K: dec-refCount-1/2/3;
+;;; nothing is ever freed — refcounts may go negative, as in K)
+dec $dec_ref_count(heap, loc) : heap
+dec $dec_ref_count_compound(heap, loc) : heap
+dec $dec_ref_count_entries(heap, arrayEntry*) : heap
+
+def $dec_ref_count(heap, loc) = $update_heap(heap, loc, zval[.REFS = $(zval.REFS - 1)])
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = true /\ $(zval.REFS > 2)                  ;; K: dec-refCount-1
+def $dec_ref_count(heap, loc) =
+  $update_heap(heap, loc, zval[.REFS = 1][.ISREF = false])
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = true /\ zval.REFS = 2                     ;; K: dec-refCount-2
+def $dec_ref_count(heap, loc) =                                ;; K: dec-refCount-3
+  $update_heap(heap, loc, zval[.REFS = $(zval.REFS - 1)])
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = false /\ $(zval.REFS <= 1)
+  -- if ~ $is_compound(zval.VAL)
+def $dec_ref_count(heap, loc) =                                ;; K: dec-refCount-3 (compound)
+  $dec_ref_count_compound(heap_1, loc)
+  -- if zval = $find_heap(heap, loc)
+  -- if zval.ISREF = false /\ $(zval.REFS <= 1)
+  -- if $is_compound(zval.VAL)
+  -- if heap_1 = $update_heap(heap, loc, zval[.REFS = $(zval.REFS - 1)])
+
+;;; (K: dec-refCount-compound-array / dec-refCount-compound-obj — an object
+;;; descends into its property array; neither the property-array location nor
+;;; any member is destroyed)
+def $dec_ref_count_compound(heap, loc) = $dec_ref_count_entries(heap, arrayEntry*)
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+def $dec_ref_count_compound(heap, loc) = $dec_ref_count_compound(heap, loc_1)
+  -- if zval = $find_heap(heap, loc)
+  -- if (OID loc_1 id n) = zval.VAL
+
+;;; (K: dec-refCount-array-elems-cons/-nil; K consumes the entry list from its
+;;; tail, so the last element is decremented first — here the recursion on the
+;;; tail happens before the head's decrement, giving the same order)
+def $dec_ref_count_entries(heap, eps) = heap
+def $dec_ref_count_entries(heap, (`[ key `, visibility `, loc ]) :: arrayEntry_t*) =
+  $dec_ref_count($dec_ref_count_entries(heap, arrayEntry_t*), loc)
+
+;;
+;;;; Reading and writing (K: read / write)
+;;
+
+;;; (K: read-loc / read-locNull / read-string; read accepts the string values
+;;; Rget yields for string indexing)
+dec $read(heap, value) : value
+def $read(heap, LOC n) = zval.VAL
+  -- if zval = $find_heap(heap, LOC n)
+def $read(heap, LOCNULL) = NULL
+def $read(heap, STR t) = STR t
+
+;;; (K: write-locNull / write-loc-exists / write-loc-undef; writes to locNull
+;;; are dropped — needed for cases like $c[$c=1] = 0)
+dec $write(heap, value, loc) : heap
+def $write(heap, value, LOCNULL) = heap                        ;; K: write-locNull
+def $write(heap, value, loc) =                                 ;; K: write-loc-exists
+  $update_heap(heap, loc, zval[.VAL = value][.TYPE = $type_of(value)])
+  -- if zval = $find_heap(heap, loc)
+def $write(heap, value, loc) =                                 ;; K: write-loc-undef
+  $zval_create(heap, loc, value, $type_of(value), 0, false)
+  -- otherwise
+
+;;
+;;;; Array operations (K: memory.k §arrays)
+;;
+
+;;; (K: array-create-empty)
+dec $array_create_empty(heap, loc) : heap
+def $array_create_empty(heap, loc) = $write(heap, $empty_array, loc)
+
+;;; append a new item, incrementing its location's refcount; an absent cursor
+;;; is pointed at the new item (K: array-create-elem /
+;;; array-create-elem-update-crnt)
+dec $array_create_elem(heap, loc, key, visibility, loc) : heap
+def $array_create_elem(heap, loc, key, visibility, loc_1) = $inc_ref_count(heap_1, loc_1)
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor `{ arrayEntry* }) = zval.VAL
+  -- if heap_1 = $update_heap(heap, loc,
+       zval[.VAL = ARR arrayCursor `{ arrayEntry* ++ [ (`[ key `, visibility `, loc_1 ]) ] }])
+def $array_create_elem(heap, loc, key, visibility, loc_1) = $inc_ref_count(heap_1, loc_1)
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR eps `{ arrayEntry* }) = zval.VAL
+  -- if heap_1 = $update_heap(heap, loc,
+       zval[.VAL = ARR (`[ key `, visibility ])
+                   `{ arrayEntry* ++ [ (`[ key `, visibility `, loc_1 ]) ] }])
+
+;;; update an existing item's location (keeping its visibility, swapping the
+;;; refcounts) or create it (K: array-update-elem-update / -create)
+dec $array_update_elem(heap, loc, key, loc) : heap
+def $array_update_elem(heap, loc, key, loc_new) =
+  $inc_ref_count($dec_ref_count(heap_1, loc_old), loc_new)
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+  -- if (`[ key_f `, visibility_f `, loc_old ]) = $find_entry(arrayEntry*, key)
+  -- if heap_1 = $update_heap(heap, loc,
+       zval[.VAL = ARR arrayCursor? `{ $replace_entry_loc(arrayEntry*, key, loc_new) }])
+def $array_update_elem(heap, loc, key, loc_new) =
+  $array_create_elem(heap, loc, key, PUB, loc_new)
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+  -- if ~ $has_key(arrayEntry*, key)
+
+;;; cursor writes (K: array-write-current-some)
+dec $array_write_crnt(heap, loc, arrayCursor?) : heap
+def $array_write_crnt(heap, loc, arrayCursor?) =
+  $update_heap(heap, loc, zval[.VAL = ARR arrayCursor? `{ arrayEntry* }])
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor_old? `{ arrayEntry* }) = zval.VAL
+
+;;; point the cursor at the element with a numeric index, none for -1
+;;; (K: array-init-reset / array-init-n; K's reset case delegates to the reset
+;;; builtin, which sets the cursor to the head — $entry_at(0) — so one clause
+;;; covers both)
+dec $array_init_crnt(heap, loc, int) : heap
+def $array_init_crnt(heap, loc, i) = $array_write_crnt(heap, loc, $entry_at(i, arrayEntry*))
+  -- if zval = $find_heap(heap, loc)
+  -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+
+;;
+;;;; Allocation and copying (K: allocValue / copyValueToLoc / copyArrayMembers)
+;;
+
+;;; a fresh location, then a copy into it; the location is the result
+;;; (K: alloc-value; the NEXT counter replaces K's !fresh)
+rule Step/alloc-value:
+  `< ((ALLOCVAL value) :: kitem*) `; config > ~>
+  `< ((COPYVAL value loc) :: loc :: kitem*) `; config_1 >
+  -- if loc = LOC config.NEXT
+  -- if config_1 = config[.NEXT = $(config.NEXT + 1)]
+
+rulegroup Step/copy-value {
+  
+  ;;; scalars and NULL write in place (K: copy-value-to-loc-scalar)
+  rule Step/loc-scalar:
+    `< ((COPYVAL value loc) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if $is_scalar(value) \/ value = NULL
+    -- if config_1 = config[.HEAP = $write(config.HEAP, value, loc)]
+
+  ;;; arrays copy member-wise into a fresh empty array, then re-point the
+  ;;; cursor at the source's cursor index (K: copy-value-to-loc-array)
+  rule Step/loc-array:
+    `< ((COPYVAL (ARR arrayCursor? `{ arrayEntry* }) loc) :: kitem*) `; config > ~>
+    `< ((COPYMEMBERS loc arrayEntry*) :: (ARRSETCRNT loc i) :: kitem*) `; config_1 >
+    -- if i = $index_of(arrayCursor?, arrayEntry*)
+    -- if config_1 = config[.HEAP = $array_create_empty(config.HEAP, loc)]
+
+  ;;; objects are shared: the property array's refcount goes up
+  ;;; (K: copy-value-to-loc-obj)
+  rule Step/loc-obj:
+    `< ((COPYVAL (OID loc_1 id n) loc) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if heap_1 = $inc_ref_count(config.HEAP, loc_1)
+    -- if config_1 = config[.HEAP = $write(heap_1, OID loc_1 id n, loc)]
+
+  ;;; literal thunks expand at copy time (K: copy-value-to-loc-array-literal /
+  ;;; -object-literal; makeArrayLiteral rules in 4.12, makeNewObject in 4.10)
+  rule Step/loc-array-literal:
+    `< ((COPYVAL (LITERAL (ARRLIT arrItem*)) loc) :: kitem*) `; config > ~>
+    `< ((MKARRLIT loc arrItem*) :: kitem*) `; config >
+
+  rule Step/loc-object-literal:
+    `< ((COPYVAL (LITERAL (NEWOBJ id arg*)) loc) :: kitem*) `; config > ~>
+    `< ((MKNEWOBJ loc id arg*) :: kitem*) `; config >
+
+}
+
+rulegroup Step/copy-members {
+
+  ;;; member copy: value members are deep-copied into fresh locations
+  ;;; (K: copyArrayMembers-cons-no-aliasing)
+  rule Step/cons-no-aliasing:
+    `< ((COPYMEMBERS loc ((`[ key `, visibility `, loc_e ]) :: arrayEntry*)) :: kitem*) `; config > ~>
+    `< ((COPYMEMBERS loc arrayEntry*) :: kitem*) `; config_2 >
+    -- if zval = $find_heap(config.HEAP, loc_e)
+    -- if zval.ISREF = false
+    -- Steps: `< [ ALLOCVAL zval.VAL ] `; config > ~> `< [ loc_new ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, loc, key, visibility, loc_new)]
+
+  ;;; member copy: reference members are shared (K: copyArrayMembers-cons-aliasing)
+  rule Step/cons-aliasing:
+    `< ((COPYMEMBERS loc ((`[ key `, visibility `, loc_e ]) :: arrayEntry*)) :: kitem*) `; config > ~>
+    `< ((COPYMEMBERS loc arrayEntry*) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc_e)
+    -- if zval.ISREF = true
+    -- if config_1 = config[.HEAP = $array_create_elem(config.HEAP, loc, key, visibility, loc_e)]
+
+  ;;; (K: copyArrayMembers-nil)
+  rule Step/nil:
+    `< ((COPYMEMBERS loc eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;; cursor re-point after a copy (K: ArrayInitCrnt)
+rule Step/array-init-crnt:
+  `< ((ARRSETCRNT loc i) :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config_1 = config[.HEAP = $array_init_crnt(config.HEAP, loc, i)]
+
+;;
+;;;; Rget — resolving a reference for reading; never vivifies
+;;
+
+;;; (K: rget-default)
+rule Step/rget:
+  `< ((RGET phpRef) :: kitem*) `; config > ~>
+  `< ((RGETREF phpRef NUL) :: kitem*) `; config >
+
+rulegroup Step/rget-ref {
+
+  ;;; resolve the inner reference of an lref first (K: rget-propagate, heated
+  ;;; via strict(1) on 'ref — here a premise)
+  rule Step/propagate:
+    `< ((RGETREF (LREF phpRef key refType_1) refType_2) :: kitem*) `; config > ~>
+    `< ((RGETREF (REF loc key) refType_2) :: kitem*) `; config_1 >
+    -- Steps: `< [ RGETREF phpRef refType_1 ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; array element, public — array elements always are (K: rget-array-prop)
+  rule Step/array-prop:
+    `< ((RGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< (loc_1 :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if loc_1 = $find_entry_vis(arrayEntry*, key, PUB)
+
+  ;;; missing array key: notice, locNull (K: rget-array-prop-undefined)
+  rule Step/array-prop-undefined:
+    `< ((RGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< ((NOTICE "Undefined variable: %s in %s on line %d\n") :: LOCNULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, key)
+
+  ;;; public object property, not shadowed by a private one of the current
+  ;;; class context (K: rget-obj-prop-public)
+  rule Step/obj-prop-public:
+    `< ((RGETREF (REF loc (STR t)) refType) :: kitem*) `; config > ~>
+    `< (loc_2 :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+    -- if ~ $has_private_key(arrayEntry*, STR t, config.CTRL.CLS)
+    -- if loc_2 = $find_entry_vis(arrayEntry*, STR t, PUB)
+
+  ;;; protected object property: visible from the hierarchy of the current
+  ;;; class context, otherwise fatal (K: rget-obj-prop-protected)
+  rule Step/obj-prop-protected:
+    `< ((RGETREF (REF loc (STR t)) refType) :: kitem*) `; config > ~>
+    `< (kitem_1 :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+    -- if ~ $has_private_key(arrayEntry*, STR t, config.CTRL.CLS)
+    -- if loc_2 = $find_entry_vis(arrayEntry*, STR t, PROT)
+    -- if kitem_1 = $ite<kitem>($is_visible(config.CLASSES, id, config.CTRL.CLS, PROT),
+                                loc_2, ERROR "ERROR-PROTECTED")
+
+  ;;; private object property, only from its defining class context
+  ;;; (K: rget-obj-prop-private)
+  rule Step/obj-prop-private:
+    `< ((RGETREF (REF loc (STR t)) refType) :: kitem*) `; config > ~>
+    `< (loc_2 :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+    -- if id_ctx = config.CTRL.CLS
+    -- if loc_2 = $find_entry_vis(arrayEntry*, STR t, PRIV id_ctx)
+
+  ;;; missing object property: notice, locNull (K: rget-obj-prop-undefined)
+  rule Step/obj-prop-undefined:
+    `< ((RGETREF (REF loc (STR t)) refType) :: kitem*) `; config > ~>
+    `< ((NOTICE "Undefined property: %s in %s on line %d\n") :: LOCNULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+    -- if ~ $has_key(arrayEntry*, STR t)
+
+  ;;; a non-compound, non-string base reads as locNull (K: rget-obj-scalar)
+  rule Step/obj-scalar:
+    `< ((RGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< (LOCNULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if phpType = $type_of(zval.VAL)
+    -- if ~ (phpType = ARRAY \/ phpType = STRING \/ phpType = OBJECT)
+
+  ;;; (K: rget-null)
+  rule Step/null:
+    `< ((RGETREF (REF LOCNULL key) refType) :: kitem*) `; config > ~>
+    `< (LOCNULL :: kitem*) `; config >
+
+  ;;; string indexing yields a one-character string — a value, not a location
+  ;;; (K: rget-string-index)
+  rule Step/string-index:
+    `< ((RGETREF (REF loc (INT i)) refType) :: kitem*) `; config > ~>
+    `< ((STR $text_at(t, i)) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (STR t) = zval.VAL
+
+  ;;; a string key on a string yields locNull (K: rget-string-undef)
+  rule Step/string-undef:
+    `< ((RGETREF (REF loc (STR t_k)) refType) :: kitem*) `; config > ~>
+    `< (LOCNULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (STR t) = zval.VAL
+
+}
+
+;;
+;;;; Lget — resolving a reference for writing; missing references are
+;;;; created on the fly (auto-vivification)
+;;
+
+;;; (K: lget-default)
+rule Step/lget:
+  `< ((LGET phpRef) :: kitem*) `; config > ~>
+  `< ((LGETREF phpRef NUL) :: kitem*) `; config >
+
+rulegroup Step/lget-ref {
+
+  ;;; (K: lget-propagate)
+  rule Step/propagate:
+    `< ((LGETREF (LREF phpRef key refType_1) refType_2) :: kitem*) `; config > ~>
+    `< ((LGETREF (REF loc key) refType_2) :: kitem*) `; config_1 >
+    -- Steps: `< [ LGETREF phpRef refType_1 ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; the reference exists: Rget takes over (K: lget-found-array)
+  rule Step/found-array:
+    `< ((LGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< ((RGET (REF loc key)) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if $has_key(arrayEntry*, key)
+
+  ;;; (K: lget-found-obj)
+  rule Step/found-obj:
+    `< ((LGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< ((RGET (REF loc key)) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+    -- if $has_key(arrayEntry*, key)
+
+  ;;; missing, nul mode: vivify with NULL (K: lget-not-found-init-null)
+  rule Step/not-found-init-null:
+    `< ((LGETREF (REF loc key) NUL) :: kitem*) `; config > ~>
+    `< ((RGET (REF loc key)) :: kitem*) `; config_2 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, key) /\ ~ (key = NULL)
+    -- Steps: `< [ ALLOCVAL NULL ] `; config > ~> `< [ loc_1 ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, loc, key, PUB, loc_1)]
+
+  ;;; missing, arr mode: vivify with an empty array (K: lget-not-found-init-array)
+  rule Step/not-found-init-array:
+    `< ((LGETREF (REF loc key) ARR) :: kitem*) `; config > ~>
+    `< ((RGET (REF loc key)) :: kitem*) `; config_2 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, key) /\ ~ (key = NULL)
+    -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc_1 ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, loc, key, PUB, loc_1)]
+
+  ;;; missing, obj mode: vivify with NULL, then assign a new stdClass into the
+  ;;; fresh element (K: lget-not-found-init-obj rewrites to
+  ;;; 'Expr('Assign(ref(L,X), 'ObjectCreation("stdClass"))) ~> Rget(ref(L,X));
+  ;;; the Assign's own Lget re-vivifies the element with NULL and its
+  ;;; copyValueToLoc expands the object literal into it — transcribed here with
+  ;;; that vivification and copy inlined: same allocations, same order, the
+  ;;; assignment's discarded return value omitted)
+  rule Step/not-found-init-obj:
+    `< ((LGETREF (REF loc key) OBJ) :: kitem*) `; config > ~>
+    `< ((COPYVAL (LITERAL (NEWOBJ "stdClass" eps)) loc_1) :: (RGET (REF loc key)) :: kitem*) `; config_2 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, key) /\ ~ (key = NULL)
+    -- Steps: `< [ ALLOCVAL NULL ] `; config > ~> `< [ loc_1 ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, loc, key, PUB, loc_1)]
+
+  ;;; missing on an object base: descend into the property array
+  ;;; (K: lget-not-found-in-obj)
+  rule Step/not-found-in-obj:
+    `< ((LGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< ((LGETREF (REF loc_1 key) refType) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_1.VAL
+    -- if ~ $has_key(arrayEntry*, key)
+
+  ;;; the NULL "append" key becomes biggestIntKey + 1
+  ;;; (K: lget-not-found-default-array-key)
+  rule Step/default-array-key:
+    `< ((LGETREF (REF loc NULL) refType) :: kitem*) `; config > ~>
+    `< ((LGETREF (REF loc (INT i)) refType) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if i = $($biggest_int_key(arrayEntry*) + 1)
+
+  ;;; a scalar base cannot be used as an array: warning, locNull
+  ;;; (K: lget-error-1)
+  rule Step/error-1:
+    `< ((LGETREF (REF loc key) refType) :: kitem*) `; config > ~>
+    `< ((WARNING "Cannot use a scalar value as an array in %s on line %d\n") :: LOCNULL :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if phpType = $type_of(zval.VAL)
+    -- if ~ (phpType = ARRAY \/ phpType = OBJECT)
+
+}

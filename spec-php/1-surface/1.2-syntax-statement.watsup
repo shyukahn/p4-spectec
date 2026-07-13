@@ -1,0 +1,64 @@
+;;
+;;;; Statements
+;;
+;; K constructors folded here:
+;;   'Expr / 'Block / 'Empty                     -> EXPR / BLOCK / SKIP
+;;   'If (+'AltIf,'ElseIf)                       -> IF (ternary is an expr)
+;;   'While/'DoWhile/'For/'ForEach (+ Alt forms) -> WHILE/DOWHILE/FOR/FOREACH
+;;   'Switch/'Case                               -> SWITCH/caseClause
+;;   'Break/'Continue/'Return                    -> BREAK/CONTINUE/RETURN
+;;   'Echo/'InlineEcho/'InlineHTML               -> ECHO / INLINEHTML
+;;   'DeclareGlobal/'DeclareStatic/'Unset        -> GLOBAL/STATIC/UNSET
+;;   'Try/'Catch/'Throw                          -> TRY/catchClause/THROW
+;;   'FunctionDecl / 'Class                      -> FUNDECL / CLASSDECL (see 1.3)
+;;
+
+;;; forward declarations for mutually-referential syntax
+syntax stmt
+syntax classMember
+syntax param
+
+;;; else-if chain element: guard + body
+syntax elseIf = ELSEIF expr stmt*
+
+;;; foreach pattern (K 'Pattern('Some('Key(k))?, target); 'Ref marks by-reference)
+syntax foreachTarget =
+  | BYVAL expr
+  | BYREF expr
+syntax foreachPattern =
+  | VAL foreachTarget            ;; foreach (e as $v) / foreach (e as &$v)
+  | KEYVAL expr foreachTarget    ;; foreach (e as $k => $v)
+
+;;; switch case clause
+syntax caseClause =
+  | CASE expr stmt*
+  | DEFAULT stmt*
+
+;;; catch clause (single clause only; parser has no finally)
+syntax catchClause = CATCH id id stmt*   ;; catch (ClassName $var) { body }
+
+;;; static declaration item
+syntax staticDecl = DECL id expr?        ;; static $x; or static $x = init;
+
+syntax stmt =
+  | EXPR expr
+  | BLOCK stmt*
+  | SKIP
+  | IF expr stmt* elseIf* stmt*          ;; if (g) {then} elseif* {else}
+  | WHILE expr stmt*
+  | DOWHILE stmt* expr
+  | FOR expr* expr* expr* stmt*          ;; for (init; cond; step) {body}
+  | FOREACH expr foreachPattern stmt*
+  | SWITCH expr caseClause*
+  | BREAK expr?                          ;; break / break N
+  | CONTINUE expr?                       ;; continue / continue N
+  | RETURN expr?
+  | ECHO expr*
+  | INLINEHTML text
+  | GLOBAL id*                           ;; global $a, $b;
+  | STATIC staticDecl*
+  | UNSET expr*
+  | TRY stmt* catchClause
+  | THROW expr
+  | FUNDECL bool id param* stmt*         ;; bool = returns by reference
+  | CLASSDECL id id? classMember*        ;; name, optional parent, members

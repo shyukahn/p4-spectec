@@ -1,0 +1,193 @@
+;;
+;;;; Type-cast expressions (K: type-conversions.k §Surface syntax)
+;;
+;; The scalar conversion tables ($to_bool/$to_int/$to_float/$to_text and the
+;; numeric-string machinery) are pure and already live in 3.2-conversion. What
+;; remains here are the CAST Step rules — evaluate the argument to a language
+;; value (TOLV), stage it on the internal CASTV kitem, then apply — plus the
+;; effectful cases that are NOT pure:
+;;   - compound -> int/float emits a WARNING and yields 1 / 1.0 (K's Zend quirk);
+;;   - object   -> string is a fatal ERROR;
+;;   - to-object / to-array allocate (makeObjectFromArray / makeArrayFromScalar).
+;;
+;; K rewrites the evaluated value in place inside the 'IntCast(...) slot; a typed
+;; AST cannot hold a value, so the evaluated cast is the internal kitem
+;; CASTV castKind value (declared in 2.5), exactly one apply rule per K rule.
+;;
+;; Only CINT/CSTRING/CBOOL/CFLOAT/COBJECT reach here; 'ArrayCast/'NullCast are
+;; trapped as unsupported (4.19).
+;;
+
+;;
+;;;; Pure helpers used by the rules below
+;;
+
+;;; reify an array's entries back into array-literal items so makeObjectFromArray
+;;; can copy them; each entry's value is read from its location through the heap
+;;; (K wraps the whole Array value in a Literal; here the literal is rebuilt)
+dec $items_of(array, heap) : arrItem*
+def $items_of(ARR arrayCursor? `{ eps }, heap) = eps
+def $items_of(ARR arrayCursor? `{ (`[ key `, visibility `, loc ]) :: arrayEntry* }, heap) =
+  (ITEM ($expr_of_key(key)) ($expr_of_value($read(heap, loc)))) :: $items_of(ARR arrayCursor? `{ arrayEntry* }, heap)
+
+;;; project an array's entries (used to reset its cursor to the first element)
+dec $entries_of(array) : arrayEntry*
+def $entries_of(ARR arrayCursor? `{ arrayEntry* }) = arrayEntry*
+
+;;; the argument is strict: evaluate it to a language value and stage on CASTV
+;;; (K: <kind>Cast(HOLE) context + <kind>-cast-arg2LangValue)
+rule Step/cast-arg:
+  `< ((CAST castKind expr) :: kitem*) `; config > ~>
+  `< ((CASTV castKind value) :: kitem*) `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_1 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_1 > ~> `< [ value ] `; config_2 >
+
+;;; marker propagation companions (throw/fatal/exit while evaluating the
+;;; cast's argument, or while resolving it through TOLV, aborts the cast)
+rule Step/cast-arg-marker-expr:
+  `< ((CAST castKind expr) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_1 >
+
+rule Step/cast-arg-marker-tolv:
+  `< ((CAST castKind expr) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_1 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+;;
+;;;; To integer (K: int-cast => *toInteger)
+;;
+
+rulegroup Step/cast-integer {
+
+  ;;; scalars and NULL: the pure table (K: *toInteger, 3.2)
+  rule Step/scalar:
+    `< ((CASTV CINT value) :: kitem*) `; config > ~>
+    `< ((INT $to_int(value)) :: kitem*) `; config >
+    -- if $is_scalar(value)
+
+  ;;; compound values are undefined; kphp warns and yields 1 (K: toInteger-compound)
+  rule Step/compound:
+    `< ((CASTV CINT value) :: kitem*) `; config > ~>
+    `< ((WARNING "conversion of compound types to integer is undefined (http://www.php.net/manual/en/language.types.integer.php)\n")
+       :: (INT 1) :: kitem*) `; config >
+    -- if $is_compound(value)
+
+}
+
+;;
+;;;; To float (K: float-cast => *toFloat)
+;;
+
+rulegroup Step/cast-float {
+
+  rule Step/scalar:
+    `< ((CASTV CFLOAT value) :: kitem*) `; config > ~>
+    `< ((FLOAT $to_float(value)) :: kitem*) `; config >
+    -- if $is_scalar(value)
+
+  ;;; (K: toFloat-compound)
+  rule Step/compound:
+    `< ((CASTV CFLOAT value) :: kitem*) `; config > ~>
+    `< ((WARNING "conversion of compound types to integer is undefined (http://www.php.net/manual/en/language.types.integer.php)\n")
+       :: (FLOAT $fone) :: kitem*) `; config >
+    -- if $is_compound(value)
+
+}
+
+;;
+;;;; To boolean (K: bool-cast => *toBoolean)
+;;
+;; *toBoolean reads object properties through the heap, so the pure $to_bool takes
+;; the heap; all cases (incl. compounds) are total, so one rule suffices.
+;;
+
+rule Step/cast-boolean:
+  `< ((CASTV CBOOL value) :: kitem*) `; config > ~>
+  `< ((BOOL $to_bool(config.HEAP, value)) :: kitem*) `; config >
+
+;;
+;;;; To string (K: string-cast => *toString)
+;;
+
+rulegroup Step/cast-string {
+
+  ;;; scalars, arrays ("Array") and NULL: the pure table (K: *toString, 3.2)
+  rule Step/non-object:
+    `< ((CASTV CSTRING value) :: kitem*) `; config > ~>
+    `< ((STR $to_text(value)) :: kitem*) `; config >
+    -- if ~ (value <: object)
+
+  ;;; objects cannot be converted to string (K: toString-object)
+  rule Step/object:
+    `< ((CASTV CSTRING value) :: kitem*) `; config > ~>
+    `< ((ERROR "Object of class %s could not be converted to string in %s on line %d") :: kitem*) `; config >
+    -- if value <: object
+
+}
+
+;;
+;;;; To object (K: object-cast => *toObject)
+;;
+;; A scalar becomes {"scalar" => S}; an array becomes an object wrapping a copy
+;; of the array (cursor reset on overflow); an object is returned unchanged.
+;; Both constructing paths go through makeObjectFromArray: allocate a fresh
+;; location, copy the array in, reset the cursor if it overflowed, and yield
+;; OID(L, stdClass, 0).
+;;
+
+rulegroup Step/cast-object {
+
+  ;;; scalar: wrap in a one-element array {"scalar" => S}, then objectify
+  ;;; (K: toObject-scalar => makeObjectFromArray(makeArrayFromScalar(S,"scalar")))
+  rule Step/scalar:
+    `< ((CASTV COBJECT scalarValue) :: kitem*) `; config > ~>
+    `< ((MKOBJ (LITERAL (ARRLIT ([ ITEM (LITSTR "scalar") ($expr_of_scalar(scalarValue)) ])))) :: kitem*) `; config >
+
+  ;;; array: objectify a copy of it — the value is read from a location by MKOBJ
+  ;;; (K: toObject-array => makeObjectFromArray(A))
+  rule Step/array:
+    `< ((CASTV COBJECT (ARR arrayCursor? `{ arrayEntry* })) :: kitem*) `; config > ~>
+    `< ((MKOBJ (LITERAL (ARRLIT ($items_of((ARR arrayCursor? `{ arrayEntry* }), config.HEAP))))) :: kitem*) `; config >
+
+  ;;; object: unchanged (K: toObject-object)
+  rule Step/object:
+    `< ((CASTV COBJECT (OID loc id n)) :: kitem*) `; config > ~>
+    `< ((OID loc id n) :: kitem*) `; config >
+
+}
+
+;;
+;;;; makeObjectFromArray (K: type-conversions.k) — the MKOBJ kitem
+;;
+;; Allocate a fresh location, copy the literal array into it, reset the cursor if
+;; the source array overflowed, then yield the stdClass OID. ALLOCVAL runs the
+;; copy and hands back the fresh loc; MKOBJ2 then does the cursor reset.
+;;
+
+rule Step/mkobj:
+  `< ((MKOBJ literalValue) :: kitem*) `; config > ~>
+  `< ((ALLOCVAL literalValue) :: MKOBJ2 :: kitem*) `; config >
+
+;;; MKOBJ2 takes the fresh array location, resets the cursor if the array
+;;; overflowed, and yields the stdClass object (K: make-object-from-array's
+;;; *Cond(arrayCurrentOverflow(A), reset(L), .K) ~> OID(L, stdClass, 0))
+rulegroup Step/mkobj2 {
+
+  rule Step/overflow:
+    `< (loc :: MKOBJ2 :: kitem*) `; config > ~>
+    `< ((OID loc "stdClass" 0) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if array = zval.VAL
+    -- if $array_current_overflow(array)
+    -- if config_1 = config[.HEAP = $array_write_crnt(config.HEAP, loc, $head_entry($entries_of(array)))]
+
+  rule Step/no-overflow:
+    `< (loc :: MKOBJ2 :: kitem*) `; config > ~>
+    `< ((OID loc "stdClass" 0) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if array = zval.VAL
+    -- if ~ $array_current_overflow(array)
+
+}

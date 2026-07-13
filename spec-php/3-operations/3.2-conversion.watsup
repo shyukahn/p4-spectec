@@ -1,0 +1,138 @@
+;;
+;;;; Pure type conversions (K: type-conversions.k)
+;;
+;; Only the pure fragments live here. The effectful cases stay in the Step rules
+;; of 4-semantics (4.04-conversions): compound-to-int/float emits a WARNING,
+;; object-to-string is a fatal ERROR, to-object/to-array allocate.
+;;
+;; K's numeric-string rules overlap non-deterministically (e.g. "-5" matches both
+;; the "short non-digit" and the "integer" rules); here clause order resolves
+;; them deterministically, matching the evidently intended PHP behavior.
+;;
+;; K gaps kept faithfully: *toInteger/*toFloat have NO rule for NULL (stuck in K,
+;; undefined here); *toBoolean/*toString etc. have no rule for Literal values.
+;;
+
+;;
+;;;; Numeric strings
+;;
+
+;;; PHP numeric-string test (K: isNumericString; isIntString/isFloatString are
+;;; declared in K but never defined nor used — omitted)
+dec $is_numeric_text(text) : bool
+def $is_numeric_text("") = false
+def $is_numeric_text(t) = $is_digit(t[0])
+  -- if |t| = 1
+def $is_numeric_text(t) = true
+  -- if $is_digit(t[0])
+def $is_numeric_text(t) = true
+  -- if (t[0] = "-" \/ t[0] = ".") /\ $is_digit(t[1])
+def $is_numeric_text(t) = true
+  -- if $(|t| > 2) /\ t[0 : 2] = "-." /\ $is_digit(t[2])
+def $is_numeric_text(t) = false
+  -- otherwise
+
+;;; finishing a number extraction in the given mode
+dec $finish_number(phpType, text) : plainValue
+def $finish_number(INT, t) = INT $text_to_int(t)
+def $finish_number(FLOAT, t) = FLOAT $text_to_float(t)
+
+;;; leading-number extraction (K: extractIntSubstring; the mode is INT or FLOAT
+;;; and flips to FLOAT at the first ".<digit>")
+dec $extract_number(text, text, nat, phpType) : plainValue
+def $extract_number(t, t_acc, n, phpType) =
+  $extract_number(t, t_acc ++ t[n], $(n + 1), phpType)
+  -- if $(n < |t|) /\ $is_digit(t[n])
+def $extract_number(t, t_acc, n, INT) =
+  $extract_number(t, t_acc ++ ".", $(n + 1), FLOAT)
+  -- if $(n + 1 < |t|) /\ t[n] = "." /\ $is_digit(t[n + 1])
+def $extract_number(t, t_acc, n, phpType) = $finish_number(phpType, t_acc)
+  -- otherwise
+
+;;; string-to-number conversion (K: string2Number); yields INT or FLOAT
+dec $string_to_number(text) : plainValue
+def $string_to_number("") = INT 0
+def $string_to_number(t) = $extract_number(t, t[0 : 1], 1, INT)
+  -- if $is_digit(t[0])
+def $string_to_number(t) = $extract_number(t, t[0 : 1], 1, INT)
+  -- if t[0] = "-" /\ $(|t| > 1) /\ $is_digit(t[1])
+def $string_to_number(t) = $extract_number(t, t[0 : 1], 1, FLOAT)
+  -- if t[0] = "." /\ $(|t| > 1) /\ $is_digit(t[1])
+def $string_to_number(t) = $extract_number(t, t[0 : 2], 2, FLOAT)
+  -- if $(|t| > 2) /\ t[0 : 2] = "-." /\ $is_digit(t[2])
+def $string_to_number(t) = INT 0
+  -- otherwise
+
+;;; numeric projections of a number produced by $string_to_number
+dec $number_to_int(plainValue) : int
+def $number_to_int(INT i) = i
+def $number_to_int(FLOAT float) = $float_to_int(float)
+
+dec $number_to_float(plainValue) : float
+def $number_to_float(INT i) = $int_to_float(i)
+def $number_to_float(FLOAT float) = float
+
+;;
+;;;; To Boolean (K: *toBoolean)
+;;
+;; The object case reads the property array through the heap and recurses
+;; (kphp keeps the PHP4-style behavior: object with no properties is false).
+
+dec $to_bool(heap, value) : bool
+def $to_bool(heap, BOOL b) = b
+def $to_bool(heap, INT i) = i =/= 0
+def $to_bool(heap, FLOAT float) = ~ $feq(float, $fzero)
+def $to_bool(heap, STR t) = ~ (t = "" \/ t = "0")
+def $to_bool(heap, ARR arrayCursor? `{ eps }) = false
+def $to_bool(heap, ARR arrayCursor? `{ arrayEntry_h :: arrayEntry_t* }) = true
+def $to_bool(heap, OID loc id n) = $to_bool(heap, zval.VAL)
+  -- if zval = $find_heap(heap, loc)
+def $to_bool(heap, NULL) = false
+
+;;
+;;;; To Integer (K: *toInteger; no NULL rule in K; compounds handled in 4.04)
+;;
+
+dec $to_int(value) : int
+def $to_int(BOOL false) = 0
+def $to_int(BOOL true) = 1
+def $to_int(INT i) = i
+def $to_int(FLOAT float) = $float_to_int(float)
+def $to_int(STR t) = $number_to_int($string_to_number(t))
+
+;;
+;;;; To Float (K: *toFloat; no NULL rule in K; compounds handled in 4.04)
+;;
+
+dec $to_float(value) : float
+def $to_float(BOOL false) = $fzero
+def $to_float(BOOL true) = $fone
+def $to_float(INT i) = $int_to_float(i)
+def $to_float(FLOAT float) = float
+def $to_float(STR t) = $number_to_float($string_to_number(t))
+
+;;
+;;;; To String (K: *toString; objects are a fatal ERROR, handled in 4.04)
+;;
+
+dec $to_text(value) : text
+def $to_text(BOOL true) = "1"
+def $to_text(BOOL false) = ""
+def $to_text(INT i) = $int_to_text(i)
+def $to_text(FLOAT float) = $float_to_text(float)
+def $to_text(STR t) = t
+def $to_text(ARR arrayCursor? `{ arrayEntry* }) = "Array"
+def $to_text(NULL) = ""
+
+;;
+;;;; Float normalization (K: normalizeFloat/hasNoDecimalPart)
+;;
+
+dec $has_no_decimal(float) : bool
+def $has_no_decimal(float) = $feq($fsub($int_to_float($float_to_int(float)), float), $fzero)
+
+dec $normalize_float(float) : plainValue
+def $normalize_float(float) = INT $float_to_int(float)
+  -- if $has_no_decimal(float)
+def $normalize_float(float) = FLOAT float
+  -- otherwise

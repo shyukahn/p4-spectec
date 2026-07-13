@@ -1,0 +1,340 @@
+;;
+;;;; Objects (K: objects.k)
+;;
+;; $this, instanceof, `new`, object-property access, method call/lookup, and
+;; constructor invocation (old-style same-name method, or PHP5's __construct;
+;; kphp requires the class name folding done by scope-resolution.k's
+;; 'ClassName to already be resolved to a plain id, which happens at NEWOBJ's
+;; id argument here — self/parent resolution for `new self(...)` sites is
+;; expected to have been done during a prior AST pass, matching kphp's own
+;; 'ObjectCreation(ClassName:Id,...) shape after 'ClassName is folded away).
+;;
+
+;;
+;;;; Pure helpers used by the rules below
+;;
+
+dec $is_object(value) : bool
+def $is_object(value) = value <: object
+
+;;; (K: this-obj-cntx / this-no-obj-cntx, collapsed: locNull IS K's thisTag(NULL))
+dec $this_loc(loc?) : loc
+def $this_loc(eps) = LOCNULL
+def $this_loc(loc) = loc
+
+dec $is_stdclass_name(id) : bool
+def $is_stdclass_name(id) = id = "stdclass" \/ id = "stdClass"
+
+;;; (K: instanceof-LHS-not-object / -LHS-and-RHS-objects / -LHS-object-base /
+;;; -LHS-object-cons / -LHS-object-stdclass)
+dec $instanceof(map<id, classDef>, value, id) : bool
+def $instanceof(classes, value, id) = false
+  -- if ~ $is_object(value)
+def $instanceof(classes, OID loc id_1 n, id) = true
+  -- if id_1 = id
+def $instanceof(classes, OID loc id_1 n, id) = false
+  -- if ~ (id_1 = id) /\ $is_stdclass_name(id)
+def $instanceof(classes, OID loc id_1 n, id) = $is_subclass(classes, id_1, id)
+  -- if ~ (id_1 = id) /\ ~ $is_stdclass_name(id)
+
+;;; (K: methodLookup / methodInfo) — a pure walk up the class hierarchy; K's
+;;; only reason to encode this as machine rules is that K functions cannot
+;;; read the <classes> cell; watsup defs can take it as an argument directly.
+;;; Returns the class where the method was actually found (needed by
+;;; methExecute to run the RIGHT class's static-scope / self context) — the
+;;; caller looks the methodDef itself back up from that class (K:
+;;; meth-lookup-found / -parent / -not-found; kphp's not-found rule is only
+;;; reachable once ClassName has walked all the way to "ROOT" — the class
+;;; table never stores "ROOT", so that case is simply undefined here, as it
+;;; would get stuck in K too once ERROR fires)
+dec $method_lookup(map<id, classDef>, id, text) : id
+def $method_lookup(classes, id_cls, t) = id_cls
+  -- if classDef = $find_map<id, classDef>(classes, id_cls)
+  -- if methodDef = $find_map<id, methodDef>(classDef.METHODS, t)
+def $method_lookup(classes, id_cls, t) = $method_lookup(classes, classDef.PARENT, t)
+  -- if classDef = $find_map<id, classDef>(classes, id_cls)
+  -- if methodDef = $find_map<id, methodDef>(classDef.METHODS, t)
+
+;;
+;;;; $this (K: this-obj-cntx / this-no-obj-cntx)
+;;
+;; $this reads the current object from the control record; outside any
+;; object context THISOBJ is eps, matching K's <object> .K, and thisTag wraps
+;; locNull exactly as K's thisTag(NULL) does.
+;;
+
+rule Step/this:
+  `< ((VAR "this") :: kitem*) `; config > ~>
+  `< ((THIS ($this_loc(config.CTRL.THISOBJ))) :: kitem*) `; config >
+
+;;
+;;;; Instanceof (K: 'Instanceof)
+;;
+
+rule Step/instanceof:
+  `< ((INSTANCEOF expr classRef) :: kitem*) `; config > ~>
+  `< ((BOOL b) :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if id = $classref_to_id(config_1.CTRL.CLS, config_1.CLASSES, classRef)
+  -- if b = $instanceof(config_1.CLASSES, value, id)
+
+;;; marker propagation companions (throw/fatal/exit inside the tested
+;;; expression or its languageValue conversion aborts the whole instanceof
+;;; check — 4.00/4.13 architecture note)
+rule Step/instanceof-marker-expr:
+  `< ((INSTANCEOF expr classRef) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/instanceof-marker-tolv:
+  `< ((INSTANCEOF expr classRef) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+;;
+;;;; Object creation (K: 'ObjectCreation)
+;;
+
+;;; (K: obj-creation — ClassName is already an id here, per the file-header note)
+rule Step/objcreation:
+  `< ((NEWOBJ id arg*) :: kitem*) `; config > ~>
+  `< ((LITERAL (NEWOBJ id arg*)) :: kitem*) `; config >
+
+;;; the object literal is expanded by copyValueToLoc's loc-object-literal rule
+;;; into MKNEWOBJ (2.5/4.01); this is that expansion (K: makeNewObject)
+rule Step/mknewobj:
+  `< ((MKNEWOBJ loc_1 id arg*) :: kitem*) `; config > ~>
+  `< ((OBJECTINIT loc id) :: (COPYVAL (OID loc id 0) loc_1) :: (ALLOCCTOR loc_1 arg*) :: kitem*) `; config_1 >
+  -- Steps: `< [ ALLOCVAL $empty_array ] `; config > ~> `< [ loc ] `; config_1 >
+
+;;
+;;;; Initialization of the object property array (K: objectInit / buildObjElemList)
+;;
+
+rule Step/objectinit:
+  `< ((OBJECTINIT loc id) :: kitem*) `; config > ~>
+  `< ((BUILDOBJPROPS loc id classDef.PROPS) :: kitem*) `; config >
+  -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+
+rulegroup Step/buildobjprops {
+
+  ;;; walk up to the parent's property list (K: built-obj-prop-list-parent)
+  rule Step/parent:
+    `< ((BUILDOBJPROPS loc id eps) :: kitem*) `; config > ~>
+    `< ((BUILDOBJPROPS loc classDef.PARENT classDef_p.PROPS) :: kitem*) `; config >
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if ~ (id = "stdClass")
+    -- if classDef_p = $find_map<id, classDef>(config.CLASSES, classDef.PARENT)
+
+  ;;; reached the root, no more properties to add (K: built-obj-prop-list-root)
+  rule Step/root:
+    `< ((BUILDOBJPROPS loc "stdClass" eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+  ;;; a public/protected property not yet present is added
+  ;;; (K: built-obj-prop-list-non-private-add)
+  rule Step/add:
+    `< ((BUILDOBJPROPS loc id ((PROP id_prop visibility expr) :: classProp*)) :: kitem*) `; config > ~>
+    `< ((ALLOCVAL languageValue) :: (BUILDOBJPROPS loc id classProp*) :: kitem*) `; config_2 >
+    -- if ~ (visibility = PRIV id)
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, STR id_prop)
+    -- Steps: `< [ expr ] `; config > ~> `< [ languageValue ] `; config_0 >
+    -- Steps: `< [ ALLOCVAL languageValue ] `; config_0 > ~> `< [ loc_1 ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, loc, STR id_prop, visibility, loc_1)]
+
+  ;;; marker propagation companion (throw/fatal/exit inside a property's
+  ;;; default-value expr aborts the whole object build — e.g. `new Foo()`)
+  rule Step/add-marker:
+    `< ((BUILDOBJPROPS loc id ((PROP id_prop visibility expr) :: classProp*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- if ~ (visibility = PRIV id)
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if ~ $has_key(arrayEntry*, STR id_prop)
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  ;;; already present (shadowed by a subclass): skip
+  ;;; (K: built-obj-prop-list-non-private-skip)
+  rule Step/skip:
+    `< ((BUILDOBJPROPS loc id ((PROP id_prop visibility expr) :: classProp*)) :: kitem*) `; config > ~>
+    `< ((BUILDOBJPROPS loc id classProp*) :: kitem*) `; config >
+    -- if ~ (visibility = PRIV id)
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if $has_key(arrayEntry*, STR id_prop)
+
+  ;;; a private property is always added, tagged with its declaring class
+  ;;; (K: built-obj-prop-list-private; private properties of different classes
+  ;;; on the hierarchy never collide because they carry distinct visibility tags)
+  rule Step/private:
+    `< ((BUILDOBJPROPS loc id ((PROP id_prop (PRIV id) expr) :: classProp*)) :: kitem*) `; config > ~>
+    `< ((ALLOCVAL languageValue) :: (BUILDOBJPROPS loc id classProp*) :: kitem*) `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ languageValue ] `; config_0 >
+    -- Steps: `< [ ALLOCVAL languageValue ] `; config_0 > ~> `< [ loc_1 ] `; config_1 >
+    -- if config_2 = config_1[.HEAP = $array_create_elem(config_1.HEAP, loc, STR id_prop, (PRIV id), loc_1)]
+
+  ;;; marker propagation companion (throw/fatal/exit inside a private
+  ;;; property's default-value expr aborts the whole object build)
+  rule Step/private-marker:
+    `< ((BUILDOBJPROPS loc id ((PROP id_prop (PRIV id) expr) :: classProp*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+}
+
+;;
+;;;; Running a constructor (K: allocAndRunConstructor)
+;;
+
+rulegroup Step/allocctor {
+
+  ;;; old-style constructor: a method with the same name as the class
+  ;;; (K: run-constructor-old)
+  rule Step/old:
+    `< ((ALLOCCTOR loc arg*) :: kitem*) `; config > ~>
+    `< (expr :: POPV :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if methodDef = $find_map<id, methodDef>(classDef.METHODS, id)
+    -- if expr = MCALL (VAR "this") id arg*
+
+  ;;; PHP5-style constructor (K: run-constructor-PHP-5)
+  rule Step/php5:
+    `< ((ALLOCCTOR loc arg*) :: kitem*) `; config > ~>
+    `< (expr :: POPV :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if methodDef = $find_map<id, methodDef>(classDef.METHODS, id)
+    -- if methodDef_c = $find_map<id, methodDef>(classDef.METHODS, "__construct")
+    -- if expr = MCALL (VAR "this") "__construct" arg*
+
+  ;;; no constructor present at all (K: run-constructor-none)
+  rule Step/none:
+    `< ((ALLOCCTOR loc arg*) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_1 id n) = zval.VAL
+    -- if classDef = $find_map<id, classDef>(config.CLASSES, id)
+    -- if methodDef = $find_map<id, methodDef>(classDef.METHODS, id)
+    -- if methodDef_c = $find_map<id, methodDef>(classDef.METHODS, "__construct")
+
+}
+
+;;
+;;;; Object property access (K: 'ObjectAccess, 'ObjectProperty)
+;;
+;; PROP expr id already carries the property name as a plain id (folded at
+;; AST time, K's 'ObjectProperty('Simple(X)) / braced-name forms), so no
+;; separate ObjectProperty staging is needed — the base evaluates to a
+;; reference/location, which is chained straight into an obj-mode lref/ref.
+;;
+
+rulegroup Step/prop {
+
+  ;;; the evaluated base is itself a reference: chain (K: obj-access-nested)
+  rule Step/nested:
+    `< ((PROP expr id) :: kitem*) `; config > ~>
+    `< ((LREF phpRef (STR id) OBJ) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ phpRef ] `; config_1 >
+
+  ;;; the evaluated base is a location (K: obj-access-simple)
+  rule Step/simple:
+    `< ((PROP expr id) :: kitem*) `; config > ~>
+    `< ((REF loc (STR id)) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ loc ] `; config_1 >
+
+  ;;; marker propagation companion (throw/fatal/exit inside the base
+  ;;; expression aborts the whole property access; covers both the -nested
+  ;;; and -simple base shapes above since neither has run yet)
+  rule Step/marker:
+    `< ((PROP expr id) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;
+;;;; Method call (K: 'FunctionCall on an object)
+;;
+
+;;; the base evaluates to a location holding an object (K: meth-call)
+rule Step/mcall:
+  `< ((MCALL expr id_name arg*) :: kitem*) `; config > ~>
+  `< ((METHRUNIFVIS id_found id_name methodDef arg* loc_obj) :: kitem*) `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc_obj ] `; config_1 >
+  -- if zval = $find_heap(config_1.HEAP, loc_obj)
+  -- if (OID loc_p id_cls n) = zval.VAL
+  -- if id_found = $method_lookup(config_1.CLASSES, id_cls, id_name)
+  -- if classDef_found = $find_map<id, classDef>(config_1.CLASSES, id_found)
+  -- if methodDef = $find_map<id, methodDef>(classDef_found.METHODS, id_name)
+  -- if config_2 = config_1
+
+;;; marker propagation companions (throw/fatal/exit inside the base
+;;; expression or its loc conversion aborts the whole method call)
+rule Step/mcall-marker-expr:
+  `< ((MCALL expr id_name arg*) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/mcall-marker-conv:
+  `< ((MCALL expr id_name arg*) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+  -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+;;
+;;;; Static method call surface form (K: scope-resolution.k 'StaticFunctionCall;
+;;;; class-name resolution — self/parent — is in 4.11)
+;;
+
+rule Step/scall:
+  `< ((SCALL classRef id_name arg*) :: kitem*) `; config > ~>
+  `< ((METHRUNIFVIS id_found id_name methodDef arg* eps) :: kitem*) `; config >
+  -- if id_cls = $classref_to_id(config.CTRL.CLS, config.CLASSES, classRef)
+  -- if id_found = $method_lookup(config.CLASSES, id_cls, id_name)
+  -- if classDef_found = $find_map<id, classDef>(config.CLASSES, id_found)
+  -- if methodDef = $find_map<id, methodDef>(classDef_found.METHODS, id_name)
+
+;;
+;;;; Run the method if visibility constraints are met (K: methRunIfVisible)
+;;
+
+rulegroup Step/methrunifvis {
+
+  ;;; a non-static method: dispatch to the current object if visible
+  ;;; (K: meth-run-if-visib-non-static)
+  rule Step/nonstatic:
+    `< ((METHRUNIFVIS id_cls id_name ({ FUN funcDef, VIS visibility, STATIC false }) arg* loc_obj?) :: kitem*) `; config > ~>
+    `< (kitem_1 :: kitem*) `; config >
+    -- if kitem_1 = $ite<kitem>($is_visible(config.CLASSES, id_cls, config.CTRL.CLS, visibility),
+                                METHEXEC id_cls id_name arg* loc_obj?,
+                                ERROR "ERROR-PROTECTED")
+
+  ;;; calling a static method non-statically: desugars to a static call — the
+  ;;; object argument is dropped (K: meth-run-if-visib-static)
+  rule Step/static:
+    `< ((METHRUNIFVIS id_cls id_name ({ FUN funcDef, VIS visibility, STATIC true }) arg* loc_obj?) :: kitem*) `; config > ~>
+    `< (kitem_1 :: kitem*) `; config >
+    -- if kitem_1 = $ite<kitem>($is_visible(config.CLASSES, id_cls, config.CTRL.CLS, visibility),
+                                METHEXEC id_cls id_name arg* eps,
+                                ERROR "ERROR-PROTECTED")
+
+}
+
+;;
+;;;; Run a method (K: methExecute)
+;;
+
+rule Step/methexec:
+  `< ((METHEXEC id_cls id_name arg* loc_obj?) :: kitem*) `; config > ~>
+  `< ((RUNFUNC id_name funcDef ($exprs_of_args(arg*)) id_cls loc_obj? methodDef.STATIC) :: kitem*) `; config >
+  -- if classDef = $find_map<id, classDef>(config.CLASSES, id_cls)
+  -- if methodDef = $find_map<id, methodDef>(classDef.METHODS, id_name)
+  -- if funcDef = methodDef.FUN

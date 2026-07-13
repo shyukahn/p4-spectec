@@ -1,0 +1,80 @@
+;;
+;;;; Configuration and machine state (K: configuration.k)
+;;
+;; The K configuration minus the <k> cell becomes the config record; the machine
+;; state pairs a continuation with a config. Cells for skipped modules (trace,
+;; instrumentation, gc) are omitted. Control stacks are kept as in K: function
+;; calls, try/catch and loops capture continuations (and, for exceptions, a
+;; snapshot of the whole control record), KOOL-style.
+;;
+
+;;; foreach bookkeeping: original array loc + optional local-copy loc
+;;; (K: shared.k foreachArrayPair(Loc, OptionLoc))
+syntax foreachArrayPair = FEPAIR loc loc?
+
+;;; the control record is referenced by exception frames (snapshot/restore);
+;;; forward-declare to break the cycle
+syntax control
+
+;;; function-call stack frame
+;;; (K: sf(FName, K, CallerScope, CallerClass, CallerObj, RetMode, ArgDecl))
+syntax stackFrame =
+  { NAME id,                     ;; function name (for diagnostics)
+    CONT k,                      ;; caller continuation
+    SCOPE loc,                   ;; caller scope array
+    CLS id?,                     ;; caller class
+    THISOBJ loc?,                ;; caller $this object
+    RET retMode,                 ;; return mode of the CALLED function
+    ARGDECL k }                  ;; saved <functionArgumentsDeclaration>
+
+;;; exception-stack frame (K: (XClass, VarName, CatchBody, K, ControlBag));
+;;; no CONT field — marker-based unwinding (4.00/4.13) resumes at the `popx`
+;;; marker already sitting on the continuation where `try` left it, rather
+;;; than restoring a captured continuation (see 4.13 header)
+syntax excFrame =
+  { CLASS id,                    ;; caught class name
+    CVAR id,                     ;; catch variable
+    CBODY stmt*,                 ;; catch body
+    CTRL control }               ;; snapshot of the control record
+
+;;; loop-stack frame (K: loopFrame(K, OptionForeachArrayPair))
+syntax loopFrame =
+  { CONT k,                      ;; continuation after the loop
+    FE foreachArrayPair? }       ;; foreach cursor-sync info, if a foreach loop
+
+;;; the K <control> cell (stacks + execution context + codegen scratch cells)
+syntax control =
+  { FUNSTACK stackFrame*,        ;; <functionStack>
+    EXCSTACK excFrame*,          ;; <exceptionStack>
+    LOOPSTACK loopFrame*,        ;; <loopStack>
+    FOREACHITEM loc?,            ;; <currentForeachItem>
+    THISOBJ loc?,                ;; <object>   (current $this)
+    CLS id?,                     ;; <class>    (current class)
+    FNSTATIC loc?,               ;; <function> (current fn's static scope)
+    ARGDECL k,                   ;; <functionArgumentsDeclaration>
+    FUNBODY k,                   ;; <processedFunBody>
+    STATICDECLS k }              ;; <processedStaticDeclarations>
+
+;;; the configuration (K: <kphp> minus <k>, <trace>, <instrumentation>, <gc>)
+syntax config =
+  { DECLS k,                     ;; <declarations> (hoisting workspace)
+    CMDS k,                      ;; <commands>     (hoisting workspace)
+    FUNCS map<id, funcDef>,      ;; <functions>
+    CLASSES map<id, classDef>,   ;; <classes>
+    CONSTS map<id, value>,       ;; <constants>
+    COUNTERS map<id, nat>,       ;; <classInstanceCounters>
+    CRNT loc,                    ;; <currentScope>       (scopes ARE heap arrays)
+    GLOB loc,                    ;; <globalScope>
+    GSTATIC loc,                 ;; <globalStaticScope>
+    SUPERGLOB loc,               ;; <superGlobalScope>
+    HEAP heap,                   ;; <heap>
+    NEXT nat,                    ;; fresh-location counter (K: !fresh)
+    CTRL control,                ;; <control>
+    IN text*,                    ;; <in>  stdin lines
+    OUT text*,                   ;; <out> stdout chunks
+    EXITCODE int,                ;; <exitStatus>
+    ERRCODE nat,                 ;; <errorManagement> 0=ok 1=warn 2=fatal 3=unsupported 4=parse-bug
+    VARDUMPLVL nat }             ;; <varDumpLevel>
+
+;;; the machine state: continuation + configuration (K: the whole <kphp> cell)
+syntax state = `< k `; config >

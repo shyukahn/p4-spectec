@@ -1,0 +1,48 @@
+;;
+;;;; Error management (K: errors.k)
+;;
+;; A warning/deprecated/notice prints a prefixed message and continues; an
+;; error or unsupported-feature trap prints a prefixed message and aborts —
+;; K's `~> K => print(...)` (no `K` on the RHS) discards the rest of the
+;; continuation, draining to the ABORTED marker (2.5). Unlike THROWN, ABORTED
+;; is NOT caught by any try/catch: K's error/not-supported rules never
+;; consult <exceptionStack> at all, so a fatal error always halts the whole
+;; program even from inside a try block — ABORTED simply has no consuming
+;; rule anywhere (its propagation companions only ever re-drain it outward,
+;; the same way EXITED does), so the machine halts once it reaches the main
+;; continuation, matching K's `error`/`not-supported` never resuming to any
+;; `K`. ERRCODE distinguishes the four cases for an external test harness
+;; (K: <errorManagement> 0=ok 1=warn 2=fatal 3=unsupported); NOT-SUPPORTED's
+;; 3 doubles as this port's own escape hatch for constructs kphp declares but
+;; never actually gives semantics to.
+;;
+
+;;; (K: warning)
+rule Step/warning:
+  `< ((WARNING t) :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config_1 = config[.OUT = config.OUT ++ [ "\nWarning: " ++ t ]][.ERRCODE = 1]
+
+;;; (K: deprecated)
+rule Step/deprecated:
+  `< ((DEPRECATED t) :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config_1 = config[.OUT = config.OUT ++ [ "\nDeprecated: " ++ t ]][.ERRCODE = 1]
+
+;;; (K: notice)
+rule Step/notice:
+  `< ((NOTICE t) :: kitem*) `; config > ~>
+  `< kitem* `; config_1 >
+  -- if config_1 = config[.OUT = config.OUT ++ [ "\nNotice: " ++ t ]][.ERRCODE = 1]
+
+;;; (K: error — the message prints, then the continuation is discarded)
+rule Step/error:
+  `< ((ERROR t) :: kitem*) `; config > ~>
+  `< [ ABORTED t ] `; config_1 >
+  -- if config_1 = config[.OUT = config.OUT ++ [ "\nFatal error: " ++ t ]][.ERRCODE = 2]
+
+;;; (K: not-supported)
+rule Step/notsupported:
+  `< ((NOTSUPPORTED t) :: kitem*) `; config > ~>
+  `< [ ABORTED t ] `; config_1 >
+  -- if config_1 = config[.OUT = config.OUT ++ [ "Unsupported feature: " ++ t ]][.ERRCODE = 3]

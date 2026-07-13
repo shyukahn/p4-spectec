@@ -1,0 +1,714 @@
+;;
+;;;; Control structures (K: control-structures.k)
+;;
+;; If/ternary, break/continue, while/for (both desugared to an internal WHILE
+;; loop-runner kitem), switch, do-while (desugared to a block), and foreach
+;; (desugared onto the array's internal cursor via current/next/reset/key).
+;;
+;; Loop bookkeeping mirrors K exactly: entering a loop pushes a loopFrame onto
+;; config.CTRL.LOOPSTACK (K: pushLoopContext) carrying the resume continuation
+;; and, for foreach, the foreachArrayPair used to sync the cursor back on exit;
+;; break/continue pop it (K: popLoopContext / break-1-normal / continue-1).
+;;
+;; current/next(myNext)/reset/key are PHP builtin functions (builtin-functions.k)
+;; that foreach's desugaring calls directly; that machinery lands in 4.16 along
+;; with the rest of the builtins, so the foreach-spec rule below emits calls to
+;; the internal CURRENTV/MYNEXTV/RESETV/KEYV kitems (declared in 2.5) whose Step
+;; rules arrive in 4.16 — a forward dependency exactly like M6's isEqualArray
+;; deferral. elab stays green (partial relations only warn).
+;;
+
+;;
+;;;; Pure helpers used by the rules below
+;;
+
+;;; wrap each init/step expression as a discarded-statement (K: makeForInit)
+dec $exprs_as_stmts(expr*) : stmt*
+def $exprs_as_stmts(eps) = eps
+def $exprs_as_stmts(expr :: expr_t*) = (EXPR expr) :: $exprs_as_stmts(expr_t*)
+
+;;; an absent guard is literally true (K: for-spec's 'ListWrap(Guard) is always
+;;; present in the K grammar with Guard possibly a single true literal; kphp's
+;;; folded AST allows an empty guard list directly)
+dec $guard_or_true(expr*) : expr
+def $guard_or_true(eps) = LITBOOL true
+def $guard_or_true(expr :: eps) = expr
+
+;;; advance the cursor and re-read the current key, then splice in the body
+dec $foreach_advance(loc, stmt*) : k
+def $foreach_advance(loc, stmt*) =
+  (MYNEXTV loc) :: POPV :: (ASSIGNKITEM (VAR "crnt") (KEYV loc)) :: $kitems(stmt*)
+
+;;; expand the foreach pattern into assign statements for this iteration, then
+;;; advance the cursor and re-read the key, then run the user body (K:
+;;; initIterationVars — the by-ref/by-key variants; a by-ref key is a
+;;; parser-rejected combination that kphp also errors on). The RHS of every
+;;; assignment here is an internal kitem (CURRENTV/KEYV), not a surface expr,
+;;; so these are staged through ASSIGNKITEM/REFASSIGNKITEM (below) rather than
+;;; the surface ASSIGN/REFASSIGN — same reasoning as the keyvalue-ref case's
+;;; FOREACHELEMREF (a typed AST cannot embed a loc or an internal kitem).
+dec $init_iteration_vars(loc, foreachPattern, stmt*) : k
+def $init_iteration_vars(loc, VAL (BYVAL expr), stmt*) =
+  (ASSIGNKITEM expr (CURRENTV loc)) :: $foreach_advance(loc, stmt*)
+def $init_iteration_vars(loc, VAL (BYREF expr), stmt*) =
+  (REFASSIGNKITEM expr (CURRENTV loc)) :: $foreach_advance(loc, stmt*)
+def $init_iteration_vars(loc, KEYVAL expr_k (BYVAL expr_v), stmt*) =
+  (ASSIGNKITEM expr_v (CURRENTV loc)) :: (ASSIGNKITEM expr_k (KEYV loc)) :: $foreach_advance(loc, stmt*)
+def $init_iteration_vars(loc, KEYVAL expr_k (BYREF expr_v), stmt*) =
+  (ASSIGNKITEM expr_k (KEYV loc)) :: (FOREACHELEMREF expr_v loc) :: $foreach_advance(loc, stmt*)
+
+;;; whether the loc still holds a compound value — re-checked on every
+;;; iteration because the body may have reassigned the variable
+;;; (K: locHoldsCompoundValue)
+dec $compound_at(heap, loc) : bool
+def $compound_at(heap, loc) = $is_compound(zval.VAL)
+  -- if zval = $find_heap(heap, loc)
+
+;;
+;;;; If (K: control-structures.k §If)
+;;
+
+;;; the guard is evaluated to a boolean, then dispatched (K: if-guard2LangValue +
+;;; if-guard2Bool folded into one Steps premise + BCAST cast)
+rulegroup Step/ifstmt {
+
+  rule Step/true:
+    `< ((IF expr (stmt_t*) elseIf* (stmt_e*)) :: kitem*) `; config > ~>
+    `< ($kitems(stmt_t*) ++ kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ BOOL true ] `; config_1 >
+
+  ;;; marker propagation companions: the guard (or its bool cast) can
+  ;;; throw/abort/exit before the branch is chosen
+  rule Step/true-marker-guard:
+    `< ((IF expr (stmt_t*) elseIf* (stmt_e*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/true-marker-cast:
+    `< ((IF expr (stmt_t*) elseIf* (stmt_e*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+  ;;; no elseif clauses left: run the else branch (K: if-false)
+  rule Step/false-no-elseif:
+    `< ((IF expr eps eps (stmt_e*)) :: kitem*) `; config > ~>
+    `< ($kitems(stmt_e*) ++ kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ BOOL false ] `; config_1 >
+
+  ;;; marker propagation companions (else-branch guard)
+  rule Step/false-no-elseif-marker-guard:
+    `< ((IF expr eps eps (stmt_e*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/false-no-elseif-marker-cast:
+    `< ((IF expr eps eps (stmt_e*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+  ;;; peel the first elseif off, testing its guard next (K: if-false-elseIf-1/2
+  ;;; folded — a non-empty then-branch is impossible once false, so this is the
+  ;;; single "fall to the next elseif" case)
+  rule Step/false-elseif:
+    `< ((IF expr eps ((ELSEIF expr_ei stmt_ei*) :: elseIf_t*) (stmt_e*)) :: kitem*) `; config > ~>
+    `< ((IF expr_ei stmt_ei* elseIf_t* stmt_e*) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ BOOL false ] `; config_1 >
+
+  ;;; marker propagation companions (elseif-chain guard)
+  rule Step/false-elseif-marker-guard:
+    `< ((IF expr eps ((ELSEIF expr_ei stmt_ei*) :: elseIf_t*) (stmt_e*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/false-elseif-marker-cast:
+    `< ((IF expr eps ((ELSEIF expr_ei stmt_ei*) :: elseIf_t*) (stmt_e*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;
+;;;; Conditional expression (K: control-structures.k §Conditional Expression)
+;;
+
+;;; desugars into an if with an empty then-branch (K: ternary)
+rule Step/ternary:
+  `< ((TERNARY expr_g expr_t expr_f) :: kitem*) `; config > ~>
+  `< ((IF expr_g ([ EXPR expr_t ]) eps ([ EXPR expr_f ])) :: POPV :: kitem*) `; config >
+
+;;
+;;;; Break (K: control-structures.k §Break)
+;;
+
+;;; the argument is strict; evaluated to a positive int level (K: break-arg2LangValue
+;;; + break-some folded into one Steps premise); a missing argument defaults to 1
+;;; (K: break-none)
+rulegroup Step/break {
+
+  rule Step/none:
+    `< ((BREAK eps) :: kitem*) `; config > ~>
+    `< ((BREAK (LITINT 1)) :: kitem*) `; config >
+
+  rule Step/arg:
+    `< ((BREAK expr) :: kitem*) `; config > ~>
+    `< ((BREAKN i) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ INT i ] `; config_1 >
+
+  ;;; marker propagation companions: the level expression (or its TOLV read)
+  ;;; can throw/abort/exit
+  rule Step/arg-marker-expr:
+    `< ((BREAK expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/arg-marker-tolv:
+    `< ((BREAK expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;; break N > 1: pop one loop frame, discarding its saved continuation, and
+;;; keep unwinding (K: break-n)
+rule Step/breakn-n:
+  `< ((BREAKN i) :: kitem*) `; config > ~>
+  `< ((BREAKN $(i - 1)) :: kitem*) `; config_1 >
+  -- if $(i > 1)
+  -- if loopFrame_h :: loopFrame_t* = config.CTRL.LOOPSTACK
+  -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_t*]
+
+rulegroup Step/breakn1 {
+
+  ;;; ordinary loop: resume at the frame's saved continuation (K: break-1-normal)
+  rule Step/normal:
+    `< ((BREAKN 1) :: kitem*) `; config > ~>
+    `< loopFrame_h.CONT `; config_1 >
+    -- if loopFrame_h :: loopFrame_t* = config.CTRL.LOOPSTACK
+    -- if loopFrame_h.FE = eps
+    -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_t*]
+
+  ;;; foreach loop: sync the (possibly local-copy) cursor back to the original
+  ;;; array before resuming (K: break-1-special-some)
+  rule Step/foreach:
+    `< ((BREAKN 1) :: kitem*) `; config > ~>
+    `< ((SYNCCRNT loc_orig loc_local?) :: loopFrame_h.CONT) `; config_1 >
+    -- if loopFrame_h :: loopFrame_t* = config.CTRL.LOOPSTACK
+    -- if (FEPAIR loc_orig loc_local?) = loopFrame_h.FE
+    -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_t*]
+
+}
+
+;;
+;;;; Continue (K: control-structures.k §Continue)
+;;
+;; kphp's continue ignores the level argument entirely (the loop desugaring
+;; below has no per-level resume point to jump to) — replicated faithfully.
+;;
+
+rulegroup Step/continue {
+
+  rule Step/none:
+    `< ((CONTINUE eps) :: kitem*) `; config > ~>
+    `< ((CONTINUE (LITINT 1)) :: kitem*) `; config >
+
+  ;;; the argument is discarded once reduced to a value (K: continue-some folds
+  ;;; the argument to a plain int, kept but unused — matched here directly)
+  rule Step/arg:
+    `< ((CONTINUE expr) :: kitem_t*) `; config > ~>
+    `< kitem_t* `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ INT i ] `; config_1 >
+
+  ;;; marker propagation companions: the (discarded) level expression can
+  ;;; still throw/abort/exit before being discarded
+  rule Step/arg-marker-expr:
+    `< ((CONTINUE expr) :: kitem_t*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/arg-marker-tolv:
+    `< ((CONTINUE expr) :: kitem_t*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+}
+
+;;
+;;;; While (K: control-structures.k §While)
+;;
+;; Entering the loop pushes a loopFrame carrying the resume continuation, runs
+;; the internal WHILE runner, and pops on normal exit (K: while / while-spec).
+;;
+
+rule Step/while:
+  `< ((WHILE expr (stmt*)) :: kitem*) `; config > ~>
+  `< ((WHILE1 expr ($kitems(stmt*))) :: POPLOOP :: kitem*) `; config_1 >
+  -- if loopFrame_new = { CONT kitem*, FE eps }
+  -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_new :: config.CTRL.LOOPSTACK]
+
+;;; the internal runner: test the guard, then either run the body followed by
+;;; another WHILE1, or stop (K: while-spec, specialized directly rather than
+;;; desugared through the surface If — WHILE1's body is an arbitrary kitem
+;;; list, which a surface stmt* cannot hold)
+rulegroup Step/while1 {
+
+  rule Step/true:
+    `< ((WHILE1 expr k) :: kitem*) `; config > ~>
+    `< (k ++ [ WHILE1 expr k ] ++ kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ BOOL true ] `; config_1 >
+
+  ;;; marker propagation companions: the guard (or its bool cast) can
+  ;;; throw/abort/exit on any iteration
+  rule Step/true-marker-guard:
+    `< ((WHILE1 expr k) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/true-marker-cast:
+    `< ((WHILE1 expr k) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+  rule Step/false:
+    `< ((WHILE1 expr k) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ CASTV CBOOL value ] `; config_0 >
+    -- Steps: `< [ CASTV CBOOL value ] `; config_0 > ~> `< [ BOOL false ] `; config_1 >
+
+}
+
+;;; normal loop exit pops the frame (K: pop-loop-cntx-normal)
+rulegroup Step/poploop {
+
+  rule Step/normal:
+    `< (POPLOOP :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if loopFrame_h :: loopFrame_t* = config.CTRL.LOOPSTACK
+    -- if loopFrame_h.FE = eps
+    -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_t*]
+
+  ;;; a foreach loop's normal exit still needs the cursor synced back
+  ;;; (K: pop-loop-cntx-special)
+  rule Step/foreach:
+    `< (POPLOOP :: kitem*) `; config > ~>
+    `< ((SYNCCRNT loc_orig loc_local?) :: kitem*) `; config_1 >
+    -- if loopFrame_h :: loopFrame_t* = config.CTRL.LOOPSTACK
+    -- if (FEPAIR loc_orig loc_local?) = loopFrame_h.FE
+    -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_t*]
+
+}
+
+;;; cursor sync-back after a foreach loop (K: syncArrayCurrent-some/-none): the
+;;; local copy's cursor overwrites the original array's
+rulegroup Step/synccrnt {
+
+  rule Step/some:
+    `< ((SYNCCRNT loc_orig loc_local) :: kitem*) `; config > ~>
+    `< kitem* `; config_1 >
+    -- if zval_local = $find_heap(config.HEAP, loc_local)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_local.VAL
+    -- if config_1 = config[.HEAP = $array_write_crnt(config.HEAP, loc_orig, arrayCursor?)]
+
+  rule Step/none:
+    `< ((SYNCCRNT loc_orig eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;
+;;;; For (K: control-structures.k §For) — desugared to While
+;;
+
+;;; run the init expressions as statements, then loop on the guard (a missing
+;;; guard is always true — PHP's `for (;;)`), running the body followed by the
+;;; increment expressions each iteration (K: for / for-spec / makeForInit)
+rule Step/for:
+  `< ((FOR expr_i* expr_g* expr_s* (stmt*)) :: kitem*) `; config > ~>
+  `< ($kitems($exprs_as_stmts(expr_i*)) ++
+      ((WHILE ($guard_or_true(expr_g*)) (stmt* ++ $exprs_as_stmts(expr_s*))) :: kitem*)) `; config >
+
+;;
+;;;; Switch (K: control-structures.k §Switch)
+;;
+;; The guard is converted to a language value (kphp does NOT force it to int,
+;; despite the K comment — isEqual does its own juggling per case); entering
+;; pushes a loopFrame so break works, running the internal SWITCH runner.
+;;
+
+rule Step/switch:
+  `< ((SWITCH expr (caseClause*)) :: kitem*) `; config > ~>
+  `< ((SWITCH1 value (caseClause*)) :: POPLOOP :: kitem*) `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if loopFrame_new = { CONT kitem*, FE eps }
+  -- if config_2 = config_1[.CTRL.LOOPSTACK = loopFrame_new :: config_1.CTRL.LOOPSTACK]
+
+;;; marker propagation companions: the switch subject expression (or its
+;;; TOLV read) can throw/abort/exit before any clause runs
+rule Step/switch-marker-expr:
+  `< ((SWITCH expr (caseClause*)) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/switch-marker-tolv:
+  `< ((SWITCH expr (caseClause*)) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+  -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+rulegroup Step/switch1 {
+
+  ;;; a default clause runs unconditionally, along with every clause after it
+  ;;; (fallthrough) — (K: switch-spec-default)
+  rule Step/default:
+    `< ((SWITCH1 value ((DEFAULT (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< ($kitems(stmt*) ++ [ RUNREST value caseClause_t* ] ++ kitem*) `; config >
+
+  ;;; a value clause: the guard expression is evaluated (K: the
+  ;;; switch(V,'ListWrap('Case(HOLE,,_,,_),,Cases)) heating context, folded
+  ;;; directly into the comparison premise since nothing else observes the
+  ;;; intermediate evaluated guard), then compared; a match runs the clause
+  ;;; and falls through (K: switch-spec-no-default)
+  rule Step/case:
+    `< ((SWITCH1 value ((CASE expr_c (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< ($kitems(stmt*) ++ [ RUNREST value caseClause_t* ] ++ kitem*) `; config_2 >
+    -- Steps: `< [ expr_c ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value_c ] `; config_1 >
+    -- Steps: `< [ COMPARE CEQ value value_c ] `; config_1 > ~> `< [ BOOL b ] `; config_2 >
+    -- if b
+  rule Step/case-no-match:
+    `< ((SWITCH1 value ((CASE expr_c (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< ((SWITCH1 value caseClause_t*) :: kitem*) `; config_2 >
+    -- Steps: `< [ expr_c ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value_c ] `; config_1 >
+    -- Steps: `< [ COMPARE CEQ value value_c ] `; config_1 > ~> `< [ BOOL b ] `; config_2 >
+    -- if ~ b
+
+  ;;; marker propagation companions (shared by Step/case and
+  ;;; Step/case-no-match — both share this LHS and premise prefix; the two
+  ;;; rules only diverge on the trailing `-- if b` / `-- if ~ b`, which comes
+  ;;; after every Steps premise, so one set of companions covers both origins)
+  rule Step/case-marker-guard:
+    `< ((SWITCH1 value ((CASE expr_c (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr_c ] `; config > ~> `< [ marker ] `; config_0 >
+
+  rule Step/case-marker-tolv:
+    `< ((SWITCH1 value ((CASE expr_c (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr_c ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+  rule Step/case-marker-compare:
+    `< ((SWITCH1 value ((CASE expr_c (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_2 >
+    -- Steps: `< [ expr_c ] `; config > ~> `< [ convertibleToLangValue ] `; config_0 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config_0 > ~> `< [ value_c ] `; config_1 >
+    -- Steps: `< [ COMPARE CEQ value value_c ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+  rule Step/nil:
+    `< ((SWITCH1 value eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;; fallthrough runner: once a clause matched, the rest run unconditionally
+;;; regardless of their own guards (K: switch-spec-run-remaining-clauses[-nil])
+rulegroup Step/runrest {
+
+  rule Step/case:
+    `< ((RUNREST value ((CASE expr_c (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< ($kitems(stmt*) ++ [ RUNREST value caseClause_t* ] ++ kitem*) `; config >
+
+  rule Step/default:
+    `< ((RUNREST value ((DEFAULT (stmt*)) :: caseClause_t*)) :: kitem*) `; config > ~>
+    `< ($kitems(stmt*) ++ [ RUNREST value caseClause_t* ] ++ kitem*) `; config >
+
+  rule Step/nil:
+    `< ((RUNREST value eps) :: kitem*) `; config > ~>
+    `< kitem* `; config >
+
+}
+
+;;
+;;;; Do-while (K: control-structures.k §Do-while) — desugared to a block
+;;
+
+rule Step/dowhile:
+  `< ((DOWHILE (stmt*) expr) :: kitem*) `; config > ~>
+  `< ($kitems(stmt*) ++ [ WHILE expr stmt* ] ++ kitem*) `; config >
+
+;;
+;;;; Foreach (K: control-structures.k §Foreach)
+;;
+;; The subject evaluates to a location; compound values (refcount <= 1) iterate
+;; with a fresh local copy (arrays by value, objects by reference — the local
+;; copy still points at the object's own property array) to avoid aliasing
+;; surprises from mutation during the loop; shared compound values (refcount >
+;; 1) iterate directly. Scalars/locNull warn (K: foreach-with-local-copy /
+;; foreach-without-local-copy / foreach / foreach-scalar-* / foreach-locNull).
+;;
+
+rulegroup Step/foreach {
+
+  ;;; marker propagation companion (shared by every Step/foreach rule below —
+  ;;; all five share this LHS and this first Steps premise verbatim; the
+  ;;; second Steps premise, $conv_to_loc_k(convertibleToLoc, RMODE), resolves
+  ;;; to ALLOCVAL/LGET/RGET/thisTag — purely internal memory ops that cannot
+  ;;; themselves recurse into user code, so it gets no companion here)
+  rule Step/marker-expr:
+    `< ((FOREACH expr foreachPattern (stmt*)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_0 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+  ;;; fresh local copy: array case (K: foreach-with-local-copy)
+  rule Step/copy-array:
+    `< ((FOREACH expr foreachPattern (stmt*)) :: kitem*) `; config > ~>
+    `< ((ALLOCVAL (ARR arrayCursor? `{ arrayEntry* })) :: (FOREACHINIT loc foreachPattern stmt*) :: POPLOOP :: kitem*) `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+    -- if zval = $find_heap(config_1.HEAP, loc)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval.VAL
+    -- if $(zval.REFS <= 1)
+    -- if config_2 = config_1[.CTRL.FOREACHITEM = loc]
+
+  ;;; fresh local copy: object case — copies the property array, iterating
+  ;;; over the same properties the object holds (K: foreach-without-local-copy)
+  rule Step/copy-object:
+    `< ((FOREACH expr foreachPattern (stmt*)) :: kitem*) `; config > ~>
+    `< ((ALLOCVAL (ARR arrayCursor? `{ arrayEntry* })) :: (FOREACHINIT loc foreachPattern stmt*) :: POPLOOP :: kitem*) `; config_2 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+    -- if zval = $find_heap(config_1.HEAP, loc)
+    -- if (OID loc_p id n) = zval.VAL
+    -- if zval_p = $find_heap(config_1.HEAP, loc_p)
+    -- if (ARR arrayCursor? `{ arrayEntry* }) = zval_p.VAL
+    -- if $(zval.REFS <= 1)
+    -- if config_2 = config_1[.CTRL.FOREACHITEM = loc]
+
+  ;;; shared compound (refcount > 1): iterate directly, no local copy
+  ;;; (K: foreach)
+  rule Step/shared:
+    `< ((FOREACH expr foreachPattern (stmt*)) :: kitem*) `; config > ~>
+    `< ((FOREACHRUN loc eps foreachPattern stmt*) :: POPLOOP :: kitem*) `; config_3 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+    -- if zval = $find_heap(config_1.HEAP, loc)
+    -- if $is_compound(zval.VAL)
+    -- if $(zval.REFS > 1)
+    -- if config_2 = config_1[.CTRL.FOREACHITEM = loc]
+    -- if loopFrame_new = { CONT kitem*, FE (FEPAIR loc eps) }
+    -- if config_3 = config_2[.CTRL.LOOPSTACK = loopFrame_new :: config_2.CTRL.LOOPSTACK]
+
+  ;;; scalar subject: warning, no iteration (K: foreach-scalar-1)
+  rule Step/scalar:
+    `< ((FOREACH expr foreachPattern (stmt*)) :: kitem*) `; config > ~>
+    `< ((WARNING "Warning: Invalid argument supplied for foreach() in %s on line %d\n") :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ loc ] `; config_1 >
+    -- if zval = $find_heap(config_1.HEAP, loc)
+    -- if ~ $is_compound(zval.VAL)
+
+  ;;; the subject expression itself was a locNull-producing lvalue conversion
+  ;;; failure (K: foreach-locNull)
+  rule Step/locnull:
+    `< ((FOREACH expr foreachPattern (stmt*)) :: kitem*) `; config > ~>
+    `< ((WARNING "Warning: Invalid argument supplied for foreach() in %s on line %d\n") :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ convertibleToLoc ] `; config_0 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config_0 > ~> `< [ LOCNULL ] `; config_1 >
+
+}
+
+;;; finish the local-copy setup: allocate, install the loop frame carrying the
+;;; foreachArrayPair (original loc, local-copy loc), then start iterating on
+;;; the local copy (the two-step alloc — write happens inside ALLOCVAL's own
+;;; rule in 4.01, this just sequences the loop-frame push after it)
+rule Step/foreachinit:
+  `< (loc_local :: (FOREACHINIT loc_orig foreachPattern stmt*) :: kitem*) `; config > ~>
+  `< ((FOREACHRUN loc_local loc_orig foreachPattern stmt*) :: kitem*) `; config_1 >
+  -- if loopFrame_new = { CONT kitem*, FE (FEPAIR loc_orig loc_local) }
+  -- if config_1 = config[.CTRL.LOOPSTACK = loopFrame_new :: config.CTRL.LOOPSTACK]
+
+;;; the actual iteration, desugared onto the array's internal cursor
+;;; (K: foreach-spec)
+rule Step/foreachrun:
+  `< ((FOREACHRUN loc loc_orig? foreachPattern stmt*) :: kitem*) `; config > ~>
+  `< ((RESETV loc) :: POPV ::
+      (ASSIGNKITEM (VAR "crnt") (KEYV loc)) ::
+      (WHILE1 (BINOP NIDEQ (LITBOOL false) (VAR "crnt"))
+              ([ FOREACHITER loc foreachPattern stmt* ])) ::
+      kitem*) `; config >
+
+;;; the loop body: skip a now-invisible element (private property of another
+;;; class), init the pattern targets, advance, re-read the cursor key, then
+;;; run the user body (K: the *Cond(isCrntVisib(L), ..., ...) branches of
+;;; foreach-spec, split into the visible/hidden cases for a typed encoding).
+;;; A direct Step-rule dispatch on VISIBLEV/COMPOUNDATV rather than a surface
+;;; If, because the visible branch's kitem list (FOREACHELEMREF included)
+;;; cannot be embedded in If's stmt* body slots.
+rulegroup Step/foreachiter {
+
+  rule Step/visible:
+    `< ((FOREACHITER loc foreachPattern stmt*) :: kitem*) `; config > ~>
+    `< ($init_iteration_vars(loc, foreachPattern, stmt*) ++ kitem*) `; config_1 >
+    -- Steps: `< [ VISIBLEV loc ] `; config > ~> `< [ BOOL true ] `; config_1 >
+
+  ;;; marker propagation companion (shared with hidden-compound/hidden-scalar
+  ;;; below: all three rules share this LHS and this first Steps premise)
+  rule Step/marker-visiblev:
+    `< ((FOREACHITER loc foreachPattern stmt*) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ VISIBLEV loc ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/hidden-compound:
+    `< ((FOREACHITER loc foreachPattern stmt*) :: kitem*) `; config > ~>
+    `< kitem* `; config_2 >
+    -- Steps: `< [ VISIBLEV loc ] `; config > ~> `< [ BOOL false ] `; config_1 >
+    -- Steps: `< [ COMPOUNDATV loc ] `; config_1 > ~> `< [ BOOL true ] `; config_2 >
+
+  ;;; marker propagation companion (shared with hidden-scalar: both share this
+  ;;; LHS and this premise prefix, diverging only on the second premise's
+  ;;; expected BOOL)
+  rule Step/marker-compoundatv:
+    `< ((FOREACHITER loc foreachPattern stmt*) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_2 >
+    -- Steps: `< [ VISIBLEV loc ] `; config > ~> `< [ BOOL false ] `; config_1 >
+    -- Steps: `< [ COMPOUNDATV loc ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+  rule Step/hidden-scalar:
+    `< ((FOREACHITER loc foreachPattern stmt*) :: kitem*) `; config > ~>
+    `< ((WARNING "Invalid argument supplied for foreach() in %s on line %d\n") ::
+        (BREAKN 1) :: kitem*) `; config_2 >
+    -- Steps: `< [ VISIBLEV loc ] `; config > ~> `< [ BOOL false ] `; config_1 >
+    -- Steps: `< [ COMPOUNDATV loc ] `; config_1 > ~> `< [ BOOL false ] `; config_2 >
+
+}
+
+;;; bind the by-ref key-value target directly to the array slot loc[key(loc)]
+;;; (K: init-foreach-iteration-vars-keyvalue-ref's 'ReferenceAssign(V,,'ArrayAccess(L,,K)))
+rule Step/foreachelemref:
+  `< ((FOREACHELEMREF expr loc) :: kitem*) `; config > ~>
+  `< ((REFASSIGNTO kResult (REF loc key)) :: POPV :: kitem*) `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_0 >
+  -- Steps: `< [ KEYV loc ] `; config_0 > ~> `< [ value ] `; config_1 >
+  -- if key = $key_of(value)
+
+;;; marker propagation companions
+rule Step/foreachelemref-marker-expr:
+  `< ((FOREACHELEMREF expr loc) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/foreachelemref-marker-keyv:
+  `< ((FOREACHELEMREF expr loc) :: kitem*) `; config > ~>
+  `< [ marker ] `; config_1 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_0 >
+  -- Steps: `< [ KEYV loc ] `; config_0 > ~> `< [ marker ] `; config_1 >
+
+;;; assign a surface lvalue from an unevaluated kitem RHS (used where the RHS
+;;; is an internal foreach cursor op like CURRENTV/KEYV, not a surface expr)
+rule Step/assignkitem:
+  `< ((ASSIGNKITEM expr kitem) :: kitem_t*) `; config > ~>
+  `< ((ASSIGNTO kResult_l kResult_r) :: POPV :: kitem_t*) `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult_l ] `; config_0 >
+  -- Steps: `< [ kitem ] `; config_0 > ~> `< [ kResult_r ] `; config_2 >
+
+;;; marker propagation companions (the RHS kitem slot is CURRENTV/KEYV in
+;;; practice, both getting companions per project convention)
+rule Step/assignkitem-marker-expr:
+  `< ((ASSIGNKITEM expr kitem) :: kitem_t*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/assignkitem-marker-rhs:
+  `< ((ASSIGNKITEM expr kitem) :: kitem_t*) `; config > ~>
+  `< [ marker ] `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult_l ] `; config_0 >
+  -- Steps: `< [ kitem ] `; config_0 > ~> `< [ marker ] `; config_2 >
+
+rule Step/refassignkitem:
+  `< ((REFASSIGNKITEM expr kitem) :: kitem_t*) `; config > ~>
+  `< ((REFASSIGNTO kResult_l kResult_r) :: POPV :: kitem_t*) `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult_l ] `; config_0 >
+  -- Steps: `< [ kitem ] `; config_0 > ~> `< [ kResult_r ] `; config_2 >
+
+;;; marker propagation companions
+rule Step/refassignkitem-marker-expr:
+  `< ((REFASSIGNKITEM expr kitem) :: kitem_t*) `; config > ~>
+  `< [ marker ] `; config_0 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_0 >
+
+rule Step/refassignkitem-marker-rhs:
+  `< ((REFASSIGNKITEM expr kitem) :: kitem_t*) `; config > ~>
+  `< [ marker ] `; config_2 >
+  -- Steps: `< [ expr ] `; config > ~> `< [ kResult_l ] `; config_0 >
+  -- Steps: `< [ kitem ] `; config_0 > ~> `< [ marker ] `; config_2 >
+
+;;
+;;;; Foreach auxiliary: element visibility (K: isCrntVisib)
+;;
+
+rulegroup Step/visiblev {
+
+  ;;; the subject is itself an array: every element is visible (K: is-crnt-visib-array)
+  rule Step/array:
+    `< ((VISIBLEV loc) :: kitem*) `; config > ~>
+    `< ((BOOL true) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if zval.VAL <: array
+
+  ;;; a public object property is always visible (K: is-crnt-visib-obj-public)
+  rule Step/object-public:
+    `< ((VISIBLEV loc) :: kitem*) `; config > ~>
+    `< ((BOOL true) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_p id n) = zval.VAL
+    -- if zval_p = $find_heap(config.HEAP, loc_p)
+    -- if (ARR (`[ key `, PUB]) `{ arrayEntry* }) = zval_p.VAL
+
+  ;;; protected: visible iff reachable from the current class context
+  ;;; (K: is-crnt-visib-obj-protected)
+  rule Step/object-protected:
+    `< ((VISIBLEV loc) :: kitem*) `; config > ~>
+    `< ((BOOL $is_visible(config.CLASSES, id, config.CTRL.CLS, PROT)) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_p id n) = zval.VAL
+    -- if zval_p = $find_heap(config.HEAP, loc_p)
+    -- if (ARR (`[ key `, PROT ]) `{ arrayEntry* }) = zval_p.VAL
+
+  ;;; private, matching context: visible (K: is-crnt-visib-obj-private-true)
+  rule Step/object-private-same:
+    `< ((VISIBLEV loc) :: kitem*) `; config > ~>
+    `< ((BOOL true) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_p id n) = zval.VAL
+    -- if zval_p = $find_heap(config.HEAP, loc_p)
+    -- if (ARR (`[ key `, (PRIV id_owner) ]) `{ arrayEntry* }) = zval_p.VAL
+    -- if config.CTRL.CLS = id_owner
+
+  ;;; private, different context: not visible (K: is-crnt-visib-obj-private-false)
+  rule Step/object-private-other:
+    `< ((VISIBLEV loc) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (OID loc_p id_obj n) = zval.VAL
+    -- if zval_p = $find_heap(config.HEAP, loc_p)
+    -- if (ARR (`[ key `, (PRIV id_owner) ]) `{ arrayEntry* }) = zval_p.VAL
+    -- if ~ (config.CTRL.CLS = id_owner)
+
+}
+
+rule Step/compoundatv:
+  `< ((COMPOUNDATV loc) :: kitem*) `; config > ~>
+  `< ((BOOL $compound_at(config.HEAP, loc)) :: kitem*) `; config >

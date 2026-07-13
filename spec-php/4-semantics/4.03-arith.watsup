@@ -1,0 +1,1002 @@
+;;
+;;;; Arithmetic, comparison, logic and inc/dec (K: arith-ops.k)
+;;
+;; Operator surface labels were folded (1-surface) into BINOP binop / UNOP unop,
+;; so the per-label dispatch rules (K's [plus]/[min]/... and [isEqual]/[less]/...)
+;; collapse into one BINOP rule per operator family. Type juggling stays exactly
+;; as K stages it — a chain of in-place rewrites on the evaluated operands held by
+;; the internal BINOPV / COMPARE kitems — rather than pure defs, because array and
+;; object comparison call the PHP-level isEqualArray through the machine (K).
+;;
+;; Comparison is genuinely effectful in kphp: comparison of two arrays/objects
+;; rewrites to isEqualScalar('FunctionCall("isEqualArray", ...)), which runs the
+;; PHP source injected at init. The function-call machinery (4.08) and the
+;; injected isEqualArray/isEqualScalar (4.16/4.17) arrive later; the array/object
+;; branches here emit those CALLs and stay partial until then (elab stays green).
+;;
+;; Evaluation order: BINOP/COMPARE evaluate LHS then RHS (K's binop-LHS/RHS
+;; strict contexts, taken left-to-right); the logic operators short-circuit, so
+;; AND/OR keep their right operand as an unevaluated expr.
+;;
+
+;;
+;;;; Pure helpers used by the rules below
+;;
+
+;;; map a comparison binop to its runtime comparison operator (partial: only the
+;;; six comparison labels have an image; CONCAT/arith/logic have none)
+dec $comp_op(binop) : compOp
+def $comp_op(EQ) = CEQ
+def $comp_op(IDEQ) = CIDENT
+def $comp_op(LT) = CLESS
+def $comp_op(LE) = CLEQ
+def $comp_op(GT) = CGREATER
+def $comp_op(GE) = CGEQ
+
+;;; strict comparison test (K: isStrictComparison)
+dec $is_strict(compOp) : bool
+def $is_strict(CIDENT) = true
+def $is_strict(compOp) = false
+  -- otherwise
+
+;;; reify a value back into a literal expression so a cast can re-run through
+;;; 4.04 (a value is not an expr; scalars/NULL cover all cases the juggling
+;;; rules feed here — compounds go to the array/object comparison branches)
+dec $expr_of_value(value) : expr
+def $expr_of_value(scalarValue) = $expr_of_scalar(scalarValue)
+def $expr_of_value(NULL) = LITNULL
+
+;;; inject a plain (int/float) result back as a value (K's Maude results are
+;;; values already; $normalize_float / $string_to_number yield plainValues)
+dec $plain_to_value(plainValue) : value
+def $plain_to_value(plainValue) = plainValue
+
+;;; is value a bool or null (K: BoolOrNull, used by isEqual-type-juggling-2/-3)
+dec $is_bool_or_null(value) : bool
+def $is_bool_or_null(BOOL b) = true
+def $is_bool_or_null(NULL) = true
+def $is_bool_or_null(value) = false
+  -- otherwise
+
+;;; inject a meta bool as a BOOL value (K's ==K etc. yield builtin Bools)
+dec $bool_to_value(bool) : value
+def $bool_to_value(b) = BOOL b
+
+;;; build the isEqualScalar(FunctionCall("isEqualArray",...), N) comparison as a
+;;; kitem; the isEqualScalar helper (shared.k) reduces to comparing the PHP
+;;; function's Int result against N — modeled here as == against the call result.
+;;; The CALL rules (4.08) evaluate it; until then this stays partial (K's
+;;; isEqualScalar is [seqstrict], evaluating the FunctionCall first)
+dec $is_equal_scalar(expr, int) : k
+def $is_equal_scalar(expr, i) = [ BINOP EQ (CAST CINT expr) (LITINT i) ]
+
+;;
+;;;; Operator dispatch (K: 'Plus => BinOp(plus,...), etc.)
+;;
+;; Arithmetic and comparison evaluate both operands to results, then stage on
+;; BINOPV / COMPARE. CONCAT is handled in 4.05; the logic operators (LAND/LOR/
+;; LXOR) short-circuit and are handled below without pre-evaluating the RHS.
+;;
+
+rulegroup Step/binop {
+
+  ;;; arithmetic: evaluate both operands, then juggle+compute on BINOPV
+  ;;; (K: plus/min/mul/div/mod + binop-LHS/RHS strict)
+  rule Step/arith:
+    `< ((BINOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((BINOPV binop kResult_1 kResult_2) :: kitem*) `; config_2 >
+    -- if binop <- [ ADD, SUB, MUL, DIV, MOD ]
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+    -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ kResult_2 ] `; config_2 >
+
+  ;;; marker propagation companions (throw/fatal/exit inside either operand
+  ;;; aborts the whole arithmetic op)
+  rule Step/arith-marker-lhs:
+    `< ((BINOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if binop <- [ ADD, SUB, MUL, DIV, MOD ]
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/arith-marker-rhs:
+    `< ((BINOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_2 >
+    -- if binop <- [ ADD, SUB, MUL, DIV, MOD ]
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+    -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+  ;;; comparison: evaluate both operands, then juggle+dispatch on COMPARE
+  ;;; (K: isEqual/isIdentical/less/lessEqual/greater/greaterEqual + strict)
+  rule Step/compare:
+    `< ((BINOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp kResult_1 kResult_2) :: kitem*) `; config_2 >
+    -- if compOp = $comp_op(binop)
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+    -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ kResult_2 ] `; config_2 >
+
+  ;;; marker propagation companions (throw/fatal/exit inside either operand
+  ;;; aborts the whole comparison)
+  rule Step/compare-marker-lhs:
+    `< ((BINOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if compOp = $comp_op(binop)
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/compare-marker-rhs:
+    `< ((BINOP binop expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_2 >
+    -- if compOp = $comp_op(binop)
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult_1 ] `; config_1 >
+    -- Steps: `< [ expr_2 ] `; config_1 > ~> `< [ marker ] `; config_2 >
+
+  ;;; !=  desugars to !(==), !==  to !(===) (K: isNotEqual / isNotIdentical)
+  rule Step/neq:
+    `< ((BINOP NEQ expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((UNOP NOT (BINOP EQ expr_1 expr_2)) :: kitem*) `; config >
+
+  rule Step/nideq:
+    `< ((BINOP NIDEQ expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((UNOP NOT (BINOP IDEQ expr_1 expr_2)) :: kitem*) `; config >
+
+  ;;; logical AND / OR short-circuit: evaluate only the LHS, keep the RHS expr
+  ;;; (K: land => 'And, context 'And(HOLE,,_))
+  rule Step/land:
+    `< ((BINOP LAND expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((AND kResult expr_2) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult ] `; config_1 >
+
+  ;;; marker propagation companion: throw/fatal/exit in the LHS aborts the
+  ;;; whole AND before the (short-circuiting, unevaluated) RHS is ever reached
+  rule Step/land-marker-lhs:
+    `< ((BINOP LAND expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/lor:
+    `< ((BINOP LOR expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((OR kResult expr_2) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ kResult ] `; config_1 >
+
+  ;;; marker propagation companion (see land-marker-lhs)
+  rule Step/lor-marker-lhs:
+    `< ((BINOP LOR expr_1 expr_2) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr_1 ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; xor is not short-circuiting (K: xor => 'Or('And(A,'Not(B)),'And('Not(A),B)))
+  rule Step/lxor:
+    `< ((BINOP LXOR expr_1 expr_2) :: kitem*) `; config > ~>
+    `< ((BINOP LOR (BINOP LAND expr_1 (UNOP NOT expr_2))
+                   (BINOP LAND (UNOP NOT expr_1) expr_2)) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Arithmetic on evaluated operands — the BINOPV kitem (K: BinOp)
+;;
+;; The type-juggling rewrites fire in K's [intermediate] order; each rewrites one
+;; operand and re-stages BINOPV, so they iterate to a normal (Int,Int) or
+;; (Float,Float) shape before the final compute rules apply.
+;;
+
+rulegroup Step/binopv {
+
+  ;;; operands still references/locations/literals are read to values first
+  ;;; (K: binop-LHS2LangValue-lref/-loc + binop-RHS2LangValue-1/-2 + binop-LHS2LangValue)
+  rule Step/lhs2val:
+    `< ((BINOPV binop convertibleToLangValue kResult) :: kitem*) `; config > ~>
+    `< ((BINOPV binop value kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; marker propagation companion: TOLV can recurse (e.g. through RGET's
+  ;;; array/object chain into ALLOCVAL / literal expansion of a constructor
+  ;;; that throws), so it too can converge to a marker
+  rule Step/lhs2val-marker:
+    `< ((BINOPV binop convertibleToLangValue kResult) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/rhs2val:
+    `< ((BINOPV binop value convertibleToLangValue) :: kitem*) `; config > ~>
+    `< ((BINOPV binop value value_1) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ value_1 ] `; config_1 >
+
+  ;;; marker propagation companion (see lhs2val-marker)
+  rule Step/rhs2val-marker:
+    `< ((BINOPV binop value convertibleToLangValue) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; if one operand is a float, the other is cast to float (K: binop-RHS2Float,
+  ;;; binop-LHS2Float; the cast runs through 4.04)
+  rule Step/rhs2float:
+    `< ((BINOPV binop (FLOAT float) value) :: kitem*) `; config > ~>
+    `< ((BINOPV binop (FLOAT float) value_1) :: kitem*) `; config_1 >
+    -- if ~ ($type_of(value) = FLOAT)
+    -- Steps: `< [ CAST CFLOAT ($expr_of_value(value)) ] `; config > ~> `< [ value_1 ] `; config_1 >
+
+  ;;; marker propagation companion: the CAST rules (4.04) are themselves
+  ;;; retrofitted with marker companions, so CAST can converge to a marker too
+  rule Step/rhs2float-marker:
+    `< ((BINOPV binop (FLOAT float) value) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if ~ ($type_of(value) = FLOAT)
+    -- Steps: `< [ CAST CFLOAT ($expr_of_value(value)) ] `; config > ~> `< [ marker ] `; config_1 >
+
+  rule Step/lhs2float:
+    `< ((BINOPV binop value (FLOAT float)) :: kitem*) `; config > ~>
+    `< ((BINOPV binop value_1 (FLOAT float)) :: kitem*) `; config_1 >
+    -- if ~ ($type_of(value) = FLOAT)
+    -- Steps: `< [ CAST CFLOAT ($expr_of_value(value)) ] `; config > ~> `< [ value_1 ] `; config_1 >
+
+  ;;; marker propagation companion (see rhs2float-marker)
+  rule Step/lhs2float-marker:
+    `< ((BINOPV binop value (FLOAT float)) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if ~ ($type_of(value) = FLOAT)
+    -- Steps: `< [ CAST CFLOAT ($expr_of_value(value)) ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; if one operand is an int and the other a string, the string is parsed
+  ;;; (K: binop-RHS2Int, binop-LHS2Int; string2Number is pure here)
+  rule Step/rhs2num:
+    `< ((BINOPV binop (INT i) (STR t)) :: kitem*) `; config > ~>
+    `< ((BINOPV binop (INT i) plainValue) :: kitem*) `; config >
+    -- if plainValue = $string_to_number(t)
+
+  rule Step/lhs2num:
+    `< ((BINOPV binop (STR t) (INT i)) :: kitem*) `; config > ~>
+    `< ((BINOPV binop plainValue (INT i)) :: kitem*) `; config >
+    -- if plainValue = $string_to_number(t)
+
+  ;;; plus (K: binop-plus-int / binop-plus-float)
+  rule Step/plus-integer:
+    `< ((BINOPV ADD (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((INT $(i_1 + i_2)) :: kitem*) `; config >
+
+  rule Step/plus-float:
+    `< ((BINOPV ADD (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((FLOAT $fadd(float_1, float_2)) :: kitem*) `; config >
+
+  ;;; min (K: binop-min-int / binop-min-float)
+  rule Step/min-integer:
+    `< ((BINOPV SUB (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((INT $(i_1 - i_2)) :: kitem*) `; config >
+
+  rule Step/min-float:
+    `< ((BINOPV SUB (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((FLOAT $fsub(float_1, float_2)) :: kitem*) `; config >
+
+  ;;; mul (K: binop-mul-int / binop-mul-float)
+  rule Step/mul-integer:
+    `< ((BINOPV MUL (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((INT $(i_1 * i_2)) :: kitem*) `; config >
+
+  rule Step/mul-float:
+    `< ((BINOPV MUL (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((FLOAT $fmul(float_1, float_2)) :: kitem*) `; config >
+
+  ;;; div: int/int goes through float then normalizes back if whole
+  ;;; (K: binop-div-int normalizeFloat(Int2Float(I1)/Float Int2Float(I2)))
+  rule Step/div-integer:
+    `< ((BINOPV DIV (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< (($plain_to_value($normalize_float($fdiv($int_to_float(i_1), $int_to_float(i_2))))) :: kitem*) `; config >
+    -- if ~ (i_2 = 0)
+
+  rule Step/div-float:
+    `< ((BINOPV DIV (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((FLOAT $fdiv(float_1, float_2)) :: kitem*) `; config >
+    -- if ~ $feq(float_2, $fzero)
+
+  ;;; division by zero warns and returns false (K: binop-div-int-zero; the
+  ;;; scalar-zero guard covers both int 0 and float 0.0)
+  rule Step/div-zero-integer:
+    `< ((BINOPV DIV value (INT 0)) :: kitem*) `; config > ~>
+    `< ((WARNING "Division by zero in %s on line %d\n") :: (BOOL false) :: kitem*) `; config >
+
+  rule Step/div-zero-float:
+    `< ((BINOPV DIV value (FLOAT float)) :: kitem*) `; config > ~>
+    `< ((WARNING "Division by zero in %s on line %d\n") :: (BOOL false) :: kitem*) `; config >
+    -- if $feq(float, $fzero)
+
+  ;;; mod converts both operands to int first (K: binop-mod-args2Int), then
+  ;;; computes (K: binop-mod-int)
+  rule Step/mod-args2integer-lhs:
+    `< ((BINOPV MOD (FLOAT float) value) :: kitem*) `; config > ~>
+    `< ((BINOPV MOD (INT $float_to_int(float)) value) :: kitem*) `; config >
+
+  rule Step/mod-args2integer-rhs:
+    `< ((BINOPV MOD value (FLOAT float)) :: kitem*) `; config > ~>
+    `< ((BINOPV MOD value (INT $float_to_int(float))) :: kitem*) `; config >
+
+  rule Step/mod-integer:
+    `< ((BINOPV MOD (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((INT $(i_1 \ i_2)) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Comparison on evaluated operands — the COMPARE kitem (K: comparison)
+;;
+;; Non-strict comparison applies PHP type juggling (a long cascade of in-place
+;; rewrites); strict comparison (identical) skips all of it. The juggling rules
+;; are guarded by ~ $is_strict(compOp), matching K's notBool(isStrictComparison).
+;;
+
+rulegroup Step/compare {
+
+  ;;; operands are read to values, but a location holding a COMPOUND value is
+  ;;; kept as the location (arrays/objects are compared by location)
+  ;;; (K: isEqual-LHS/RHS2Loc then isEqual-LHS/RHS2LangValue when not compound)
+  rule Step/lhs2loc:
+    `< ((COMPARE compOp convertibleToLoc kResult) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp value kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config > ~> `< [ value ] `; config_1 >
+
+  rule Step/rhs2loc:
+    `< ((COMPARE compOp value convertibleToLoc) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp value value_1) :: kitem*) `; config_1 >
+    -- Steps: `< [ $conv_to_loc_k(convertibleToLoc, RMODE) ] `; config > ~> `< [ value_1 ] `; config_1 >
+
+  ;;; a location NOT holding a compound value is dereferenced (K: isEqual-LHS/RHS2LangValue)
+  rule Step/lhs2val:
+    `< ((COMPARE compOp loc kResult) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp value kResult) :: kitem*) `; config >
+    -- if value = $read(config.HEAP, loc)
+    -- if ~ $is_compound(value)
+
+  rule Step/rhs2val:
+    `< ((COMPARE compOp value_l loc) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp value_l value) :: kitem*) `; config >
+    -- if value = $read(config.HEAP, loc)
+    -- if ~ $is_compound(value)
+
+  ;;; NULL vs String becomes "" vs String (K: isEqual-type-juggling-1-1/-1-2)
+  rule Step/null-str-lhs:
+    `< ((COMPARE compOp NULL (STR t)) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (STR "") (STR t)) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+
+  rule Step/null-str-rhs:
+    `< ((COMPARE compOp (STR t) NULL) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (STR t) (STR "")) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+
+  ;;; if either operand is bool or null (and the other is not string/bool),
+  ;;; both are cast to bool (K: isEqual-type-juggling-2 / -3)
+  rule Step/boolean-lhs:
+    `< ((COMPARE compOp value_1 value_2) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (BOOL b_1) (BOOL b_2)) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+    -- if $is_bool_or_null(value_1)
+    -- if ~ ($type_of(value_2) = STRING \/ $type_of(value_2) = BOOL)
+    -- if b_1 = $to_bool(config.HEAP, value_1)
+    -- if b_2 = $to_bool(config.HEAP, value_2)
+
+  rule Step/boolean-rhs:
+    `< ((COMPARE compOp value_1 value_2) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (BOOL b_1) (BOOL b_2)) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+    -- if $is_bool_or_null(value_2)
+    -- if ~ ($type_of(value_1) = STRING \/ $type_of(value_1) = BOOL)
+    -- if b_1 = $to_bool(config.HEAP, value_1)
+    -- if b_2 = $to_bool(config.HEAP, value_2)
+
+  ;;; numeric strings are parsed to numbers (K: the two unlabeled isNumericString rules)
+  rule Step/numeric-str-lhs:
+    `< ((COMPARE compOp (STR t) value) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp ($plain_to_value($string_to_number(t))) value) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+    -- if $is_numeric_text(t)
+
+  rule Step/numeric-str-rhs:
+    `< ((COMPARE compOp value (STR t)) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp value ($plain_to_value($string_to_number(t)))) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+    -- if $is_numeric_text(t)
+
+  ;;; a non-numeric string against a non-string value becomes 0
+  ;;; (K: comparison-ac / comparison-acd)
+  rule Step/nonnum-str-rhs:
+    `< ((COMPARE compOp value (STR t)) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp value (INT 0)) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+    -- if ~ ($type_of(value) = STRING)
+    -- if ~ $is_numeric_text(t)
+
+  rule Step/nonnum-str-lhs:
+    `< ((COMPARE compOp (STR t) value) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (INT 0) value) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+    -- if ~ ($type_of(value) = STRING)
+    -- if ~ $is_numeric_text(t)
+
+  ;;; if one operand is float, the int operand is cast to float
+  ;;; (K: isEqual-toFloat-RHS / -LHS)
+  rule Step/float-rhs:
+    `< ((COMPARE compOp (FLOAT float) (INT i)) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (FLOAT float) (FLOAT $int_to_float(i))) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+
+  rule Step/float-lhs:
+    `< ((COMPARE compOp (INT i) (FLOAT float)) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp (FLOAT $int_to_float(i)) (FLOAT float)) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+
+  ;;; locNull becomes NULL (K: isEqual-null-RHS / -LHS; LOCNULL is a loc)
+  rule Step/locnull-lhs:
+    `< ((COMPARE compOp LOCNULL kResult) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp NULL kResult) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+
+  rule Step/locnull-rhs:
+    `< ((COMPARE compOp kResult LOCNULL) :: kitem*) `; config > ~>
+    `< ((COMPARE compOp kResult NULL) :: kitem*) `; config >
+    -- if ~ $is_strict(compOp)
+
+  ;;; --- dispatch to the per-operator computation ---
+
+  ;;; equal, same scalar type (K: comparison-equal-scalar)
+  rule Step/equal-scalar:
+    `< ((COMPARE CEQ value_1 value_2) :: kitem*) `; config > ~>
+    `< ((ISEQ value_1 value_2) :: kitem*) `; config >
+    -- if $is_scalar(value_1) /\ $has_same_type(value_1, value_2)
+
+  ;;; equal, two compound locations (K: comparison-equal-array)
+  rule Step/equal-array:
+    `< ((COMPARE CEQ loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((ISEQ loc_1 loc_2) :: kitem*) `; config >
+    -- if $locs_hold_same_compound(config.HEAP, loc_1, loc_2)
+
+  ;;; identical, scalar unless both compound of same type (K: comparison-identical-scalar)
+  rule Step/identical-scalar:
+    `< ((COMPARE CIDENT value_1 value_2) :: kitem*) `; config > ~>
+    `< (($bool_to_value(value_1 = value_2)) :: kitem*) `; config >
+    -- if ~ ($is_compound(value_1) /\ $is_compound(value_2) /\ $has_same_type(value_1, value_2))
+
+  ;;; identical, two compound locations: compared as arrays (K: comparison-identical-array)
+  rule Step/identical-array:
+    `< ((COMPARE CIDENT loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((ISEQ loc_1 loc_2) :: kitem*) `; config >
+    -- if $locs_hold_same_compound(config.HEAP, loc_1, loc_2)
+
+  ;;; less / lessEqual / greater / greaterEqual, same scalar type
+  ;;; (K: comparison-less-scalar / -lessequal-scalar / -greater-scalar / -greaterEqual-scalar)
+  rule Step/less-scalar:
+    `< ((COMPARE CLESS value_1 value_2) :: kitem*) `; config > ~>
+    `< ((LESSV value_1 value_2) :: kitem*) `; config >
+    -- if $is_scalar(value_1) /\ $has_same_type(value_1, value_2)
+
+  rule Step/leq-scalar:
+    `< ((COMPARE CLEQ value_1 value_2) :: kitem*) `; config > ~>
+    `< ((LEQV value_1 value_2) :: kitem*) `; config >
+    -- if $is_scalar(value_1) /\ $has_same_type(value_1, value_2)
+
+  rule Step/greater-scalar:
+    `< ((COMPARE CGREATER value_1 value_2) :: kitem*) `; config > ~>
+    `< ((GREATERV value_1 value_2) :: kitem*) `; config >
+    -- if $is_scalar(value_1) /\ $has_same_type(value_1, value_2)
+
+  rule Step/geq-scalar:
+    `< ((COMPARE CGEQ value_1 value_2) :: kitem*) `; config > ~>
+    `< ((GEQV value_1 value_2) :: kitem*) `; config >
+    -- if $is_scalar(value_1) /\ $has_same_type(value_1, value_2)
+
+  ;;; less / lessEqual / greater / greaterEqual, two compound locations
+  ;;; (K: comparison-*-array)
+  rule Step/less-array:
+    `< ((COMPARE CLESS loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((LESSV loc_1 loc_2) :: kitem*) `; config >
+    -- if $locs_hold_same_compound(config.HEAP, loc_1, loc_2)
+
+  rule Step/leq-array:
+    `< ((COMPARE CLEQ loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((LEQV loc_1 loc_2) :: kitem*) `; config >
+    -- if $locs_hold_same_compound(config.HEAP, loc_1, loc_2)
+
+  rule Step/greater-array:
+    `< ((COMPARE CGREATER loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((GREATERV loc_1 loc_2) :: kitem*) `; config >
+    -- if $locs_hold_same_compound(config.HEAP, loc_1, loc_2)
+
+  rule Step/geq-array:
+    `< ((COMPARE CGEQ loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((GEQV loc_1 loc_2) :: kitem*) `; config >
+    -- if $locs_hold_same_compound(config.HEAP, loc_1, loc_2)
+
+}
+
+;;
+;;;; Equality (K: isEqual)
+;;
+;; Scalar equality reuses the meta operators; array/object equality calls the
+;; PHP-level isEqualArray (4.16/4.17) through isEqualScalar (a FunctionCall).
+;;
+
+rulegroup Step/iseq {
+
+  ;;; scalar equality (K: isEqual-int / -float / -bool / -string)
+  rule Step/integer:
+    `< ((ISEQ (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (i_1 = i_2)) :: kitem*) `; config >
+
+  rule Step/float:
+    `< ((ISEQ (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $feq(float_1, float_2)) :: kitem*) `; config >
+
+  rule Step/boolean:
+    `< ((ISEQ (BOOL b_1) (BOOL b_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (b_1 = b_2)) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((ISEQ (STR t_1) (STR t_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (t_1 = t_2)) :: kitem*) `; config >
+
+  ;;; identical locations are equal (K: isEqual-same-loc)
+  rule Step/same-loc:
+    `< ((ISEQ loc loc) :: kitem*) `; config > ~>
+    `< ((BOOL true) :: kitem*) `; config >
+
+  ;;; two distinct array locations: isEqualScalar(isEqualArray(L1,L2), 0)
+  ;;; (K: isEqual-array; isEqualArray/isEqualScalar are injected PHP source, and
+  ;;; the FunctionCall/IntCast machinery arrives with 4.08/4.16 — partial here)
+  rule Step/array:
+    `< ((ISEQ loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ($is_equal_scalar(CALL "isEqualArray" ([ ARG ($expr_of_value(loc_1)), ARG ($expr_of_value(loc_2)) ]), 0)) `; config >
+    -- if ~ (loc_1 = loc_2)
+    -- if $loc_holds_array(config.HEAP, loc_1)
+    -- if $loc_holds_array(config.HEAP, loc_2)
+
+  ;;; objects of the same class compare as their property arrays; different
+  ;;; classes are not equal (K: isEqual-object-same-class / -different-class)
+  rule Step/obj-same-class:
+    `< ((ISEQ loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((ISEQ loc_3 loc_4) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if id_1 = id_2
+
+  rule Step/obj-diff-class:
+    `< ((ISEQ loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if ~ (id_1 = id_2)
+
+}
+
+;;
+;;;; Less than (K: less)
+;;
+
+rulegroup Step/lessv {
+
+  ;;; scalars (K: less-int / -float / -bool-* / -string)
+  rule Step/integer:
+    `< ((LESSV (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $(i_1 < i_2)) :: kitem*) `; config >
+
+  rule Step/float:
+    `< ((LESSV (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $flt(float_1, float_2)) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((LESSV (STR t_1) (STR t_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $text_lt(t_1, t_2)) :: kitem*) `; config >
+
+  ;;; bool ordering: only false < true (K: less-bool-1..4)
+  rule Step/boolean:
+    `< ((LESSV (BOOL b_1) (BOOL b_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (~ b_1 /\ b_2)) :: kitem*) `; config >
+
+  ;;; arrays: isEqualScalar(isEqualArray(L1,L2), -1) (K: less-array)
+  rule Step/array:
+    `< ((LESSV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ($is_equal_scalar(CALL "isEqualArray" ([ ARG ($expr_of_value(loc_1)), ARG ($expr_of_value(loc_2)) ]), -1)) `; config >
+    -- if $loc_holds_array(config.HEAP, loc_1)
+    -- if $loc_holds_array(config.HEAP, loc_2)
+
+  ;;; objects (K: less-object-same-class / -diff-class)
+  rule Step/obj-same-class:
+    `< ((LESSV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((LESSV loc_3 loc_4) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if id_1 = id_2
+
+  rule Step/obj-diff-class:
+    `< ((LESSV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if ~ (id_1 = id_2)
+
+}
+
+;;
+;;;; Greater than (K: greater)
+;;
+
+rulegroup Step/greaterv {
+
+  ;;; scalars (K: greater-int / -float / -bool-* / -string)
+  rule Step/integer:
+    `< ((GREATERV (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $(i_1 > i_2)) :: kitem*) `; config >
+
+  rule Step/float:
+    `< ((GREATERV (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $fgt(float_1, float_2)) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((GREATERV (STR t_1) (STR t_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $text_gt(t_1, t_2)) :: kitem*) `; config >
+
+  ;;; bool ordering: only true > false (K: greater-bool-1..4)
+  rule Step/boolean:
+    `< ((GREATERV (BOOL b_1) (BOOL b_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (b_1 /\ ~ b_2)) :: kitem*) `; config >
+
+  ;;; arrays: K compares with args swapped, level -1 (K: greater-array)
+  rule Step/array:
+    `< ((GREATERV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ($is_equal_scalar(CALL "isEqualArray" ([ ARG ($expr_of_value(loc_2)), ARG ($expr_of_value(loc_1)) ]), -1)) `; config >
+    -- if $loc_holds_array(config.HEAP, loc_1)
+    -- if $loc_holds_array(config.HEAP, loc_2)
+
+  ;;; objects (K: greater-obj-same-class / -diff-class)
+  rule Step/obj-same-class:
+    `< ((GREATERV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((GREATERV loc_3 loc_4) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if id_1 = id_2
+
+  rule Step/obj-diff-class:
+    `< ((GREATERV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if ~ (id_1 = id_2)
+
+}
+
+;;
+;;;; Less than or equal (K: lessEqual)
+;;
+
+rulegroup Step/leqv {
+
+  ;;; scalars (K: lessEqual-int / -float / -bool-* / -string)
+  rule Step/integer:
+    `< ((LEQV (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $(i_1 <= i_2)) :: kitem*) `; config >
+
+  rule Step/float:
+    `< ((LEQV (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $fle(float_1, float_2)) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((LEQV (STR t_1) (STR t_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $text_le(t_1, t_2)) :: kitem*) `; config >
+
+  ;;; bool ordering: only true <= ... fails at (true,false) (K: lessEqual-bool-1..4)
+  rule Step/boolean:
+    `< ((LEQV (BOOL b_1) (BOOL b_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (~ (b_1 /\ ~ b_2))) :: kitem*) `; config >
+
+  ;;; arrays: *or('Less(L1,L2), 'IsEqual(L1,L2)) (K: lessEqual.-array)
+  rule Step/array:
+    `< ((LEQV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BINOP LOR (BINOP LT ($expr_of_value(loc_1)) ($expr_of_value(loc_2)))
+                   (BINOP EQ ($expr_of_value(loc_1)) ($expr_of_value(loc_2)))) :: kitem*) `; config >
+    -- if $loc_holds_array(config.HEAP, loc_1)
+    -- if $loc_holds_array(config.HEAP, loc_2)
+
+  ;;; objects (K: lessEqual-obj-same-class / -diff-class)
+  rule Step/obj-same-class:
+    `< ((LEQV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((LEQV loc_3 loc_4) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if id_1 = id_2
+
+  rule Step/obj-diff-class:
+    `< ((LEQV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if ~ (id_1 = id_2)
+
+}
+
+;;
+;;;; Greater than or equal (K: greaterEqual)
+;;
+
+rulegroup Step/geqv {
+
+  ;;; scalars (K: greaterEqual-int / -float / -bool-* / -string)
+  rule Step/integer:
+    `< ((GEQV (INT i_1) (INT i_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $(i_1 >= i_2)) :: kitem*) `; config >
+
+  rule Step/float:
+    `< ((GEQV (FLOAT float_1) (FLOAT float_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $fge(float_1, float_2)) :: kitem*) `; config >
+
+  rule Step/string:
+    `< ((GEQV (STR t_1) (STR t_2)) :: kitem*) `; config > ~>
+    `< ((BOOL $text_ge(t_1, t_2)) :: kitem*) `; config >
+
+  ;;; bool ordering (K: greaterEqual-bool-1..4)
+  rule Step/boolean:
+    `< ((GEQV (BOOL b_1) (BOOL b_2)) :: kitem*) `; config > ~>
+    `< ((BOOL (~ (~ b_1 /\ b_2))) :: kitem*) `; config >
+
+  ;;; arrays: *or(greater(L1,L2), isEqual(L1,L2)) (K: greaterEqual-array)
+  rule Step/array:
+    `< ((GEQV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BINOP LOR (BINOP GT ($expr_of_value(loc_1)) ($expr_of_value(loc_2)))
+                   (BINOP EQ ($expr_of_value(loc_1)) ($expr_of_value(loc_2)))) :: kitem*) `; config >
+    -- if $loc_holds_array(config.HEAP, loc_1)
+    -- if $loc_holds_array(config.HEAP, loc_2)
+
+  ;;; objects (K: greaterEqual-obj-same-class / -diff-class)
+  rule Step/obj-same-class:
+    `< ((GEQV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((GEQV loc_3 loc_4) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if id_1 = id_2
+
+  rule Step/obj-diff-class:
+    `< ((GEQV loc_1 loc_2) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+    -- if zval_1 = $find_heap(config.HEAP, loc_1)
+    -- if (OID loc_3 id_1 n_1) = zval_1.VAL
+    -- if zval_2 = $find_heap(config.HEAP, loc_2)
+    -- if (OID loc_4 id_2 n_2) = zval_2.VAL
+    -- if ~ (id_1 = id_2)
+
+}
+
+;;
+;;;; Logic operators (K: 'And / 'Or / 'Not)
+;;
+;; AND/OR short-circuit: the LHS was evaluated by the dispatch rules above; the
+;; RHS is kept as an expr and only scheduled when needed.
+;;
+
+rulegroup Step/and {
+
+  ;;; read/convert the LHS to a value (K: and-LHS2LangValue)
+  rule Step/lhs2val:
+    `< ((AND phpRef expr) :: kitem*) `; config > ~>
+    `< ((AND value expr) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV phpRef ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; marker propagation companion (see 4.03 binopv/lhs2val-marker note)
+  rule Step/lhs2val-marker:
+    `< ((AND phpRef expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV phpRef ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; cast a non-bool LHS to bool (K: and-LHS2Bool)
+  rule Step/lhs2boolean:
+    `< ((AND value expr) :: kitem*) `; config > ~>
+    `< ((AND (BOOL b) expr) :: kitem*) `; config_1 >
+    -- if ~ ($type_of(value) = BOOL)
+    -- Steps: `< [ CAST CBOOL ($expr_of_value(value)) ] `; config > ~> `< [ BOOL b ] `; config_1 >
+
+  ;;; marker propagation companion
+  rule Step/lhs2boolean-marker:
+    `< ((AND value expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if ~ ($type_of(value) = BOOL)
+    -- Steps: `< [ CAST CBOOL ($expr_of_value(value)) ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; true: result is the (evaluated) RHS; false: short-circuits to false
+  ;;; (K: and-true / and-false)
+  rule Step/true:
+    `< ((AND (BOOL true) expr) :: kitem*) `; config > ~>
+    `< (expr :: kitem*) `; config >
+
+  rule Step/false:
+    `< ((AND (BOOL false) expr) :: kitem*) `; config > ~>
+    `< ((BOOL false) :: kitem*) `; config >
+
+}
+
+rulegroup Step/or {
+
+  ;;; (K: or-LHS2LangValue)
+  rule Step/lhs2val:
+    `< ((OR phpRef expr) :: kitem*) `; config > ~>
+    `< ((OR value expr) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV phpRef ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; marker propagation companion
+  rule Step/lhs2val-marker:
+    `< ((OR phpRef expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV phpRef ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; (K: or-LHS2Bool)
+  rule Step/lhs2boolean:
+    `< ((OR value expr) :: kitem*) `; config > ~>
+    `< ((OR (BOOL b) expr) :: kitem*) `; config_1 >
+    -- if ~ ($type_of(value) = BOOL)
+    -- Steps: `< [ CAST CBOOL ($expr_of_value(value)) ] `; config > ~> `< [ BOOL b ] `; config_1 >
+
+  ;;; marker propagation companion
+  rule Step/lhs2boolean-marker:
+    `< ((OR value expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if ~ ($type_of(value) = BOOL)
+    -- Steps: `< [ CAST CBOOL ($expr_of_value(value)) ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; true short-circuits to true; false yields the RHS (K: or-true / or-false)
+  rule Step/true:
+    `< ((OR (BOOL true) expr) :: kitem*) `; config > ~>
+    `< ((BOOL true) :: kitem*) `; config >
+
+  rule Step/false:
+    `< ((OR (BOOL false) expr) :: kitem*) `; config > ~>
+    `< (expr :: kitem*) `; config >
+
+}
+
+;;
+;;;; Not (K: 'Not; the surface UNOP NOT is dispatched here)
+;;
+
+rulegroup Step/not {
+
+  ;;; evaluate the argument, then stage on NOTV (K: context 'Not(HOLE))
+  rule Step/arg:
+    `< ((UNOP NOT expr) :: kitem*) `; config > ~>
+    `< ((NOTV kResult) :: kitem*) `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ kResult ] `; config_1 >
+
+  ;;; marker propagation companion
+  rule Step/arg-marker:
+    `< ((UNOP NOT expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; read/convert to a value (K: not-arg2LangValue)
+  rule Step/arg2val:
+    `< ((NOTV convertibleToLangValue) :: kitem*) `; config > ~>
+    `< ((NOTV value) :: kitem*) `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ value ] `; config_1 >
+
+  ;;; marker propagation companion
+  rule Step/arg2val-marker:
+    `< ((NOTV convertibleToLangValue) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- Steps: `< [ TOLV convertibleToLangValue ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; cast a non-bool to bool (K: not-arg2Bool)
+  rule Step/arg2boolean:
+    `< ((NOTV value) :: kitem*) `; config > ~>
+    `< ((NOTV (BOOL b)) :: kitem*) `; config_1 >
+    -- if ~ ($type_of(value) = BOOL)
+    -- Steps: `< [ CAST CBOOL ($expr_of_value(value)) ] `; config > ~> `< [ BOOL b ] `; config_1 >
+
+  ;;; marker propagation companion
+  rule Step/arg2boolean-marker:
+    `< ((NOTV value) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if ~ ($type_of(value) = BOOL)
+    -- Steps: `< [ CAST CBOOL ($expr_of_value(value)) ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; negate the bool (K: not)
+  rule Step/boolean:
+    `< ((NOTV (BOOL b)) :: kitem*) `; config > ~>
+    `< ((BOOL (~ b)) :: kitem*) `; config >
+
+}
+
+;;
+;;;; Unary negation / plus (K: 'Negative / 'Positive)
+;;
+
+rulegroup Step/unary {
+
+  ;;; -x desugars to 0 - x (K: negative => 'Min(0,,X))
+  rule Step/neg:
+    `< ((UNOP NEG expr) :: kitem*) `; config > ~>
+    `< ((BINOP SUB (LITINT 0) expr) :: kitem*) `; config >
+
+  ;;; +x is the identity (K: positive => X)
+  rule Step/pos:
+    `< ((UNOP POS expr) :: kitem*) `; config > ~>
+    `< (expr :: kitem*) `; config >
+
+}
+
+;;
+;;;; Increment / decrement (K: 'PostInc/'PostDec/'PreInc/'PreDec)
+;;
+;; The operand resolves to a location (r-mode: convertToLoc(R,r)), then the
+;; in-place update runs on INCDECV. Post-ops yield the OLD value, pre-ops the
+;; NEW; kphp only defines integer inc/dec plus the PostInc-on-null special case.
+;;
+
+rulegroup Step/incrdecr {
+
+  ;;; evaluate the operand to a reference, then resolve it to a location in
+  ;;; r-mode (K: context 'PostDec(HOLE) then postDecArg2Loc, convertToLoc(R,r))
+  rule Step/arg:
+    `< ((UNOP unop expr) :: kitem*) `; config > ~>
+    `< ((INCDECV unop loc) :: kitem*) `; config_2 >
+    -- if unop <- [ POSTINC, POSTDEC, PREINC, PREDEC ]
+    -- Steps: `< [ expr ] `; config > ~> `< [ phpRef ] `; config_1 >
+    -- Steps: `< [ RGET phpRef ] `; config_1 > ~> `< [ loc ] `; config_2 >
+
+  ;;; marker propagation companion: only the operand-expression evaluation can
+  ;;; recurse into user code; RGET (position 2) is a pure memory chase and
+  ;;; never converges to a marker, so it gets no companion
+  rule Step/arg-marker:
+    `< ((UNOP unop expr) :: kitem*) `; config > ~>
+    `< [ marker ] `; config_1 >
+    -- if unop <- [ POSTINC, POSTDEC, PREINC, PREDEC ]
+    -- Steps: `< [ expr ] `; config > ~> `< [ marker ] `; config_1 >
+
+  ;;; post-decrement: result is the old int, heap holds int-1 (K: postDec)
+  rule Step/post-decr:
+    `< ((INCDECV POSTDEC loc) :: kitem*) `; config > ~>
+    `< ((INT i) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (INT i) = zval.VAL
+    -- if config_1 = config[.HEAP = $update_heap(config.HEAP, loc, zval[.VAL = INT $(i - 1)])]
+
+  ;;; post-increment on an int: result is old int, heap holds int+1 (K: postInc)
+  rule Step/post-inc:
+    `< ((INCDECV POSTINC loc) :: kitem*) `; config > ~>
+    `< ((INT i) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (INT i) = zval.VAL
+    -- if config_1 = config[.HEAP = $update_heap(config.HEAP, loc, zval[.VAL = INT $(i + 1)])]
+
+  ;;; post-increment on NULL: result is NULL, heap becomes 1 (K: postInc-null)
+  rule Step/post-inc-null:
+    `< ((INCDECV POSTINC loc) :: kitem*) `; config > ~>
+    `< (NULL :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if NULL = zval.VAL
+    -- if config_1 = config[.HEAP = $update_heap(config.HEAP, loc, zval[.VAL = INT 1])]
+
+  ;;; pre-decrement / pre-increment: result is the NEW int (K: preDec / preInc)
+  rule Step/pre-decr:
+    `< ((INCDECV PREDEC loc) :: kitem*) `; config > ~>
+    `< ((INT $(i - 1)) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (INT i) = zval.VAL
+    -- if config_1 = config[.HEAP = $update_heap(config.HEAP, loc, zval[.VAL = INT $(i - 1)])]
+
+  rule Step/pre-inc:
+    `< ((INCDECV PREINC loc) :: kitem*) `; config > ~>
+    `< ((INT $(i + 1)) :: kitem*) `; config_1 >
+    -- if zval = $find_heap(config.HEAP, loc)
+    -- if (INT i) = zval.VAL
+    -- if config_1 = config[.HEAP = $update_heap(config.HEAP, loc, zval[.VAL = INT $(i + 1)])]
+
+}

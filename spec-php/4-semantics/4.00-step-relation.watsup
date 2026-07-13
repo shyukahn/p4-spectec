@@ -1,0 +1,81 @@
+;;
+;;;; The machine: Step and Steps
+;;
+;; A K rewrite rule matching the head of the <k> cell becomes a rule of the
+;; single-step relation
+;;
+;;   Step: `< kitem_head :: kitem_tail* `; config > ~> `< k `; config >
+;;
+;; and Steps is its reflexive-transitive closure, used
+;;   - as the top-level driver (4.19), and
+;;   - inside Step rules to run a subterm to its result on a scratch state
+;;     ("premise-driven sub-evaluation"), replacing K's heating/cooling
+;;     (context / [strict]): where K heats a subterm e, a rule here adds
+;;
+;;       -- Steps: `< e :: eps `; config_0 > ~> `< r :: eps `; config_1 >
+;;
+;;     with r the required result shape (a value, a reference, a location)
+;;     and threads config_1 onward. K's [seqstrict] becomes such premises
+;;     chained left-to-right, so K's evaluation order is preserved by
+;;     construction.
+;;
+;; Control effects that in K discard or replace the rest of the <k> cell
+;; interact with premise boundaries; the port handles them by kind:
+;;   - return, break and continue resolve at the same machine as the frame
+;;     push they undo (function bodies and loop bodies execute on the machine
+;;     of their call/loop site), so the K stack rules port directly;
+;;   - throw, fatal errors and exit can cross premise boundaries: they drain
+;;     the local continuation to a marker head `< marker :: eps `; config >,
+;;     and each sub-evaluating rule gets a companion rule propagating the
+;;     marker outward (the K analogue: the effect item sits at the head of
+;;     <k> and the surrounding context never cools). Markers and their rules
+;;     arrive with 4.07/4.13/4.14.
+;;
+;; K's reference-solving macros (shared.k) appear as:
+;;   - convertToLoc(V, mode): $conv_to_loc_k yields the kitem to run on a
+;;     scratch state via a Steps premise;
+;;   - convertToLanguageValue(V): the internal kitem (TOLV V), run on a
+;;     scratch state via a Steps premise (rules in 4.02);
+;;   - toBasicRef / readBasicRef(lref(R, X, T)): run (LGETREF R T) /
+;;     (RGETREF R T) to a location via a Steps premise, then build (REF loc X).
+;;
+
+;;; single rewrite step (K: one rule application at the head of <k>)
+relation Step: state ~> state
+  hint(input %0)
+
+;;; reflexive-transitive closure of Step
+relation Steps: state ~> state
+  hint(input %0)
+
+rule Steps/trans:
+  state_0 ~> state_2
+  -- Step: state_0 ~> state_1
+  -- Steps: state_1 ~> state_2
+
+rule Steps/refl:
+  state ~> state
+  -- otherwise
+
+;;
+;;;; Reference-solving macros (K: shared.k)
+;;
+;; convertibleToLoc / convertibleToLangValue live in 2.2 (kitem payloads use
+;; them).
+
+;;; l-mode vivifies (Lget), r-mode only reads (Rget) (K: ConversionMode l | r)
+syntax convMode =
+  | LMODE
+  | RMODE
+
+;;; the computation resolving a convertible to a location (K: convertToLoc, a
+;;; [function] whose result is itself a computation — here the kitem to run)
+;;; (the mode cases are guarded by equality, not matched by pattern: elab drops
+;;; atom case checks inside option-typed pattern positions)
+dec $conv_to_loc_k(convertibleToLoc, convMode?) : kitem
+def $conv_to_loc_k(literalValue, convMode?) = ALLOCVAL literalValue
+def $conv_to_loc_k(phpRef, convMode) = LGET phpRef
+  -- if convMode = LMODE
+def $conv_to_loc_k(phpRef, convMode) = RGET phpRef
+  -- if convMode = RMODE
+def $conv_to_loc_k(THIS loc, convMode?) = loc

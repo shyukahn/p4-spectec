@@ -1,0 +1,181 @@
+;;
+;;;; Computation items (K: the K sort inside the <k> cell)
+;;
+;; A kitem is anything that can sit on the continuation: surface AST terms,
+;; runtime results (values, references, $this), and internal computations.
+;; Since watsup variants cannot be extended after declaration, ALL kitem cases
+;; are declared centrally here — exactly as kphp declares all its KLabels
+;; centrally in syntax.k ("grouping them here makes the development more
+;; modular"). Internal-operation cases are appended to this union as the
+;; corresponding semantic modules (4-semantics/4.xx) are ported.
+;;
+
+;;; evaluated list()-pattern elements (K: the members of 'List('ListWrap(...))
+;;; once heated to KResults; the assignment machinery rules are in 4.02)
+syntax rtListElem =
+  | RTBLANK                         ;; 'None
+  | RTELEM kResult                  ;; 'Some(KResult)
+  | RTNEST rtListElem*              ;; 'Some('List(...)) with members evaluated
+
+;;; the comparison operator dispatched by the runtime comparison kitem
+;;; (K: ComparisonOp = StrictComparisonOp (identical) | NonStrictComparisonOp)
+syntax compOp =
+  | CEQ                             ;; equal
+  | CIDENT                          ;; identical
+  | CLESS                           ;; less
+  | CLEQ                            ;; lessEqual
+  | CGREATER                        ;; greater
+  | CGEQ                            ;; greaterEqual
+
+;;; forward declaration: WHILE1 below holds an arbitrary continuation
+syntax k
+
+;;; continuation-draining effects (rules in 4.07/4.13/4.14): once one of
+;;; these reaches the head of a continuation, nothing consumes it further —
+;;; it is a terminal state for Steps (Steps/refl), and every sub-evaluating
+;;; Step rule elsewhere gets a companion rule that re-emits it one level out
+;;; when a Steps premise's sub-evaluation converges to a marker instead of
+;;; its expected result shape (the operant analogue of K's context never
+;;; cooling once its hole is stuck on a thrown/fatal value — see 4.00's
+;;; header and 4.13's header for the full architecture note). Declared as
+;;; its own sub-union (not inlined into kitem) so companion rules can match
+;;; "any marker" with one bare-metavar pattern instead of three.
+syntax marker =
+  | THROWN value                    ;; K: 'Throw(V) once V is a resolved Object; catchable —
+                                     ;; walks out to the nearest enclosing POPX (4.13)
+  | ABORTED text                    ;; K: ERROR(Msg) / NOT-SUPPORTED(Msg) — a fatal abort that,
+                                     ;; unlike THROWN, is uncatchable: K's error/not-supported
+                                     ;; rules discard the continuation unconditionally without
+                                     ;; ever consulting <exceptionStack> (4.14)
+  | EXITED                          ;; K: exit's `~> _ => print(V)` continuation-discard,
+                                     ;; reified as its own marker (an empty `k` alone is
+                                     ;; ambiguous with ordinary successful completion)
+
+syntax kitem =
+  ;; surface AST terms scheduled for execution
+  | expr
+  | stmt
+  | phpProgram
+  ;; results (K: KResult = Value, plus thisTag)
+  | value
+  | thisTag
+  ;; internal operations — memory (rules in 4.01)
+  | ALLOCVAL value                  ;; K: allocValue(V)
+  | COPYVAL value loc               ;; K: copyValueToLoc(V, L)
+  | COPYMEMBERS loc arrayEntry*     ;; K: copyArrayMembers(L, Elems)
+  | ARRSETCRNT loc int              ;; K: ArrayInitCrnt(L, N)
+  | RGET phpRef                     ;; K: Rget(R)
+  | RGETREF phpRef refType          ;; K: RgetRef(R, T)
+  | LGET phpRef                     ;; K: Lget(R)
+  | LGETREF phpRef refType          ;; K: LgetRef(R, T)
+  ;; literal expansion at copy time (rules in 4.12 / 4.10)
+  | MKARRLIT loc arrItem*           ;; K: makeArrayLiteral(L, Elems)
+  | MKNEWOBJ loc id arg*            ;; K: makeNewObject(L, Class, Args)
+  ;; internal operations — arithmetic and comparison (rules in 4.03)
+  | BINOPV binop kResult kResult    ;; K: BinOp(Op, L, R)
+  | COMPARE compOp kResult kResult  ;; K: comparison(Op, L, R)
+  | ISEQ value value                ;; K: isEqual(V1, V2)
+  | LESSV value value               ;; K: less(V1, V2)
+  | GREATERV value value            ;; K: greater(V1, V2)
+  | LEQV value value                ;; K: lessEqual(V1, V2)
+  | GEQV value value                ;; K: greaterEqual(V1, V2)
+  | AND kResult expr                ;; K: 'And(L, R) — R stays unevaluated (short-circuit)
+  | OR kResult expr                 ;; K: 'Or(L, R)
+  | NOTV kResult                    ;; K: 'Not(V)
+  | INCDECV unop loc                ;; K: 'PostInc/'PostDec/'PreInc/'PreDec on a Loc
+  ;; internal operations — strings (rules in 4.05)
+  | CONCATV kResult kResult         ;; K: 'Concat(L, R) with operands staged
+  | CONCATTOSTR value               ;; pending RHS while the LHS is cast to string
+  | CONCATFROM value                ;; already-string LHS while the RHS is cast
+  ;; internal operations — conversions (rules in 4.04)
+  | CASTV castKind value            ;; K: 'IntCast(V:LanguageValue) etc.
+  | MKOBJ literalValue              ;; K: makeObjectFromArray(A)
+  | MKOBJ2                          ;; second phase of makeObjectFromArray (cursor reset)
+  ;; internal operations — shared macros (rules in 4.02)
+  | TOLV convertibleToLangValue     ;; K: convertToLanguageValue(V) (shared.k)
+  ;; internal operations — core (rules in 4.02)
+  | RUNSCRIPT stmt*                 ;; K: runScript(Prog) (rules in 4.19)
+  | POPV                            ;; K: 'Expr(V) => . — drops the result before it
+  | TOKEY kResult                   ;; K: 'ArrayAccess in-place key staging
+  | ASSIGNTO kResult kResult        ;; K: 'Assign with both sides evaluated
+  | REFASSIGNTO kResult kResult     ;; K: 'ReferenceAssign with both sides evaluated
+  | EVALPAT listElem* rtListElem*   ;; heats list()-pattern targets left-to-right
+  | PAT rtListElem*                 ;; fully evaluated list()-pattern (EVALPAT result)
+  | LISTASSIGNTO rtListElem* kResult ;; K: 'ListAssign with the pattern evaluated
+  | ASSIGNSEQ rtListElem* loc int   ;; K: assignSeqOfIds(Vars, L, I)
+  | ISSETV kResult                  ;; K: isset(Arg)
+  | UNSETV kResult                  ;; K: 'Unset(Arg) with Arg evaluated
+  ;; io (rules in 4.07)
+  | PRINTV value                    ;; K: print(V) (io.k)
+  ;; error management (rules in 4.14)
+  | NOTICE text                     ;; K: NOTICE(Msg)
+  | WARNING text                    ;; K: WARNING(Msg)
+  | DEPRECATED text                 ;; K: DEPRECATED(Msg)
+  | ERROR text                      ;; K: ERROR(Msg)
+  | NOTSUPPORTED text               ;; K: NOT-SUPPORTED(Msg)
+  ;; exceptions and other continuation-draining effects (rules in 4.07/4.13/
+  ;; 4.14); see the `marker` declaration above
+  | POPX                            ;; K: popx — try-frame resume point on the continuation
+  | marker
+  ;; internal operations — control structures (rules in 4.06)
+  | BREAKN int                      ;; K: 'Break(N) with the argument reduced to int
+  | WHILE1 expr k                   ;; K: while(Cond, Body) — body is an arbitrary k
+  | POPLOOP                         ;; K: popLoopContext
+  | SYNCCRNT loc loc?               ;; K: syncArrayCurrent(Lorig, Llocal)
+  | SWITCH1 value caseClause*       ;; K: switch(In, Clauses)
+  | RUNREST value caseClause*       ;; K: runRemainingSwitchClauses(Clauses)
+  | FOREACHINIT loc foreachPattern stmt*      ;; finishes a local-copy foreach setup
+  | FOREACHRUN loc loc? foreachPattern stmt*  ;; K: foreach(L, Pattern, Stmt)
+  | FOREACHITER loc foreachPattern stmt*      ;; one iteration's visibility dispatch
+  | FOREACHELEMREF expr loc         ;; K: ReferenceAssign(V, ArrayAccess(L,K)) staging
+  | ASSIGNKITEM expr kitem          ;; assign a surface lvalue from an unevaluated kitem RHS
+  | REFASSIGNKITEM expr kitem       ;; ref-assign a surface lvalue from an unevaluated kitem RHS
+  | VISIBLEV loc                    ;; K: isCrntVisib(L)
+  | COMPOUNDATV loc                 ;; K: locHoldsCompoundValue(L)
+  | CURRENTV loc                    ;; K: current(L) (rules in 4.16)
+  | MYNEXTV loc                     ;; K: myNext(L) (rules in 4.16)
+  | RESETV loc                      ;; K: reset(L) (rules in 4.16)
+  | KEYV loc                        ;; K: key(L) (rules in 4.16)
+  | EACHV loc                       ;; K: each(L) (rules in 4.16)
+  | VARDUMPV loc                    ;; K: var_dump(L) (rules in 4.16)
+  | DUMPCONTENT arrayEntry*         ;; K: dump_content(Elems)
+  | PRINTRV loc                     ;; K: print_r(L)
+  | PRINTRCONTENT arrayEntry*       ;; K: print_r_content(Elems)
+  | INDENTINC                       ;; K: indentInc
+  | INDENTDEC                       ;; K: indentDec
+  ;; internal operations — functions (rules in 4.08)
+  | RUNFUNC id funcDef expr* id? loc? bool  ;; K: runFunction(FName, FunDef, Args, Class, Obj, Static)
+  | PROCESSARGS param* expr*        ;; K: processFunArgs(Parameters, Args)
+  | RUNBODY stmt*                   ;; K: CopyFunctionArgs ~> Body (runs staged ARGDECL, then Body)
+  | RETURNV value                   ;; K: 'Return(V) once its argument is fully resolved
+                                     ;; (K's Returnable = LanguageValue | Loc collapses to our
+                                     ;; unified `value`, since a loc is already a value here —
+                                     ;; a compound return stays a loc, a scalar return is read out)
+  ;; internal operations — class declaration (rules in 4.09)
+  | CREATEEMPTYCLASS id id          ;; K: createEmptyClass(ClassName, ParentName)
+  | INITCLASS id classMember*       ;; K: initClass(ClassName, Members)
+  | INITMEMBER id classMember       ;; K: initClassMemberDecl(ClassName, Member)
+  | WRITEINSTMEMBERS id propDecl* visibility  ;; K: writeClassInstanceMembers (kphp-flipped: see 4.09 note)
+  | WRITESTATMEMBERS id propDecl* visibility  ;; K: writeClassStaticMembers
+  | WRITEMETHOD id id param* bool visibility bool stmt* loc  ;; K: writeClassMethod (bool_1 = byRef, bool_2 = static)
+  ;; internal operations — objects (rules in 4.10)
+  | OBJECTINIT loc id               ;; K: objectInit(L, ClassName)
+  | BUILDOBJPROPS loc id classProp* ;; K: buildObjElemList(L, ClassName, PropList)
+  | ALLOCCTOR loc arg*              ;; K: allocAndRunConstructor(L, Args)
+  | METHLOOKUP id text               ;; K: methodLookup(ClassName, MethName)
+  | METHRUNIFVIS id text methodDef arg* loc?  ;; K: methRunIfVisible(methodInfo, Args, Obj)
+  | METHEXEC id text arg* loc?      ;; K: methExecute(Class, MethName, Args, Obj)
+  ;; internal operations — arrays (rules in 4.12)
+  | ARRAYINITPROPS loc arrItem*     ;; K: ArrayInitProps(L, KVs)
+  | ARRAYINITPROP loc arrItem       ;; K: ArrayInitProp(L, Kv)
+  ;; initial-state construction (rules in 4.17)
+  | INITSTATE                       ;; K: buildInitState
+  | INITSCOPES                      ;; K: initScopes
+  | INITSUPERGLOBALS                ;; K: initSuperGlobals
+  | INITBUILTINFUNCS                ;; K: initBuiltinFunctions
+  | INITBUILTINCLASSES              ;; K: initBuiltinClasses
+  | BUILDARRAYCOMPAREFUN            ;; K: buildArrayCompareFun
+
+;;; the continuation: a list of computation items
+;;; (K: <k> K1 ~> K2 ~> ... </k>; eps is K's .K, :: is K's ~>)
+syntax k = kitem*
