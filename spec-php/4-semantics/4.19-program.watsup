@@ -47,3 +47,40 @@ rule Step/runscript:
   `< ($kitems($detect_deprecated_stmts(stmt_d*)) ++ $kitems($detect_deprecated_stmts(stmt_c*))
      ++ kitem*) `; config >
   -- if (stmt_d*, stmt_c*) = $refactor(stmt*)
+
+;;
+;;;; Whole-program execution (K: what `krun prog.php` does — instantiate
+;;;; configuration.k's initial cell contents around <k> buildInitState ~> $PGM
+;;;; </k> and rewrite to a normal form)
+;;
+;; K has no rule for this — it is the K tool's own semantics. Made explicit
+;; here: the Run relation is the spec's top-level judgment, tying Steps (the
+;; reflexive-transitive closure of Step) to a parsed program and its stdin.
+;; The terminal state's continuation is eps on normal completion, or a lone
+;; marker (EXITED / ABORTED / THROWN for an uncaught exception) when the run
+;; was cut short; either way the final config carries the observables (OUT,
+;; EXITCODE, ERRCODE).
+;;
+
+;;; the initial configuration (K: configuration.k's cell initializers — empty
+;;; maps/lists, counters 0; the four scope cells start as K's .K, i.e. no
+;;; location yet — LOCNULL here — and are set by INITSCOPES before any use)
+dec $init_config(text*) : config
+def $init_config(text*) =
+  { DECLS eps, CMDS eps,
+    FUNCS $empty_map<id, funcDef>, CLASSES $empty_map<id, classDef>,
+    CONSTS $empty_map<id, value>, COUNTERS $empty_map<id, nat>,
+    CRNT LOCNULL, GLOB LOCNULL, GSTATIC LOCNULL, SUPERGLOB LOCNULL,
+    HEAP $empty_map<loc, zval>, NEXT 0,
+    CTRL { FUNSTACK eps, EXCSTACK eps, LOOPSTACK eps,
+           FOREACHITEM eps, THISOBJ eps, CLS eps, FNSTATIC eps,
+           ARGDECL eps, FUNBODY eps, STATICDECLS eps },
+    IN text*, OUT eps, EXITCODE 0, ERRCODE 0, VARDUMPLVL 0 }
+
+;;; run a parsed program with the given stdin lines to its terminal state
+relation Run: (phpProgram, text*) ~> state
+  hint(input %0)
+
+rule Run/program:
+  (phpProgram, text*) ~> state
+  -- Steps: `< (INITSTATE :: phpProgram :: eps) `; $init_config(text*) > ~> state
