@@ -5,11 +5,9 @@
 //! comparing with the main driver's expectations;
 //! `run_group` runs groups of P4 corpus programs, comparing with each group's expectations;
 //! `sim_group` runs groups of simulation tests, comparing with each group's expectations;
-//! `k_in_st` runs K definitions through spec-k, comparing with `krun`;
 //! `metaparse` checks that the meta codecs round-trip.
 
 pub mod config;
-pub mod k_in_st;
 pub mod metaparse;
 pub mod run;
 pub mod run_group;

@@ -48,7 +48,7 @@ METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al test-metacirc-ru
   metacirc-run-group-split test-metacirc-sim-al test-metacirc-sim-il \
   test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al \
   test-metacirc-sim-group-il test-metacirc-sim-group-k test-metacirc-sim-group-redex \
-  metacirc-sim-group-split test-metacirc-k-in-st test-metacirc-elab \
+  metacirc-sim-group-split test-metacirc-elab \
   test-metacirc-algo test-metacirc-structure test-metacirc-prose test-metacirc-metaparse \
   test-metacirc-promote
 

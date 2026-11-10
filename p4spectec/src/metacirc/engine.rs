@@ -10,7 +10,7 @@
 //! from a K base, and `EngineRedex` (`redex`) a `racket` process running
 //! a PLT Redex base.
 //! `InterfaceSt` answers the builtins of a base executed by `EngineSt`,
-//! spec-meta or spec-k.
+//! spec-meta or spec-meta-ext.
 
 pub(super) use super::k::{EngineK, RuntimeK, StateK};
 pub(super) use super::redex::{EngineRedex, RuntimeRedex, StateRedex};
@@ -19,7 +19,7 @@ use super::st::{SpecSt, StateSt};
 
 use super::{Result as MetacircResult, tower::UpperMut};
 use crate::{
-    interface::{kore::KoreInterface, meta::MetaInterface, meta_ext::MetaExtInterface},
+    interface::{meta::MetaInterface, meta_ext::MetaExtInterface},
     lang::{
         data::{arena::Arena, value::flat::Value},
         il::ast::{Id, Typ},
@@ -171,8 +171,6 @@ pub(in crate::metacirc) enum InterfaceSt {
     StSt(MetaInterface),
     /// spec-meta-ext, interpreting AL or IL.
     StStExt(MetaExtInterface),
-    /// spec-k, interpreting KORE.
-    KSt(KoreInterface),
 }
 
 impl Interface for InterfaceSt {
@@ -185,7 +183,6 @@ impl Interface for InterfaceSt {
         match self {
             Self::StSt(interface) => interface.parse_program(arena, includes, paths),
             Self::StStExt(interface) => interface.parse_program(arena, includes, paths),
-            Self::KSt(interface) => interface.parse_program(arena, includes, paths),
         }
     }
 
@@ -199,7 +196,6 @@ impl Interface for InterfaceSt {
         match self {
             Self::StSt(interface) => interface.call_builtin(arena, id, targs, values),
             Self::StStExt(interface) => interface.call_builtin(arena, id, targs, values),
-            Self::KSt(interface) => interface.call_builtin(arena, id, targs, values),
         }
     }
 
@@ -207,7 +203,6 @@ impl Interface for InterfaceSt {
         match self {
             Self::StSt(interface) => interface.clear(),
             Self::StStExt(interface) => interface.clear(),
-            Self::KSt(interface) => interface.clear(),
         }
     }
 }

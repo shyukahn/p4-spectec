@@ -1,6 +1,6 @@
 //! JSON descriptions of AL interpreter towers
 //!
-//! Levels run from the native base toward a top level consuming AL, IL, P4, or KORE.
+//! Levels run from the native base toward a top level consuming AL, IL, or P4.
 //! Each level names the language it accepts:
 //! the level above it is passed to it as AL or IL, in the meta syntax of
 //! spec-meta (`al`) or spec-meta-ext (`al-ext`, `il-ext`).
@@ -173,8 +173,7 @@ impl TowerConfig {
     ///
     /// Specification paths are relative to the current directory.
     /// A single level is both the top level and the base.
-    /// A K or Redex base accepts AL;
-    /// KORE is accepted only by a single level, since no level stacks over K yet.
+    /// A K or Redex base accepts AL.
     pub fn new(base: BaseConfig, levels: Vec<LevelConfig>, entry: String) -> Result<Self> {
         if levels.is_empty() {
             return Err(config_invalid("a tower requires at least one level"));
@@ -203,12 +202,6 @@ impl TowerConfig {
                 return Err(config_invalid("a redex tower's base accepts al"));
             }
             _ => {}
-        }
-        // Stacking a level over a K definition is not implemented
-        if levels[idx_top].lang == Lang::Kore && idx_top != 0 {
-            return Err(config_invalid(
-                "kore is accepted only by a single-level tower; stacking over K is not implemented",
-            ));
         }
         Ok(Self { base, levels, entry })
     }

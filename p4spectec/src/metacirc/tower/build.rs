@@ -22,8 +22,6 @@
 //! An AL or IL top ends the tower at its program, `Top::St`,
 //! which answers only the program's builtins
 //! across one more boundary above the highest meta level.
-//! A KORE top ends it at the K definition above spec-k, `Top::K`,
-//! whose K library answers spec-k's extern relations.
 //!
 //! | level below accepts | `PreparedLevel` | encoded for the level below  |
 //! |---------------------|-----------------|------------------------------|
@@ -34,15 +32,13 @@
 
 use super::super::engine::{InterfaceSt, RuntimeK, RuntimeRedex, StateK, StateRedex};
 use super::super::protocol::{
-    Protocol, ProtocolKSt, ProtocolKind, ProtocolStK, ProtocolStRedex, ProtocolStSt,
-    ProtocolStStExt,
+    Protocol, ProtocolKind, ProtocolStK, ProtocolStRedex, ProtocolStSt, ProtocolStStExt,
 };
 use super::super::{BaseConfig, Repr, Result, TowerConfig, config::Lang, error::config_invalid};
 use super::{Base, BaseK, BaseRedex, PreparedLevel, Top, Tower, Upper};
 use crate::{
     interface::{
         self,
-        kore::KLibrary,
         p4::{P4Interface, unparse::P4Unparser},
     },
     lang::{al::ast as al, data::arena::Arena},
@@ -79,26 +75,19 @@ fn interface_p4(level_top: &PreparedLevel, spec_base_al: Option<&al::Spec>) -> P
 /// Prepares the levels above a meta base, up to the P4 top or the program,
 /// and the protocol of each boundary below them.
 ///
-/// Only a P4 top level uses `external_p4`, and only a KORE top level,
-/// spec-k as the single level, uses `library`, its K definition's library.
+/// Only a P4 top level uses `external_p4`.
 fn build_upper<Ext: Extern>(
     config: &TowerConfig,
     level_top: &PreparedLevel,
     spec_base_al: Option<&al::Spec>,
     options: runner::Config,
     external_p4: Ext,
-    library: Option<KLibrary>,
 ) -> Upper<Ext> {
     let (top, configs_host) = match config.top_lang() {
         // Above a meta top level is its program; every level above the base is meta
         Lang::Al | Lang::AlExt | Lang::IlExt => {
             let top = Top::St(interface::meta());
             (top, &config.levels[1..])
-        }
-        // Above spec-k is the K definition it runs
-        Lang::Kore => {
-            let library = library.expect("a KORE top level is spec-k as the base");
-            (Top::K(library), &config.levels[1..])
         }
         // A P4 top level is the highest level, above the meta levels below it
         Lang::P4 => {
@@ -114,8 +103,8 @@ fn build_upper<Ext: Extern>(
         .collect::<Vec<_>>();
     // The level below each boundary interprets the level above it:
     // a K base runs spec-meta-k, a Redex base runs spec-meta-redex,
-    // a level accepting KORE is spec-k, a level accepting AL or IL for
-    // spec-meta-ext is spec-meta-ext, and every other level is spec-meta
+    // a level accepting AL or IL for spec-meta-ext is spec-meta-ext,
+    // and every other level is spec-meta
     // Each level through the top has C and the protocol of the boundary below it,
     // which keeps that boundary's codec state
     let count = hosts.len() + 1;
@@ -124,7 +113,6 @@ fn build_upper<Ext: Extern>(
         .map(|idx_below| match (idx_below, &config.base, config.levels[idx_below].lang) {
             (0, BaseConfig::K { .. }, _) => ProtocolKind::StK(ProtocolStK::new(cache)),
             (0, BaseConfig::Redex { .. }, _) => ProtocolKind::StRedex(ProtocolStRedex::new(cache)),
-            (_, _, Lang::Kore) => ProtocolKind::KSt(ProtocolKSt::new(cache)),
             (_, _, Lang::AlExt | Lang::IlExt) => {
                 ProtocolKind::StStExt(Box::new(ProtocolStStExt::new(cache)))
             }
@@ -188,14 +176,14 @@ impl<Ext: Extern> Tower<Ext> {
             BaseConfig::K { kompiled } => {
                 let runtime = RuntimeK::load(kompiled)?;
                 let state = StateK::new(&runtime)?;
-                let upper = build_upper(config, level_top, None, options, external_p4, None);
+                let upper = build_upper(config, level_top, None, options, external_p4);
                 Base::K(BaseK { runtime, state, upper, effects: 0 })
             }
             // A Redex base runs in a racket process and hosts the levels above it
             BaseConfig::Redex { module } => {
                 let runtime = RuntimeRedex::load(module)?;
                 let state = StateRedex::new(&runtime)?;
-                let upper = build_upper(config, level_top, None, options, external_p4, None);
+                let upper = build_upper(config, level_top, None, options, external_p4);
                 Base::Redex(BaseRedex { runtime, state, upper, effects: 0 })
             }
             BaseConfig::St { repr } => {
@@ -209,19 +197,13 @@ impl<Ext: Extern> Tower<Ext> {
                             Runner::new(arena, spec_base, options, interface, external_p4)?;
                         Base::P4(runner)
                     }
-                    // A meta base or spec-k hosts the levels above it as its extern
+                    // A meta base hosts the levels above it as its extern
                     lang_base => {
-                        // spec-k's interface reads the K definition whose library is the top
-                        let (interface, library) = match lang_base {
-                            Lang::Kore => {
-                                let interface = interface::kore();
-                                let library = interface.library();
-                                (InterfaceSt::KSt(interface), Some(library))
-                            }
+                        let interface = match lang_base {
                             Lang::AlExt | Lang::IlExt => {
-                                (InterfaceSt::StStExt(interface::meta_ext(lang_base)), None)
+                                InterfaceSt::StStExt(interface::meta_ext(lang_base))
                             }
-                            _ => (InterfaceSt::StSt(interface::meta()), None),
+                            _ => InterfaceSt::StSt(interface::meta()),
                         };
                         let upper = build_upper(
                             config,
@@ -229,7 +211,6 @@ impl<Ext: Extern> Tower<Ext> {
                             Some(&spec_base_al),
                             options,
                             external_p4,
-                            library,
                         );
                         let spec_base = into_runner_spec(*repr, spec_base_al)?;
                         let runner = Runner::new(arena, spec_base, options, interface, upper)?;

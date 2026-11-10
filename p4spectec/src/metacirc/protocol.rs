@@ -12,12 +12,11 @@
 //! whose specification interprets the level above:
 //! `ProtocolStSt` is spec-meta's and `ProtocolStStExt` spec-meta-ext's (`st`),
 //! `ProtocolStK` is spec-meta-k's, the AL semantics written in K (`k`),
-//! `ProtocolStRedex` is spec-meta-redex's, the AL semantics written in PLT Redex (`redex`),
-//! and `ProtocolKSt` is spec-k's, the K semantics written in P4-SpecTec (`st`).
+//! and `ProtocolStRedex` is spec-meta-redex's, the AL semantics written in PLT Redex (`redex`).
 
 pub(super) use super::k::ProtocolStK;
 pub(super) use super::redex::ProtocolStRedex;
-pub(super) use super::st::{ProtocolKSt, ProtocolStSt, ProtocolStStExt};
+pub(super) use super::st::{ProtocolStSt, ProtocolStStExt};
 
 use super::{Result as MetacircResult, tower::PreparedLevel};
 use crate::{
@@ -106,8 +105,6 @@ pub(in crate::metacirc) enum ProtocolKind {
     StK(ProtocolStK),
     /// spec-meta-redex, run by an `EngineRedex`, interprets the level above as AL.
     StRedex(ProtocolStRedex),
-    /// spec-k interprets the level above as KORE.
-    KSt(ProtocolKSt),
 }
 
 impl ProtocolKind {
@@ -118,7 +115,6 @@ impl ProtocolKind {
             Self::StStExt(_) => ProtocolStStExt::load,
             Self::StK(_) => ProtocolStK::load,
             Self::StRedex(_) => ProtocolStRedex::load,
-            Self::KSt(_) => ProtocolKSt::load,
         }
     }
 
@@ -135,7 +131,6 @@ impl ProtocolKind {
             Self::StStExt(_) => ProtocolStStExt::encode_entry(arena, above, name, values),
             Self::StK(_) => ProtocolStK::encode_entry(arena, above, name, values),
             Self::StRedex(_) => ProtocolStRedex::encode_entry(arena, above, name, values),
-            Self::KSt(_) => ProtocolKSt::encode_entry(arena, above, name, values),
         }
     }
 
@@ -150,7 +145,6 @@ impl ProtocolKind {
             Self::StStExt(protocol) => protocol.lower(arena, value_ctx, call),
             Self::StK(protocol) => protocol.lower(arena, value_ctx, call),
             Self::StRedex(protocol) => protocol.lower(arena, value_ctx, call),
-            Self::KSt(protocol) => protocol.lower(arena, value_ctx, call),
         }
     }
 
@@ -165,7 +159,6 @@ impl ProtocolKind {
             Self::StStExt(protocol) => protocol.raise(arena, output, call),
             Self::StK(protocol) => protocol.raise(arena, output, call),
             Self::StRedex(protocol) => protocol.raise(arena, output, call),
-            Self::KSt(protocol) => protocol.raise(arena, output, call),
         }
     }
 
@@ -180,7 +173,6 @@ impl ProtocolKind {
             Self::StStExt(protocol) => protocol.host(arena, name, values),
             Self::StK(protocol) => protocol.host(arena, name, values),
             Self::StRedex(protocol) => protocol.host(arena, name, values),
-            Self::KSt(protocol) => protocol.host(arena, name, values),
         }
     }
 
@@ -195,7 +187,6 @@ impl ProtocolKind {
             Self::StStExt(protocol) => protocol.reply(arena, call, eval),
             Self::StK(protocol) => protocol.reply(arena, call, eval),
             Self::StRedex(protocol) => protocol.reply(arena, call, eval),
-            Self::KSt(protocol) => protocol.reply(arena, call, eval),
         }
     }
 
@@ -205,7 +196,6 @@ impl ProtocolKind {
             Self::StStExt(protocol) => protocol.clear(),
             Self::StK(protocol) => protocol.clear(),
             Self::StRedex(protocol) => protocol.clear(),
-            Self::KSt(protocol) => protocol.clear(),
         }
     }
 
@@ -215,7 +205,7 @@ impl ProtocolKind {
         match self {
             Self::StK(protocol) => protocol.host_response(request),
             Self::StRedex(protocol) => protocol.host_response(request),
-            Self::StSt(_) | Self::StStExt(_) | Self::KSt(_) => None,
+            Self::StSt(_) | Self::StStExt(_) => None,
         }
     }
 
@@ -225,20 +215,17 @@ impl ProtocolKind {
         match self {
             Self::StK(protocol) => protocol.cache_host_response(request, response),
             Self::StRedex(protocol) => protocol.cache_host_response(request, response),
-            Self::StSt(_) | Self::StStExt(_) | Self::KSt(_) => {}
+            Self::StSt(_) | Self::StStExt(_) => {}
         }
     }
 }
 
 /// A specification entered from the level below, in the form that level accepts:
-/// a configured level above the base, or the program above the top,
-/// an AL or IL script or a K definition.
+/// a configured level above the base, or the program above the top, an AL or IL script.
 #[derive(Clone, Copy)]
 pub(in crate::metacirc) enum Entered<'a> {
     Al(&'a al::Spec),
     Il(&'a il::Spec),
-    /// A K definition, as spec-k's `kdefinition` value.
-    Kore(Value),
 }
 
 /// Calls on the level below a boundary, which `Protocol::load` runs.

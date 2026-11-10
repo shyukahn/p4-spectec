@@ -5,8 +5,7 @@
 //! which decodes them with the protocol of the level below it.
 //! A meta level answers its builtins and sends its own host calls up;
 //! the top answers P4 builtins and externs,
-//! the program's builtins and extern functions,
-//! or, as the K definition above spec-k, spec-k's extern relations.
+//! or the program's builtins and extern functions.
 //! A P4 extern that reenters, as static_assert does to read its arguments,
 //! runs on the next depth, made on its first use and kept for the program.
 
@@ -188,8 +187,6 @@ impl<Ext: Extern> HostCalls for Boundary<'_, '_, Ext> {
             match &mut self.upper.top {
                 TopMut::P4 { interface, .. } => interface.call_builtin(arena, id, targs, values),
                 TopMut::St(interface) => interface.call_builtin(arena, id, targs, values),
-                // spec-k declares no builtins for the level above
-                TopMut::K(_) => return unsupported(&id.node).map_err(Into::into),
             }
         } else {
             self.upper.hosts[self.level.index()].call_builtin(arena, id, targs, values)
@@ -210,11 +207,6 @@ impl<Ext: Extern> HostCalls for Boundary<'_, '_, Ext> {
                 .with_next(arena, |ctx| ctx.call_extern_rel(name, values)),
             // The program declares no host relations
             TopMut::St(_) => unsupported(name).map_err(Into::into),
-            // The K library computes a hook without effects
-            TopMut::K(library) => Eval::new(
-                library.eval_rel(arena, name, values).map_err(Into::into),
-                SideEffect::Pure,
-            ),
         }
     }
 
@@ -239,8 +231,6 @@ impl<Ext: Extern> HostCalls for Boundary<'_, '_, Ext> {
                 ScriptExtern::call_func(arena, name, values).map_err(Into::into),
                 SideEffect::Pure,
             ),
-            // The K definition declares no host functions
-            TopMut::K(_) => unsupported(name).map_err(Into::into),
         }
     }
 }

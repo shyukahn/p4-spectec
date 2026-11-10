@@ -54,8 +54,8 @@ impl Interface for MetaExtInterface {
             Lang::IlExt => crate::elab(paths)
                 .map_err(InterfaceError::from)?
                 .encode(arena),
-            // spec-meta-ext never interprets spec-meta's AL, P4, or KORE directly
-            Lang::Al | Lang::P4 | Lang::Kore => {
+            // spec-meta-ext never interprets spec-meta's AL or P4 directly
+            Lang::Al | Lang::P4 => {
                 return Err(InterfaceError::diagnostic_unconfigured());
             }
         };

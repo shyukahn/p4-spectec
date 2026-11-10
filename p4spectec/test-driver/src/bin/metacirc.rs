@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 
 use p4spectec_test::{
     harness::{self, Error, Result},
-    metacirc::{k_in_st, metaparse, run, run_group, sim, sim_group},
+    metacirc::{metaparse, run, sim, sim_group},
     suite::{snapshot, snapshot::Stage},
 };
 
@@ -75,17 +75,6 @@ enum Command {
     },
     /// Write the group folders of `suites/metacirc/sim-group.toml`
     SimGroupSplit,
-    /// Compare K definitions run through spec-k with krun
-    KInSt {
-        /// Configuration name in `suites/metacirc/k-in-st.toml`
-        config: String,
-        /// Run only the registered suite with this name.
-        #[arg(long = "suite", value_name = "NAME")]
-        name_suite: Option<String>,
-        /// Record a program still running after this many seconds as a timeout.
-        #[arg(long, value_name = "SECONDS")]
-        timeout: Option<u64>,
-    },
     /// Compare the elaborated meta specification with expected output
     Elab,
     /// Compare the algorithmic meta specification with expected output
@@ -116,8 +105,6 @@ enum Worker {
     Sim { config: String, arch: String },
     /// Run STF tests of `suites/metacirc/sim-group.toml` on one architecture
     SimGroup { config: String, arch: String },
-    /// Run K definitions of `suites/metacirc/k-in-st.toml` through a tower
-    KInSt { config: String, tower: PathBuf },
 }
 
 /// Compares P4 corpus and AL script outcomes through metacircular towers.
@@ -180,9 +167,6 @@ fn execute(cli: Cli) -> Result<()> {
             path_log.as_deref(),
         ),
         Command::SimGroupSplit => sim_group::split(),
-        Command::KInSt { config, name_suite, timeout } => {
-            k_in_st::run(&config, name_suite.as_deref(), timeout.map(Duration::from_secs))
-        }
         // Snapshot and codec checks compile the meta specification without executing it
         Command::Elab => snapshot::run("metacirc/snapshot", &[Stage::Elab], None),
         Command::Algo => snapshot::run("metacirc/snapshot", &[Stage::Algo], None),
@@ -195,7 +179,6 @@ fn execute(cli: Cli) -> Result<()> {
         Command::Worker(Worker::RunGroup { config, tower }) => run_group::serve(&config, &tower),
         Command::Worker(Worker::Sim { config, arch }) => sim::serve(&config, &arch),
         Command::Worker(Worker::SimGroup { config, arch }) => sim_group::serve(&config, &arch),
-        Command::Worker(Worker::KInSt { config, tower }) => k_in_st::serve(&config, &tower),
     }
 }
 
@@ -206,7 +189,6 @@ fn list() -> Result<()> {
     println!("run-group: {:#?}", harness::load::<run_group::Registration>("metacirc/run-group")?);
     println!("sim: {:#?}", harness::load::<sim::Registration>("metacirc/sim")?);
     println!("sim-group: {:#?}", harness::load::<sim_group::Registration>("metacirc/sim-group")?);
-    println!("k-in-st: {:#?}", harness::load::<k_in_st::Registration>("metacirc/k-in-st")?);
     println!("metaparse: {:#?}", harness::load::<metaparse::Registration>("metacirc/metaparse")?);
     Ok(())
 }

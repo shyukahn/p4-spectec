@@ -11,7 +11,7 @@ use super::super::{
 };
 use super::HostLevel;
 use crate::{
-    interface::{kore::KLibrary, meta::MetaInterface, p4::P4Interface},
+    interface::{meta::MetaInterface, p4::P4Interface},
     lang::data::value::flat::Value,
     runner::{Extern, Host, Interface},
 };
@@ -24,8 +24,7 @@ use crate::{
 /// the protocol of the boundary below each level, C of each level,
 /// and the meta builtins of each level below the top.
 /// The top is the P4 specification,
-/// the AL or IL program that the highest meta level interprets,
-/// or the K definition that spec-k interprets.
+/// or the AL or IL program that the highest meta level interprets.
 /// Protocols and C are shared by every reentry depth;
 /// depth 0 uses `hosts`, and each deeper depth its own.
 pub(in crate::metacirc) struct Upper<Ext: Extern> {
@@ -46,8 +45,6 @@ pub(in crate::metacirc) enum Top<Ext: Extern> {
     P4(Host<P4Interface, Ext>),
     /// The AL or IL program of the highest meta level, answering only its builtins.
     St(MetaInterface),
-    /// The K definition above spec-k, whose K library answers spec-k's extern relations.
-    K(KLibrary),
 }
 
 impl<Ext: Extern> Upper<Ext> {
@@ -59,8 +56,6 @@ impl<Ext: Extern> Upper<Ext> {
         match &mut self.top {
             Top::P4(host) => host.reset(),
             Top::St(interface) => interface.clear(),
-            // The library stays with the definition, as in `KoreInterface::clear`
-            Top::K(_) => {}
         }
         self.depth_next = None;
     }
@@ -73,7 +68,6 @@ impl<Ext: Extern> Upper<Ext> {
                 TopMut::P4 { interface, external }
             }
             Top::St(interface) => TopMut::St(interface),
-            Top::K(library) => TopMut::K(library),
         };
         UpperMut {
             env,
@@ -109,8 +103,6 @@ pub(in crate::metacirc) enum TopMut<'l, Ext: Extern> {
     P4 { interface: &'l mut P4Interface, external: &'l mut Ext },
     /// The AL or IL program of the highest meta level, answering only its builtins.
     St(&'l mut MetaInterface),
-    /// The K definition above spec-k, whose K library answers spec-k's extern relations.
-    K(&'l KLibrary),
 }
 
 impl<'l, Ext: Extern> UpperMut<'l, Ext> {

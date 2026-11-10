@@ -75,7 +75,7 @@ pub fn cover_run(
         let outcome = run_catching(|| {
             let paths = std::slice::from_ref(path);
             let input = tower
-                .parse_input(&mut arena, includes, paths, None)
+                .parse_input(&mut arena, includes, paths)
                 .map_err(drop)?;
             let values = tower.encode_input(&mut arena, &input).map_err(drop)?;
             tower.eval_input(&mut arena, &values).map_err(drop)

@@ -131,12 +131,6 @@ pub fn run(
         let (input_suite, suites_input) = match config_tower.top_lang() {
             Lang::P4 => (Input::P4, &mut suites_p4),
             Lang::Al | Lang::AlExt | Lang::IlExt => (Input::Al, &mut suites_al),
-            Lang::Kore => {
-                return Err(Error::from(format!(
-                    "{}: a KORE tower is not a run suite",
-                    suite.name
-                )));
-            }
         };
         if input.is_none_or(|input| input == input_suite) {
             suites_input.push(SelectedSuite { suite, path_tower });
@@ -511,7 +505,7 @@ fn execute_script(
         _ => p4spectec::algo(paths_program).map(|_| ()),
     };
     valid.map_err(|error| Error::from(format!("{}: {error}", path.display())))?;
-    let accepted = metacirc::run(config_tower, &[], paths_program, config.runner(), None).is_ok();
+    let accepted = metacirc::run(config_tower, &[], paths_program, config.runner()).is_ok();
     Ok(if accepted { diagnostic::Outcome::Success } else { diagnostic::Outcome::Failure })
 }
 

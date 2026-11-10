@@ -11,10 +11,6 @@
 //! `meta` also converts AL to and from spec-meta's values.
 //! `meta_ext` is the preset for spec-meta-ext, with inputs parsed as AL or IL
 //! scripts and converted to and from spec-meta-ext's values.
-//!
-//! `kore` is the preset for spec-k, the K semantics:
-//! standard builtins plus the K hooks spec-k delegates,
-//! with a K definition and initial term parsed from KORE
 
 use crate::lang::{common::source::Span, data::value};
 
@@ -22,14 +18,12 @@ use crate::runner::Spec;
 
 use self::{
     builtin::{call::Builtins, extract},
-    kore::KoreInterface,
     meta::MetaInterface,
     meta_ext::MetaExtInterface,
     p4::{P4Interface, unparse::P4Unparser},
 };
 
 pub mod builtin;
-pub mod kore;
 pub mod meta;
 pub mod meta_ext;
 pub mod p4;
@@ -47,8 +41,6 @@ pub enum Lang {
     IlExt,
     /// A P4 program, which only the P4 specification accepts.
     P4,
-    /// A K definition and initial term in KORE, which only spec-k accepts.
-    Kore,
 }
 
 impl Lang {
@@ -71,13 +63,6 @@ pub fn meta() -> MetaInterface {
 /// with the standard specification builtins.
 pub fn meta_ext(lang: Lang) -> MetaExtInterface {
     MetaExtInterface::new(lang, Builtins::new())
-}
-
-// == KORE
-
-/// Builds the interface of spec-k, with the standard builtins and the K hooks.
-pub fn kore() -> KoreInterface {
-    KoreInterface::new()
 }
 
 // == P4

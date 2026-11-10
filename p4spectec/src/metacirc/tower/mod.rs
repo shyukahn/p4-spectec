@@ -59,22 +59,10 @@ pub struct Tower<Ext: Extern = Dummy> {
 }
 
 /// The input of a tower, prepared in the form the top accepts:
-/// a P4 program for a P4 top level, a script above an AL or IL top level,
-/// or a K definition above spec-k with its initial term.
+/// a P4 program for a P4 top level, or a script above an AL or IL top level.
 pub enum Input {
     P4(Value),
     Script(Script),
-    Kore(Kore),
-}
-
-/// A K definition and an initial term above spec-k, as `Krun` takes them.
-pub struct Kore {
-    /// The definition, as spec-k's `kdefinition` value.
-    pub definition: Value,
-    /// The initial term, as spec-k's `kore` value.
-    pub init: Value,
-    /// At most this many rewriting steps, as `krun --depth` does.
-    pub depth: Option<u64>,
 }
 
 /// A script above the top level, entered at the tower's configured entry.
@@ -107,7 +95,7 @@ pub(super) enum Base<Ext: Extern> {
     /// A P4 specification, interpreting a parsed P4 program.
     P4(Runner<P4Interface, Ext>),
     /// A P4-SpecTec specification run natively on AL or SL, hosting the levels above it:
-    /// spec-meta interpreting an AL or IL script, or spec-k a K definition.
+    /// spec-meta interpreting an AL or IL script.
     St(Runner<InterfaceSt, Upper<Ext>>),
     /// A K specification, compiled to a library, interpreting an AL script
     /// and hosting the levels above it.
