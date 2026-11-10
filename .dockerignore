@@ -6,3 +6,5 @@ debug
 log
 **/*.log
 **/.DS_Store
+spec-meta-k/kompiled
+**/compiled
