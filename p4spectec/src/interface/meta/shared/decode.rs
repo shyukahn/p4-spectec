@@ -34,7 +34,7 @@ use crate::{
 use num_traits::ToPrimitive;
 use std::rc::Rc;
 
-/// Reconstructs source IL or AL data from a meta value.
+/// Reconstructs source AL data from a meta value.
 pub trait Decode: Sized {
     /// Decodes a value without retaining conversion results.
     fn decode(arena: &mut Arena, value_meta: Value) -> Result<Self, Error> {

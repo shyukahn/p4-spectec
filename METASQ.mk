@@ -19,7 +19,8 @@ METACIRC_TEST = $(CARGO) run --locked --release --manifest-path test-driver/Carg
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT)) $(if $(SUITE),--suite $(SUITE))
 METACIRC_SNAPSHOTS := test-metacirc-elab test-metacirc-algo test-metacirc-structure test-metacirc-prose
 
-.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al test-metacirc-run-il test-metacirc-run-k test-metacirc-run-redex test-metacirc-micro-al test-metacirc-micro-il test-metacirc-micro-k test-metacirc-micro-redex test-metacirc-run-group-al test-metacirc-run-group-il test-metacirc-run-group-k test-metacirc-run-group-redex metacirc-run-group-split test-metacirc-sim-al test-metacirc-sim-il test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-il test-metacirc-sim-group-k test-metacirc-sim-group-redex metacirc-sim-group-split test-metacirc-k-in-st $(METACIRC_SNAPSHOTS) test-metacirc-metaparse test-metacirc-promote clean
+
+.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al test-metacirc-run-k test-metacirc-run-redex test-metacirc-micro-al test-metacirc-micro-k test-metacirc-micro-redex test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex metacirc-run-group-splittest-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex metacirc-sim-group-split $(METACIRC_SNAPSHOTS) test-metacirc-metaparse test-metacirc-promote clean
 
 metacirc-cli:
 	cd $(RUST_DIR) && $(CARGO) build --locked --release --bin metacirc --target-dir "$(CARGO_TARGET_DIR)"
@@ -61,10 +62,6 @@ redex: metacirc
 test-metacirc-run-al:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run al --input p4 $(CORPUS_ARGS)
 
-# P4 corpus through the IL/P4 towers, converted by Algo_IL of spec-meta-ext
-test-metacirc-run-il:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run il --input p4 $(CORPUS_ARGS)
-
 # P4 corpus through the K/P4 towers, spec-meta-k on its K library (ST-in-K)
 test-metacirc-run-k:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run k --input p4 $(CORPUS_ARGS)
@@ -76,10 +73,6 @@ test-metacirc-run-redex:
 # Spec-language micro test sources through the AL tower
 test-metacirc-micro-al:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run al --input al $(CORPUS_ARGS)
-
-# Spec-language micro test sources through the IL tower, converted by Algo_IL of spec-meta-ext
-test-metacirc-micro-il:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run il --input al $(CORPUS_ARGS)
 
 # Spec-language micro test sources through the K tower (ST-in-K)
 test-metacirc-micro-k:
@@ -109,10 +102,6 @@ metacirc-run-group-split:
 test-metacirc-sim-al:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim al $(CORPUS_ARGS)
 
-# Registered simulation suites through the IL/P4 tower, converted by Algo_IL of spec-meta-ext
-test-metacirc-sim-il:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim il $(CORPUS_ARGS)
-
 # Registered simulation suites through the K/P4 tower (ST-in-K), against native expectations
 test-metacirc-sim-k:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim k $(CORPUS_ARGS)
@@ -121,9 +110,10 @@ test-metacirc-sim-k:
 test-metacirc-sim-redex:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim redex $(CORPUS_ARGS)
 
-# One group of a simulation suite of suites/metacirc/sim-group.toml through the AL/P4, IL/P4,
+# One group of a simulation suite of suites/metacirc/sim-group.toml through the AL/P4,
 # K/P4, or Redex/P4 tower, against the group's expected file for the suite
-SIM_GROUP_TARGETS := test-metacirc-sim-group-al test-metacirc-sim-group-il test-metacirc-sim-group-k test-metacirc-sim-group-redex
+SIM_GROUP_ARGS = --suite $(SUITE) --group $(GROUP) $(if $(TIMEOUT),--timeout $(TIMEOUT))
+SIM_GROUP_TARGETS := test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex
 
 $(SIM_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=v1model-p4c GROUP=1))
@@ -137,7 +127,7 @@ metacirc-sim-group-split:
 $(METACIRC_SNAPSHOTS):
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) $(@:test-metacirc-%=%)
 
-# IL and AL meta codec round trips of the specifications
+# AL meta codec round trips of the specifications
 test-metacirc-metaparse:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) metaparse
 

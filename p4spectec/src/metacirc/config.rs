@@ -1,13 +1,12 @@
 //! JSON descriptions of AL interpreter towers
 //!
-//! Levels run from the native base toward a top level consuming AL, IL, or P4.
+//! Levels run from the native base toward a top level consuming AL or P4.
 //! Each level names the language it accepts:
-//! the level above it is passed to it as AL or IL, in the meta syntax of
-//! spec-meta (`al`) or spec-meta-ext (`al-ext`, `il-ext`).
+//! the level above it is passed to it as AL, in the meta syntax of spec-meta (`al`).
 //! The base runs natively, as `BaseConfig` says: a P4-SpecTec specification on
 //! the AL or SL interpreter (`St`), a K library compiled from the base (`K`),
 //! or a Racket module of the base run by `racket` (`Redex`).
-//! An AL or IL script above the top level is entered at `entry`,
+//! An AL script above the top level is entered at `entry`,
 //! the function `main` unless the JSON names another function or relation.
 //! Specification, library, and module paths are resolved relative to the JSON file.
 //!
@@ -34,7 +33,7 @@ pub struct TowerConfig {
     pub(super) base: BaseConfig,
     /// Nonempty, ordered from base toward top.
     pub(super) levels: Vec<LevelConfig>,
-    /// The function or relation entering an AL or IL script above the top level.
+    /// The function or relation entering an AL script above the top level.
     pub(super) entry: String,
 }
 
@@ -183,7 +182,7 @@ impl TowerConfig {
         for (idx, level) in levels.iter().enumerate() {
             if idx != idx_top && !level.lang.is_script() {
                 return Err(config_invalid(format!(
-                    "invalid language at level {idx}: expected al, al-ext, or il-ext"
+                    "invalid language at level {idx}: expected al"
                 )));
             }
             if level.rel.is_empty() || level.specdir.as_os_str().is_empty() {

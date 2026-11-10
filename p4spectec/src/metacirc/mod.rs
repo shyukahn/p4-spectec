@@ -1,4 +1,4 @@
-//! Configured interpreter towers over AL, IL, or P4 inputs
+//! Configured interpreter towers over AL or P4 inputs
 //!
 //! Each runner is prepared in the arena used by all of its calls.
 //! Only the base runs natively, on an `engine` executing AL or SL,
@@ -11,7 +11,7 @@
 //! and `run` runs a program through a tower.
 //! `cover` measures the SL instruction coverage of an SL base over many P4 inputs.
 //! Each backend is its own module, sharing nothing with the others:
-//! `st` runs P4-SpecTec specifications (spec-meta, spec-meta-ext),
+//! `st` runs P4-SpecTec specifications (spec-meta),
 //! `k` spec-meta-k from its K library, and `redex` spec-meta-redex in `racket`.
 //!
 //! ```text
@@ -50,7 +50,7 @@ pub use tower::{Input, Script, Tower};
 /// Executes a program through the configured interpreter tower.
 ///
 /// `paths_program` are the program in the language the top level accepts:
-/// one P4 program, or the sources of an AL or IL script.
+/// one P4 program, or the sources of an AL script.
 pub fn run(
     config: &TowerConfig,
     includes: &[PathBuf],

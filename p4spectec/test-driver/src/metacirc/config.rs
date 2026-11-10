@@ -18,8 +18,6 @@ use crate::harness::{Error, Result};
 pub enum Base {
     /// The native `algo` pass converts the base specification and AL inputs.
     Al,
-    /// The base level converts its IL input with `Algo_IL` of spec-meta-ext.
-    Il,
     /// The base runs from the library compiled from spec-meta-k, which takes AL (ST-in-K).
     K,
     /// The base runs spec-meta-redex in a racket process, which takes AL (ST-in-Redex).
@@ -31,7 +29,6 @@ impl Base {
     pub fn name(self) -> &'static str {
         match self {
             Self::Al => "al",
-            Self::Il => "il",
             Self::K => "k",
             Self::Redex => "redex",
         }
@@ -43,7 +40,6 @@ impl Base {
 #[serde(deny_unknown_fields)]
 pub struct ByBase<T> {
     pub al: Option<T>,
-    pub il: Option<T>,
     pub k: Option<T>,
     pub redex: Option<T>,
 }
@@ -53,7 +49,6 @@ impl<T> ByBase<T> {
     pub fn get(&self, base: Base) -> Option<&T> {
         match base {
             Base::Al => self.al.as_ref(),
-            Base::Il => self.il.as_ref(),
             Base::K => self.k.as_ref(),
             Base::Redex => self.redex.as_ref(),
         }

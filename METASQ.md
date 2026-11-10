@@ -115,26 +115,20 @@ architecture reenters the P4 specification, the call runs one depth below
 
 Levels are ordered from native base through intermediates to top level.
 A single level supplies both top level and base. `lang` names the language a
-level accepts, in the meta syntax of the specification accepting it: every
-level below the top level uses `al`, `al-ext`, or `il-ext`, and the top level
-may also use `p4`. An `al` level runs `spec-meta`, which specifies AL only;
-`al-ext` and `il-ext` levels run `spec-meta-ext`, its copy extended with the
-IL-to-AL specification, whose AL syntax is named apart from spec-meta's.
-The level above an `al` or `al-ext` level is passed to it as AL converted by
-the native `algo` pass; the level above an `il-ext` level is passed as
-elaborated IL. `mode` selects the base's native backend
-(`sl` or `al`).
+level accepts: every level below the top level uses `al`, and the top level
+may also use `p4`. An `al` level runs `spec-meta`, and the level above it is
+passed to it as AL converted by the native `algo` pass. `mode` selects the
+base's native backend (`sl` or `al`).
 
 Only the base runs on a native interpreter. Every level above it is
 interpreted by the level below, so natively it only answers the builtin and
 host calls relayed from below, without consulting its own definitions.
 
-`rel` names the relation entering a level. A level above an `al`, `al-ext`, or `il-ext` level
+`rel` names the relation entering a level. A level above an `al` level
 is encoded as the inputs of an entry relation at the level below: the
 specification, its `rel`, and the inputs of that `rel` as `val`s.
-spec-meta's `Eval_rel`, and spec-meta-ext's `Eval_AL_rel` and `Eval_IL_rel`,
-call a relation through `Call_rel`; `Eval_func`, `Eval_AL_func`, and
-`Eval_IL_func` call a function through `Call_func` and output its value. A
+spec-meta's `Eval_rel` calls a relation through `Call_rel`; `Eval_func`
+calls a function through `Call_func` and outputs its value. A
 level entered through a relation of the level above, including every P4 tower
 and the supplied script towers entering `Main`, uses the `_rel` entry; only the
 level below a script entered at a function uses the `_func` entry.
@@ -145,9 +139,7 @@ resolved relative to the current working directory.
 
 To add an AL interpretation layer, insert another
 `{ "specdir": "../spec-meta", "rel": "Eval_rel", "lang": "al" }`
-below the top level, as the supplied three-level `al-al-p4.json` does;
-`al-il-p4.json` instead makes the middle level accept IL,
-running `spec-meta-ext` there. A name such as
+below the top level, as the supplied three-level `al-al-p4.json` does. A name such as
 `al-al.json` describes another configuration of this kind.
 
 `run-meta` accepts `--no-cache`, `--no-det`, and `--guard`. `--no-det` disables
@@ -172,7 +164,7 @@ Upper { protocols, ctxs, hosts, top, depth_next }
   depth_next      reentry depths 1 and deeper
 ```
 
-Above a meta top level is its AL or IL program, one more boundary whose
+Above a meta top level is its AL program, one more boundary whose
 builtins `Top::St` answers.
 
 `TowerConfig` reads `mode` and the base's `kompiled` or `module` into
@@ -241,40 +233,12 @@ spec-meta-k-detcheck and spec-meta-redex-detcheck enable that check
 and the `testdata/spec-meta` suites run on the k and redex bases only through them;
 `make kompile` and `make redex` build both.
 
-## Algo through the IL-to-AL specification
-
-`spec-meta-ext` is `spec-meta` with the IL syntax (`1-syntax/1.1-il`),
-the IL-to-AL pass as the relation `Algo_IL` (`3-algo`), and the IL entries.
-`Eval_IL_rel` and `Eval_IL_func` convert their IL input with `Algo_IL` and
-evaluate the result with `Eval_AL_rel` and `Eval_AL_func`, so a spec-meta-ext level that accepts IL runs the specification
-above it on AL produced by the specification:
-
-```json
-{
-  "mode": "sl",
-  "levels": [
-    { "specdir": "../spec-meta-ext", "rel": "Eval_IL_rel", "lang": "il-ext" },
-    { "specdir": "../spec", "rel": "Program_inst", "lang": "p4" }
-  ]
-}
-```
-
-The conversion runs for every input, in the level that accepts the IL.
-Only the base, here the IL-to-AL specification itself, is converted by the
-native `algo` pass; the specification above it reaches native code only
-through its builtin and host calls.
-`towers/il-rel.json`, `towers/il-p4.json`, and `towers/il-p4-ok.json`
-are the supplied towers entered through `Eval_IL_rel`.
-
 ## Execution corpus
 
 ```sh
 make test-metacirc-micro-al
-make test-metacirc-micro-il
 make test-metacirc-run-al
-make test-metacirc-run-il
 make test-metacirc-sim-al
-make test-metacirc-sim-il
 ```
 
 `test-metacirc-micro-al` runs the spec-language sources under
@@ -287,14 +251,11 @@ tower and requires the p4c submodule. Both check determinism.
 names, against the native simulation expectations; it requires the p4c submodule.
 
 The driver's `run` and `sim` subcommands take a configuration name,
-`al` or `il`, which selects the language the towers' base level takes.
-Each suite registers a tower per base; the `-il` targets run the same suites
-through towers entered by `Eval_IL_rel`, so the input is converted by `Algo_IL`
-instead of the native `algo` pass. They share the expectations of the `al` runs;
-sources whose outcome differs are listed in the `il` exclusions.
+`al`, `k`, or `redex`, which selects the towers' base; each suite registers a
+tower per base.
 `run` selects suites with `--input al` or `--input p4`,
 and both select one registered suite with `--suite <NAME>`,
-for example `run al --suite neg-run` or `sim il --suite v1model-regression`.
+for example `run al --suite neg-run` or `sim al --suite v1model-regression`.
 With `--timeout <SECONDS>`, a worker process runs each source and is restarted
 after a source that does not finish in time, which is recorded as `timeout`;
 `p4spectec-test run` and `sim` take the same option.
@@ -379,7 +340,7 @@ four snapshot stages.
 make test-metacirc-metaparse
 ```
 
-Checks that the IL and AL meta encodings of `spec` and `spec-meta` are fixed
+Checks that the AL meta encodings of `spec` and `spec-meta` are fixed
 points of decode-then-encode, as registered in `suites/metacirc/metaparse.toml`.
 
 ## OCaml reference

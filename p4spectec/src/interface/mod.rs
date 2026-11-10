@@ -9,8 +9,6 @@
 //! `meta` is the preset for spec-meta: standard builtins,
 //! with specification inputs parsed as AL scripts;
 //! `meta` also converts AL to and from spec-meta's values.
-//! `meta_ext` is the preset for spec-meta-ext, with inputs parsed as AL or IL
-//! scripts and converted to and from spec-meta-ext's values.
 
 use crate::lang::{common::source::Span, data::value};
 
@@ -19,13 +17,11 @@ use crate::runner::Spec;
 use self::{
     builtin::{call::Builtins, extract},
     meta::MetaInterface,
-    meta_ext::MetaExtInterface,
     p4::{P4Interface, unparse::P4Unparser},
 };
 
 pub mod builtin;
 pub mod meta;
-pub mod meta_ext;
 pub mod p4;
 
 /// The language of the input a specification accepts,
@@ -35,10 +31,6 @@ pub mod p4;
 pub enum Lang {
     /// An AL script for spec-meta, converted by the native `algo` pass.
     Al,
-    /// An AL script for spec-meta-ext, converted by the native `algo` pass.
-    AlExt,
-    /// An IL script for spec-meta-ext, converted to AL by spec-meta-ext.
-    IlExt,
     /// A P4 program, which only the P4 specification accepts.
     P4,
 }
@@ -47,7 +39,7 @@ impl Lang {
     /// Returns whether the language is a script the level above can be passed as,
     /// so that a level accepting it may sit below another level.
     pub fn is_script(self) -> bool {
-        matches!(self, Self::Al | Self::AlExt | Self::IlExt)
+        matches!(self, Self::Al)
     }
 }
 
@@ -57,12 +49,6 @@ impl Lang {
 /// with the standard specification builtins.
 pub fn meta() -> MetaInterface {
     MetaInterface::new(Builtins::new())
-}
-
-/// Builds the interface of spec-meta-ext accepting `lang` scripts,
-/// with the standard specification builtins.
-pub fn meta_ext(lang: Lang) -> MetaExtInterface {
-    MetaExtInterface::new(lang, Builtins::new())
 }
 
 // == P4

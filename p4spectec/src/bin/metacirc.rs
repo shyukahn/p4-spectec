@@ -1,7 +1,7 @@
 //! Command-line specification transformation and AL metacircular execution
 //!
 //! `algo`, `struct`, and `prose` transform ordered specification paths natively.
-//! `run-meta` requires a tower configuration for AL, IL, and P4 inputs.
+//! `run-meta` requires a tower configuration for AL and P4 inputs.
 //! `sim` runs an STF test on an SL, K, or Redex tower of two or more levels over P4,
 //! printing each matched packet as `p4spectec sim` does.
 //! `cover-run` and `cover-sim` report the SL instruction coverage of the base

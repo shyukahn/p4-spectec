@@ -75,10 +75,7 @@ impl Protocol for ProtocolStSt {
         name: &str,
         values: &[Value],
     ) -> MetacircResult<Vec<Value>> {
-        let Entered::Al(spec_al) = above else {
-            let message = "spec-meta enters only a level passed to it as AL";
-            return Err(error::config_invalid(message));
-        };
+        let Entered::Al(spec_al) = above;
         let value_spec = spec_al.encode(arena).map_err(meta::Error::into_report)?;
         entry_inputs(arena, value_spec, name, values)
     }

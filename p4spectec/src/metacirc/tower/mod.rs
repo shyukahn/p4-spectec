@@ -32,7 +32,6 @@ use crate::{
     lang::{
         al::ast as al,
         data::{arena::Arena, value::flat::Value},
-        il::ast as il,
     },
     runner::{self, Extern, Handler, InterpreterError, Runner},
     sim_plugin::dummy::Dummy,
@@ -59,7 +58,7 @@ pub struct Tower<Ext: Extern = Dummy> {
 }
 
 /// The input of a tower, prepared in the form the top accepts:
-/// a P4 program for a P4 top level, or a script above an AL or IL top level.
+/// a P4 program for a P4 top level, or a script above an AL top level.
 pub enum Input {
     P4(Value),
     Script(Script),
@@ -68,14 +67,12 @@ pub enum Input {
 /// A script above the top level, entered at the tower's configured entry.
 pub enum Script {
     Al(al::Spec),
-    Il(il::Spec),
 }
 
 impl Script {
     fn entered(&self) -> Entered<'_> {
         match self {
             Self::Al(spec_al) => Entered::Al(spec_al),
-            Self::Il(spec_il) => Entered::Il(spec_il),
         }
     }
 }
@@ -86,8 +83,6 @@ pub(super) enum PreparedLevel {
     Base { config: LevelConfig },
     /// A level passed to the level below as AL.
     Al { config: LevelConfig, spec_al: al::Spec },
-    /// A level passed to the level below as IL.
-    Il { config: LevelConfig, spec_il: il::Spec },
 }
 
 /// The native runner of the base, selected by the language it interprets.
@@ -95,7 +90,7 @@ pub(super) enum Base<Ext: Extern> {
     /// A P4 specification, interpreting a parsed P4 program.
     P4(Runner<P4Interface, Ext>),
     /// A P4-SpecTec specification run natively on AL or SL, hosting the levels above it:
-    /// spec-meta interpreting an AL or IL script.
+    /// spec-meta interpreting an AL script.
     St(Runner<InterfaceSt, Upper<Ext>>),
     /// A K specification, compiled to a library, interpreting an AL script
     /// and hosting the levels above it.
@@ -181,7 +176,7 @@ impl<Ext: Extern> Tower<Ext> {
 impl PreparedLevel {
     pub(super) fn config(&self) -> &LevelConfig {
         match self {
-            Self::Base { config, .. } | Self::Al { config, .. } | Self::Il { config, .. } => config,
+            Self::Base { config, .. } | Self::Al { config, .. } => config,
         }
     }
 
@@ -189,7 +184,6 @@ impl PreparedLevel {
     fn entered(&self) -> Entered<'_> {
         match self {
             Self::Al { spec_al, .. } => Entered::Al(spec_al),
-            Self::Il { spec_il, .. } => Entered::Il(spec_il),
             Self::Base { .. } => unreachable!("the base is never entered from another level"),
         }
     }

@@ -1,7 +1,7 @@
 # Meta codec round trips: `metaparse` (make test-metacirc-metaparse).
 #
-# Each suite elaborates and converts its `spec` sources, then requires the IL
-# and AL meta encodings to be fixed points of decode-then-encode.
+# Each suite converts its `spec` sources, then requires the AL
+# meta encoding to be a fixed point of decode-then-encode.
 # Paths are relative to the repository root.
 
 [[suites]]

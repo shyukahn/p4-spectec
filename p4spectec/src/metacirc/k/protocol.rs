@@ -29,7 +29,7 @@ use crate::{
             value::flat::{self as value, Value, make},
         },
     },
-    metacirc::{Result as MetacircResult, error, tower::PreparedLevel},
+    metacirc::{Result as MetacircResult, tower::PreparedLevel},
     runner::{Eval, ExternError, InterpreterError},
 };
 
@@ -86,10 +86,7 @@ impl Protocol for ProtocolStK {
         name: &str,
         values: &[Value],
     ) -> MetacircResult<Vec<Value>> {
-        let Entered::Al(spec_al) = above else {
-            let message = "spec-meta-k enters only a level passed to it as AL";
-            return Err(error::config_invalid(message));
-        };
+        let Entered::Al(spec_al) = above;
         let mut writer = Writer::new();
         spec_json::spec(&mut writer, spec_al);
         serve::entry_inputs(arena, writer.finish(), name, values)

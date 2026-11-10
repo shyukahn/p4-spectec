@@ -32,7 +32,7 @@ use crate::{
     phrase,
 };
 
-/// Converts source IL or AL data into its meta representation.
+/// Converts source AL data into its meta representation.
 pub trait Encode {
     /// The encoded value, or an omitted source declaration.
     type Output;

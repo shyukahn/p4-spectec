@@ -20,7 +20,7 @@ use crate::{
             value::flat::{self as value, Value, make},
         },
     },
-    metacirc::{Result as MetacircResult, error, tower::PreparedLevel},
+    metacirc::{Result as MetacircResult, tower::PreparedLevel},
     runner::{Eval, ExternError, InterpreterError},
 };
 
@@ -78,10 +78,7 @@ impl Protocol for ProtocolStRedex {
         name: &str,
         values: &[Value],
     ) -> MetacircResult<Vec<Value>> {
-        let Entered::Al(spec_al) = above else {
-            let message = "spec-meta-redex enters only a level passed to it as AL";
-            return Err(error::config_invalid(message));
-        };
+        let Entered::Al(spec_al) = above;
         serve::entry_inputs(arena, sexp::script(spec_al), name, values)
     }
 

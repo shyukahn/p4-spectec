@@ -83,7 +83,7 @@ enum Command {
     Structure,
     /// Compare the prose meta specification with expected output
     Prose,
-    /// Check that IL and AL encodings are fixed points of decode-then-encode
+    /// Check that AL encodings are fixed points of decode-then-encode
     Metaparse,
     /// List every metacirc registration
     List,

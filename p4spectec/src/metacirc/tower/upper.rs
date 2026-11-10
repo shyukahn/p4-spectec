@@ -24,7 +24,7 @@ use crate::{
 /// the protocol of the boundary below each level, C of each level,
 /// and the meta builtins of each level below the top.
 /// The top is the P4 specification,
-/// or the AL or IL program that the highest meta level interprets.
+/// or the AL program that the highest meta level interprets.
 /// Protocols and C are shared by every reentry depth;
 /// depth 0 uses `hosts`, and each deeper depth its own.
 pub(in crate::metacirc) struct Upper<Ext: Extern> {
@@ -43,7 +43,7 @@ pub(in crate::metacirc) struct Upper<Ext: Extern> {
 pub(in crate::metacirc) enum Top<Ext: Extern> {
     /// A P4 specification, answering the builtins and externs of its program.
     P4(Host<P4Interface, Ext>),
-    /// The AL or IL program of the highest meta level, answering only its builtins.
+    /// The AL program of the highest meta level, answering only its builtins.
     St(MetaInterface),
 }
 
@@ -101,7 +101,7 @@ pub(in crate::metacirc) struct UpperMut<'l, Ext: Extern> {
 pub(in crate::metacirc) enum TopMut<'l, Ext: Extern> {
     /// A P4 specification, answering the builtins and externs of its program.
     P4 { interface: &'l mut P4Interface, external: &'l mut Ext },
-    /// The AL or IL program of the highest meta level, answering only its builtins.
+    /// The AL program of the highest meta level, answering only its builtins.
     St(&'l mut MetaInterface),
 }
 

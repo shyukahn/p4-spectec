@@ -1,8 +1,0 @@
-{
-  "mode": "sl",
-  "levels": [
-    { "specdir": "../spec-meta", "rel": "Eval_rel", "lang": "al" },
-    { "specdir": "../spec-meta-ext", "rel": "Eval_IL_rel", "lang": "il-ext" },
-    { "specdir": "../spec", "rel": "Program_inst", "lang": "p4" }
-  ]
-}

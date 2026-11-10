@@ -1,7 +1,7 @@
 //! The program above the top level, and the inputs of the native base's entry
 //!
 //! `Tower::parse_input` reads the program in the language the top level accepts:
-//! a P4 program, or an AL or IL script.
+//! a P4 program, or an AL script.
 //!
 //! The meta specification's entry relations, such as spec-meta's `Eval_rel`, take a script,
 //! the name of the script's entry, and the entry's inputs as meta values.
@@ -10,10 +10,9 @@
 //! Each level above the base wraps the inputs of the level above it this way,
 //! through the protocol of the boundary below it (`Protocol::encode_entry`),
 //! with the level encoded in the language of the level consuming it.
-//! A program above the top is one more level: an AL or IL script is entered
+//! A program above the top is one more level: an AL script is entered
 //! at the configured entry with no inputs, its function `main` through
-//! `Eval_func`, `Eval_AL_func`, or `Eval_IL_func`, or a relation through
-//! `Eval_rel`, `Eval_AL_rel`, or `Eval_IL_rel`.
+//! `Eval_func` or `Eval_AL_func`, or a relation through `Eval_rel` or `Eval_AL_rel`.
 
 use super::super::{Result, config::Lang, error};
 use super::{Input, Script, Tower};
@@ -38,8 +37,7 @@ impl<Ext: Extern> Tower<Ext> {
             return Err(error::input_invalid("a tower requires at least one program path"));
         }
         match self.lang_top() {
-            Lang::Al | Lang::AlExt => Ok(Input::Script(Script::Al(crate::algo(paths)?))),
-            Lang::IlExt => Ok(Input::Script(Script::Il(crate::elab(paths)?))),
+            Lang::Al => Ok(Input::Script(Script::Al(crate::algo(paths)?))),
             // P4 inputs contain exactly one translation unit
             Lang::P4 => {
                 let [path] = paths else {
@@ -61,8 +59,7 @@ impl<Ext: Extern> Tower<Ext> {
         // A P4 program is the top level's input; a script is a program above the top
         let (mut values, program) = match (input, lang_top) {
             (Input::P4(program), Lang::P4) => (vec![*program], None),
-            (Input::Script(script @ Script::Al(_)), Lang::Al | Lang::AlExt)
-            | (Input::Script(script @ Script::Il(_)), Lang::IlExt) => {
+            (Input::Script(script @ Script::Al(_)), Lang::Al) => {
                 (vec![], Some((script.entered(), self.entry.as_str())))
             }
             _ => {

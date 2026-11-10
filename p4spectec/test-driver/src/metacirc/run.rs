@@ -55,7 +55,7 @@ pub struct Registration {
 /// Registers a corpus run through one tower per base.
 ///
 /// The tower's top level decides the entry relation
-/// and whether inputs are P4 programs or AL or IL scripts.
+/// and whether inputs are P4 programs or AL scripts.
 /// P4 suites compare against an `expected` file of per-program results;
 /// script suites give every script under `root` one `outcome`.
 #[derive(Debug, Deserialize)]
@@ -130,7 +130,7 @@ pub fn run(
             .map_err(|error| Error::from(format!("{}: {error}", suite.name)))?;
         let (input_suite, suites_input) = match config_tower.top_lang() {
             Lang::P4 => (Input::P4, &mut suites_p4),
-            Lang::Al | Lang::AlExt | Lang::IlExt => (Input::Al, &mut suites_al),
+            Lang::Al => (Input::Al, &mut suites_al),
         };
         if input.is_none_or(|input| input == input_suite) {
             suites_input.push(SelectedSuite { suite, path_tower });
@@ -498,13 +498,9 @@ fn execute_script(
     path: &PathBuf,
 ) -> Result<diagnostic::Outcome> {
     let paths_program = std::slice::from_ref(path);
-    // Invalid scripts are test errors, not rejected executions;
-    // an IL top level converts the script itself, so it need only elaborate
-    let valid = match config_tower.top_lang() {
-        Lang::IlExt => p4spectec::elab(paths_program).map(|_| ()),
-        _ => p4spectec::algo(paths_program).map(|_| ()),
-    };
-    valid.map_err(|error| Error::from(format!("{}: {error}", path.display())))?;
+    // Invalid scripts are test errors, not rejected executions
+    p4spectec::algo(paths_program)
+        .map_err(|error| Error::from(format!("{}: {error}", path.display())))?;
     let accepted = metacirc::run(config_tower, &[], paths_program, config.runner()).is_ok();
     Ok(if accepted { diagnostic::Outcome::Success } else { diagnostic::Outcome::Failure })
 }
