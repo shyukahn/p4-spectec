@@ -1,233 +1,314 @@
-# P4-SpecTec
+# Meta-Meta Artifact
 
-A specification mechanization toolchain for the P4 programming language.
-As of March 2026, P4-SpecTec has been **conditionally accepted** as the
-official P4 specification authoring toolchain by the P4 Language Design Working
-Group (LDWG). This means that:
+## 1. Installation
 
-* P4 language design will take place at the mechanized specification level
-  (in the `spec` directory).
-* The P4 language specification will be automatically generated from the
-  mechanized specification
-  ([preview](https://kaist-plrg.github.io/p4-spectec/p4/P4-16-spec-release.html)).
-* The mechanized specification will be tested using the `p4c` test suite.
+Choose one of the three options below.
+Options 1 and 2 require Docker; option 1 also requires BuildKit, the default builder since Docker Engine 23.0.
 
-The implementation is written in Rust. It reimplements work from
-[Petr4](https://github.com/verified-network-toolchain/petr4), especially the
-parser and numerics implementation, and
-[Wasm-SpecTec](https://github.com/Wasm-DSL/spectec), especially the specification
-parser and the high-level architecture of the tool.
+### Option 1: Build the Docker image
 
-## Tutorial
+Build the image from the repository root and open a shell in a container.
 
-* [Mechanizing the Nano-P4 Specification with P4-SpecTec](https://kaist-plrg.github.io/nano-p4-tutorial/):
-  a hands-on guide to syntax, type checking, evaluation, and prose generation
-  for an educational subset of P4.
-* [P4-SpecTec Tutorial: A Project-Based Introduction with Nano-P4](https://www.youtube.com/watch?v=wqshMP8Tz-k&t=30s):
-  a video tutorial from P4 Developer Days.
+```sh
+# clone the artifact repository
+git clone <URL>
 
-## Publications and Talks
+# build an image from Dockerfile
+docker build -t meta-artifact:latest .
 
-* **P4 Workshop 2024**:
-  [P4-SpecTec: Mechanized Language Definition for P4](https://www.youtube.com/watch?v=AcxAYvM8pnA&t=4s).
-* **P4 Developer Days 2025**:
-  [Mechanizing the P4 Language Specification with P4-SpecTec](https://www.youtube.com/watch?v=2BhqyE7c-Pw).
-* **PLSS 2025**:
-  [P4-SpecTec: Mechanized Language Definition for P4](https://www.youtube.com/watch?v=a97P7VvCg6k&t=1070s).
-* **HATRA 2025**:
-  [P4-SpecTec: A Language Mechanization Framework for P4](https://www.youtube.com/watch?v=Y_lRXfUszF0&t=1278s).
-* **OOPSLA 2026**:
-  [P4-SpecTec: Integrating a Language Mechanization Framework into the Real-World P4 Specification](https://dl.acm.org/doi/10.1145/3839535).
+# launch a docker container in detached state
+docker run -dit --name artifact meta-artifact
 
-## Building
-
-Install [Rust through rustup](https://rustup.rs/), GNU Make, and a C compiler
-available as `cc`. The P4 parser also uses `cc` to preprocess P4 input files.
-The toolchain is pinned in `p4spectec/rust-toolchain.toml`; rustup selects it
-when Make enters the Rust crate. OCaml, opam, and Dune are not required.
-
-On Linux, install the native build tools with your package manager, for example
-`sudo apt-get install build-essential` on Debian/Ubuntu. On macOS, install the
-Xcode command line tools with `xcode-select --install`. On Windows, use WSL2
-and the Linux instructions.
-
-The P4 include files and test corpus taken from [p4c](https://github.com/p4lang/p4c)
-are vendored in `p4c/p4include/`, `p4c/testdata/p4_16_samples/`, and `p4c/testdata/p4_16_errors/`.
-
-```shell
-make build
+# run a shell inside the container
+docker exec -it artifact bash
 ```
 
-This creates the optimized executable `./bin/p4spectec`. `make` and
-`make release` also build in release mode. To build a debug executable:
+The image build compiles the Rust implementation, the test drivers, and the meta specifications,
+so every command in Evaluation runs without further builds.
+You may download the Racket 9.3 installer for Linux (x86_64) from [here](https://download.racket-lang.org/racket-v9.3.html)
+to skip downloading it during the build;
+place `racket-9.3-x86_64-linux-buster-cs.sh` at the repository root before building.
 
-```shell
-make debug
-./bin/p4spectec --help
+### Option 2: Pull the Docker image from DockerHub
+
+<!-- TODO: fill in the DockerHub account once the image is published -->
+
+```sh
+# pull the image from DockerHub
+docker pull <TODO>/meta-artifact:latest
+
+# launch a docker container in detached state
+docker run -dit --name artifact <TODO>/meta-artifact:latest
+
+# run a shell inside the container
+docker exec -it artifact bash
 ```
 
-The Cargo package and default binary are named `p4spectec`, and build output
-defaults to `p4spectec/target/`.
-To select another build directory, pass `CARGO_TARGET_DIR` to Make; a relative
-path is resolved from the directory where Make is invoked:
+### Option 3: Build from source on Ubuntu 24.04
 
-```shell
-make build CARGO_TARGET_DIR=target
+Run the commands below from the repository root.
+
+a. Install the dependencies and build the artifact.
+
+```sh
+# clone the artifact repository
+git clone <URL>
+
+# install system packages
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl build-essential pkg-config python3
+
+# install rustup and the Rust toolchain pinned in p4spectec/rust-toolchain.toml
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
+. "$HOME/.cargo/env"
+(cd p4spectec && rustup toolchain install)
+
+# build the Rust implementation and the test drivers
+make build metacirc
+(cd p4spectec && cargo build --locked --release --manifest-path test-driver/Cargo.toml --target-dir target --bins)
 ```
 
-A `Dockerfile` provides a development environment with the pinned toolchain
-and the document dependencies below.
-Build and enter the image:
+b. Install Racket 9.3 with PLT Redex, and compile `spec-meta-redex`.
 
-```shell
-docker build -t p4spectec .
-docker run --rm -it p4spectec
+```sh
+# install Racket 9.3 into /opt/racket
+curl -fSL -o racket.sh https://download.racket-lang.org/releases/9.3/installers/racket-9.3-x86_64-linux-buster-cs.sh
+echo "30dc59d9b5af083eacf793253d35782c5231e8bfb7a7331fe32ccd9a41fd792f  racket.sh" | sha256sum -c -
+sudo sh racket.sh --in-place --dest /opt/racket < /dev/null
+rm racket.sh
+export PATH="/opt/racket/bin:$PATH"
+
+# compile spec-meta-redex
+make redex
 ```
 
-Inside the container, `p4spectec` is on `PATH` and all Make targets work.
+c. Install the K framework v7.1.337, and compile `spec-meta-k`.
 
-## Processing the specification
+```sh
+# install the K framework 7.1.337 and z3
+curl -fSL -o kframework.deb https://github.com/runtimeverification/k/releases/download/v7.1.337/kframework_7.1.337_amd64_ubuntu_noble.deb
+echo "3692997e6bfa4be490d24bd9201289d4a05872889c9da725dda21e99d03d6990  kframework.deb" | sha256sum -c -
+sudo apt-get install -y ./kframework.deb z3
+rm kframework.deb
 
-The specification source files live in `spec/`. The tool processes them through
-EL (external language), IL (internal language), AL (algorithmic language),
-SL (structured language), and PL (prose language).
-
-```shell
-# Parse and elaborate the specification to IL
-./bin/p4spectec elab spec
-# Translate to AL
-./bin/p4spectec algo spec
-# Structure the specification as SL
-./bin/p4spectec struct spec
-# Generate PL
-./bin/p4spectec prose spec
+# compile spec-meta-k
+make kompile
 ```
 
-Run `./bin/p4spectec <command> --help` for command-specific arguments.
+Add `/opt/racket/bin` to `PATH` in your shell profile to keep it in new shells.
 
-## Running P4 programs
+## 2. File structure
 
-`run` evaluates a relation on a P4 program. Use `Program_ok` for type checking
-or `Program_inst` for instantiation. SL is the default interpreter;
-`--al`, `--sl`, and `--pl` select a language explicitly.
-
-```shell
-./bin/p4spectec run spec --rel Program_ok -i p4c/p4include \
-  -p p4c/testdata/p4_16_samples/basic_routing-bmv2.p4
-
-./bin/p4spectec run spec --rel Program_inst -i p4c/p4include \
-  -p p4c/testdata/p4_16_samples/basic_routing-bmv2.p4 --al
+```
+/meta/
+├── p4spectec/          # Rust implementation of meta-meta execution, built on top of P4-SpecTec
+│   ├── src/            # P4-SpecTec, with metacircular towers in src/metacirc/
+│   └── test-driver/    # Test drivers, with test suite registrations (suites/) and expected results (expected/)
+├── spec/               # P4^P4ST: the P4 specification from P4-SpecTec
+├── spec-meta/          # P4ST^P4ST: the P4-SpecTec AL specification in P4-SpecTec
+├── spec-meta-redex/    # P4ST^Redex: the P4-SpecTec AL specification in PLT Redex
+├── spec-meta-k/        # P4ST^K: the P4-SpecTec AL specification in K
+├── towers/             # Tower configurations running P4^P4ST on P4ST^P4ST, P4ST^Redex, or P4ST^K
+├── p4c/                # P4 include files (p4include/) and test programs (testdata/) from p4c
+├── testdata/           # STF tests from P4-SpecTec
+├── excludes/           # Excluded tests from P4-SpecTec
+├── patches/            # Patched STF tests from P4-SpecTec
+├── docs/               # P4 specification documents from P4-SpecTec
+├── scripts/            # Scripts printing statistics of spec-meta-redex and spec-meta-k
+└── logs/               # Logs recorded by our runs; TEST_LOG=logs also writes here
 ```
 
-`sim` executes packet tests in STF format. The supported architectures are
-`v1model`, `ebpf`, and `psa`:
+## 3. Evaluation
 
-```shell
-./bin/p4spectec sim spec --arch v1model -i p4c/p4include \
-  -p p4c/testdata/p4_16_samples/basic_routing-bmv2.p4 \
-  --stf testdata/p4testgen/basic_routing-bmv2/basic_routing-bmv2_1.stf
+Run every command from `/meta` in the container, or from the repository root for option 3.
+
+For comparison, `test-run-sl` and `test-sim-sl` run P4^P4ST directly on the SL interpreter
+of P4-SpecTec, without a tower.
+`test-run-sl` type-checks (`Program_ok`) each P4 program of
+`p4c/testdata/p4_16_samples/` and `p4c/testdata/p4_16_errors/`.
+`test-sim-sl` runs every STF packet test of the simulation suites listed below.
+Both skip the same excluded tests as the meta-meta execution tests below.
+
+```sh
+# run the type-checking tests
+make test-run-sl TEST_LOG=logs
+# run the STF packet tests
+make test-sim-sl TEST_LOG=logs
 ```
 
-Both commands enable interpreter caching and deterministic execution checks by
-default. Use `--no-cache` to disable caching or `--no-det` to disable determinism
-checks.
+Each meta-meta execution test runs P4^P4ST on one of three bases, selected by the suffix of the command:
 
-## Generating specification documents
+| suffix | base | tower |
+|---|---|---|
+| `al` | P4ST^P4ST in `spec-meta` | `towers/al-p4*.json` |
+| `redex` | P4ST^Redex in `spec-meta-redex` | `towers/redex-p4*.json` |
+| `k` | P4ST^K in `spec-meta-k`  | `towers/k-p4*.json` |
 
-Document generation additionally requires Ruby, Python 3.10 or later, and the
-`asciidoctor`, `asciidoctor-pdf`, and `rouge` Ruby gems:
+Every meta-meta execution test takes the options below:
 
-```shell
-gem install asciidoctor asciidoctor-pdf rouge
+- `SUITE=<NAME>` runs only the named test suite.
+- `TIMEOUT=300` runs each test case in a worker process and records a test case
+  still running after 300 seconds as `timeout`.
+- `TEST_LOG=logs` writes a per-test timing log into `logs/`.
+
+`test-metacirc-run-<base>` type-checks (`Program_ok`) each P4 program through the tower.
+Programs listed in `excludes/static/` are skipped.
+
+| suite | P4 programs |
+|---|---|
+| `run-positive` | `p4c/testdata/p4_16_samples/` |
+| `run-negative` | `p4c/testdata/p4_16_errors/` |
+
+`test-metacirc-sim-<base>` runs the STF packet tests of each P4 program of
+`p4c/testdata/p4_16_samples/` for its architecture on a simulator whose calls to
+the P4 specification go through the tower (`towers/<base>-p4.json`).
+Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
+
+| suite | architecture | STF tests |
+|---|---|---|
+| `v1model-p4c` | v1model | `p4c/testdata/p4_16_samples/` |
+| `v1model-p4testgen` | v1model | `testdata/p4testgen/` |
+| `ebpf-p4c` | ebpf | `p4c/testdata/p4_16_samples/` |
+| `ebpf-p4testgen` | ebpf | `testdata/p4testgen/` |
+| `psa-p4c` | psa | `p4c/testdata/p4_16_samples/` |
+
+### P4ST^P4ST
+
+```sh
+# run all suites
+make test-metacirc-run-al TIMEOUT=300 TEST_LOG=logs
+# run each suite separately
+make test-metacirc-run-al SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-run-al SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
 
-Use a Ruby installation where you can install gems. On Linux, native gem
-extensions may also require the Ruby development package (`ruby-dev` on
-Debian/Ubuntu). On macOS, a package-manager Ruby installation avoids modifying
-the system Ruby. Ensure its gem executables and a supported `python3` are on
-`PATH`; macOS may select an older system Python by default.
-
-From the project root:
-
-```shell
-# P4 release document: HTML only, or HTML and PDF
-make p4spec-release-html
-make p4spec-release
-# P4 draft document: HTML only, or HTML and PDF
-make p4spec-draft-html
-make p4spec-draft
+```sh
+# run all suites
+make test-metacirc-sim-al TIMEOUT=300 TEST_LOG=logs
+# run each suite separately
+make test-metacirc-sim-al SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-al SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-al SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-al SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
-The generated files are in `docs/p4/`.
-These targets build the release executable and splice the specifications into
-AsciiDoc skeletons before rendering. Missing prose and references are reported
-in `docs/p4/splice.missing`.
+### P4ST^Redex and P4ST^K
 
-To splice another skeleton, use the Rust CLI's long options:
+> [!NOTE]
+> Running on P4ST^Redex and P4ST^K can take a very long time.
+> For reference, the `logs` folder contains the log file of each suite recorded in our runs.
 
-```shell
-./bin/p4spectec splice spec --splice input.adoc --out output.adoc
-# Or replace the skeleton in place
-./bin/p4spectec splice spec --splice input.adoc --inplace
+```sh
+# run all suites
+make test-metacirc-run-redex TIMEOUT=300 TEST_LOG=logs
+# run each suite separately
+make test-metacirc-run-redex SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-run-redex SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
 
-## Development and tests
-
-Run these commands from the project root:
-
-```shell
-make fmt          # Format the product and E2E driver
-make fmt-check    # Check formatting without rewriting files
-make lint         # Clippy for the product and E2E driver
-make rustdoc      # Build the Rust API documentation
-make test         # Run all registered E2E suites
+```sh
+# run all suites
+make test-metacirc-sim-redex TIMEOUT=300 TEST_LOG=logs
+# run each suite separately
+make test-metacirc-sim-redex SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-redex SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-redex SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-redex SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-redex SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
-`make test` runs specification/document snapshots, P4 parsing, diagnostics,
-and AL/SL/PL execution and simulation.
-Suite registrations live in `p4spectec/test-driver/suites/`, one TOML file per runner.
-Execution, simulation, and micro tests run one named configuration at a time
-(`run sl` runs the `sl` configuration of `suites/run.toml`),
-which sets the interpreter language, caching, and determinism checking.
+```sh
+# run all suites
+make test-metacirc-run-k TIMEOUT=300 TEST_LOG=logs
+# run each suite separately
+make test-metacirc-run-k SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-run-k SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
+```
 
-Individual targets are available for focused runs:
+```sh
+# run all suites
+make test-metacirc-sim-k TIMEOUT=300 TEST_LOG=logs
+# run each suite separately
+make test-metacirc-sim-k SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-k SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-k SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-k SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
+```
 
-| Targets | Coverage |
-| --- | --- |
-| `test-elab`, `test-algo`, `test-structure`, `test-prose` | Specification processing |
-| `test-adoc` | AsciiDoc snapshots and anchor determinism |
-| `test-p4parse` | P4 parse/unparse/parse corpus |
-| `test-diagnostics` | Source/expected diagnostics, including CLI and splicing errors |
-| `test-run-al`, `test-run-sl`, `test-run-pl` | P4 execution corpus |
-| `test-sim-al`, `test-sim-sl`, `test-sim-pl` | Packet simulation corpus |
-| `test-expected` | All of the above except simulation |
+### Grouped P4 simulation
 
-Normal test targets clear `UPDATE_EXPECT` and compare against stored results.
-To deliberately regenerate the elaboration, AL, prose, and AsciiDoc snapshots,
-run `make promote` (also available as `make test-promote`). Diagnostics have a
-separate `make test-diagnostics-promote` target. These commands rerun the suites;
-review their diffs before committing. P4 parsing, structure, execution,
-simulation, and exclusions are not promoted by these targets.
+`test-metacirc-sim-group-<base>` runs one of four groups of the `v1model-p4testgen`
+simulation suite, so that the suite can be split over four commands.
+`SUITE` and `GROUP` are required. Group `<n>` skips the tests listed in
+`excludes/static/`, `excludes/dynamic/`, and the other groups' folders under
+`excludes/metacirc-groups/`.
+Since P4ST^Redex and P4ST^K take a long time, we recommend running the 1870 tests of
+`v1model-p4testgen` on them group by group with these commands.
 
-`make clean` removes `bin/p4spectec` and the selected Cargo build directory.
+```sh
+# run each group separately
+make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
+```
 
-CI runs Rust builds, formatting, Clippy, API documentation, E2E acceptance, and
-HTML specification generation for pull requests and pushes to `rust-port`
-and `main`, version tags, and manual dispatches. Version tags and manual
-runs also render the P4 release PDF specification.
+```sh
+# run each group separately
+make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
+```
 
-## Retired OCaml workflows
+### Running a single P4 program
 
-Fuzzing and coverage collection are not supported by the Rust release.
-The frozen OCaml implementation is preserved at
-[`v0.1.3`](https://github.com/kaist-plrg/p4-spectec/tree/v0.1.3), with its
-[installation and fuzzing instructions](https://github.com/kaist-plrg/p4-spectec/blob/v0.1.3/README.md).
+The `metacirc` binary runs a single P4 program or STF test through a tower.
+For option 3, either add the `bin` folder of the repository root to `PATH`,
+or run it as `./bin/metacirc` instead of `metacirc`.
 
-## Contributing
+Run `metacirc run-meta --help` or `metacirc sim --help` for the full list of options.
 
-P4-SpecTec is an open-source project. Please feel free to contribute by opening
-issues or pull requests.
+#### P4 type checking
 
-## License
+```sh
+metacirc run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
+```
 
-P4-SpecTec is released under the [Apache 2.0 license](LICENSE).
+- `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
+- `<PROGRAM>`: the P4 program to type-check.
+- `<CONFIG>`: the tower configuration. Use `towers/al-p4-ok.json`, `towers/redex-p4-ok.json`,
+  or `towers/k-p4-ok.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+
+```sh
+# P4ST^P4ST
+metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/al-p4-ok.json
+# P4ST^Redex
+metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/redex-p4-ok.json
+# P4ST^K
+metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/k-p4-ok.json
+```
+
+#### P4 simulation
+
+```sh
+metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
+```
+
+- `<ARCH>`: the architecture of the P4 program, one of `v1model`, `ebpf`, or `psa`.
+- `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
+- `<PROGRAM>`: the P4 program to simulate.
+- `<STF>`: the STF test to run on the P4 program.
+- `<CONFIG>`: the tower configuration. Use `towers/al-p4.json`, `towers/redex-p4.json`,
+  or `towers/k-p4.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+
+```sh
+# P4ST^P4ST
+metacirc sim --arch psa -i p4c/p4include -p p4c/testdata/p4_16_samples/hash-extern-bmv2.p4 --stf p4c/testdata/p4_16_samples/hash-extern-bmv2.stf towers/al-p4.json
+# P4ST^Redex
+metacirc sim --arch ebpf -i p4c/p4include -p p4c/testdata/p4_16_samples/action_call_ebpf.p4 --stf p4c/testdata/p4_16_samples/action_call_ebpf.stf towers/redex-p4.json
+# P4ST^K
+metacirc sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/action-synth.p4 --stf testdata/p4testgen/action-synth/action-synth_1.stf towers/k-p4.json
+```
