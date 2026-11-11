@@ -122,36 +122,9 @@ Add `/opt/racket/bin` to `PATH` in your shell profile to keep it in new shells.
 
 Run every command from `/meta` in the container, or from the repository root for option 3.
 
-For comparison, `test-run-sl` and `test-sim-sl` run P4^P4ST directly on the SL interpreter
-of P4-SpecTec, without a tower.
-`test-run-sl` type-checks (`Program_ok`) each P4 program of
-`p4c/testdata/p4_16_samples/` and `p4c/testdata/p4_16_errors/`.
-`test-sim-sl` runs every STF packet test of the simulation suites listed below.
-Both skip the same excluded tests as the meta-meta execution tests below.
+### Test suites
 
-```sh
-# run the type-checking tests
-make test-run-sl TEST_LOG=logs
-# run the STF packet tests
-make test-sim-sl TEST_LOG=logs
-```
-
-Each meta-meta execution test runs P4^P4ST on one of three bases, selected by the suffix of the command:
-
-| suffix | base | tower |
-|---|---|---|
-| `al` | P4ST^P4ST in `spec-meta` | `towers/al-p4*.json` |
-| `redex` | P4ST^Redex in `spec-meta-redex` | `towers/redex-p4*.json` |
-| `k` | P4ST^K in `spec-meta-k`  | `towers/k-p4*.json` |
-
-Every meta-meta execution test takes the options below:
-
-- `SUITE=<NAME>` runs only the named test suite.
-- `TIMEOUT=300` runs each test case in a worker process and records a test case
-  still running after 300 seconds as `timeout`.
-- `TEST_LOG=logs` writes a per-test timing log into `logs/`.
-
-`test-metacirc-run-<base>` type-checks (`Program_ok`) each P4 program through the tower.
+The type-checking suites type-check (`Program_ok`) each P4 program.
 Programs listed in `excludes/static/` are skipped.
 
 | suite | P4 programs |
@@ -159,9 +132,8 @@ Programs listed in `excludes/static/` are skipped.
 | `run-positive` | `p4c/testdata/p4_16_samples/` |
 | `run-negative` | `p4c/testdata/p4_16_errors/` |
 
-`test-metacirc-sim-<base>` runs the STF packet tests of each P4 program of
-`p4c/testdata/p4_16_samples/` for its architecture on a simulator whose calls to
-the P4 specification go through the tower (`towers/<base>-p4.json`).
+The simulation suites run the STF packet tests of each P4 program of
+`p4c/testdata/p4_16_samples/` for its architecture.
 Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
 
 | suite | architecture | STF tests |
@@ -172,7 +144,30 @@ Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
 | `ebpf-p4testgen` | ebpf | `testdata/p4testgen/` |
 | `psa-p4c` | psa | `p4c/testdata/p4_16_samples/` |
 
-### P4ST^P4ST
+### Meta-execution of P4^P4ST
+
+For comparison, `test-run-sl` and `test-sim-sl` run P4^P4ST directly on the SL interpreter
+of P4-SpecTec, without a tower.
+`test-run-sl` runs all type-checking suites, and `test-sim-sl` runs all simulation suites.
+
+```sh
+# run the type-checking tests
+make test-run-sl TEST_LOG=logs
+# run the STF packet tests
+make test-sim-sl TEST_LOG=logs
+```
+
+### Meta-meta-execution of P4ST^P4ST
+
+The commands below run P4^P4ST on P4ST^P4ST in `spec-meta`, through the tower
+`towers/al-p4-ok.json` for type checking and `towers/al-p4.json` for simulation.
+They take the options below:
+
+- `SUITE=<NAME>` runs only the named test suite.
+- `TIMEOUT=300` runs each test case with a timeout of 300 seconds.
+- `TEST_LOG=logs` writes a per-test timing log into `logs/`.
+
+`test-metacirc-run-al` runs the type-checking suites.
 
 ```sh
 # run all suites
@@ -181,6 +176,8 @@ make test-metacirc-run-al TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-run-al SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-run-al SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
+
+`test-metacirc-sim-al` runs the simulation suites.
 
 ```sh
 # run all suites
@@ -193,11 +190,14 @@ make test-metacirc-sim-al SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
-### P4ST^Redex and P4ST^K
+### Meta-meta-execution of P4ST^Redex and P4ST^K
 
-> [!NOTE]
-> Running on P4ST^Redex and P4ST^K can take a very long time.
-> For reference, the `logs` folder contains the log file of each suite recorded in our runs.
+The commands below run P4^P4ST on P4ST^Redex in `spec-meta-redex`, through the towers
+`towers/redex-p4-ok.json` and `towers/redex-p4.json`, and on P4ST^K in `spec-meta-k`,
+through the towers `towers/k-p4-ok.json` and `towers/k-p4.json`.
+They take the same options as the commands for P4ST^P4ST.
+
+`test-metacirc-run-redex` runs the type-checking suites.
 
 ```sh
 # run all suites
@@ -206,6 +206,8 @@ make test-metacirc-run-redex TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-run-redex SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-run-redex SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
+
+`test-metacirc-sim-redex` runs the simulation suites.
 
 ```sh
 # run all suites
@@ -218,6 +220,8 @@ make test-metacirc-sim-redex SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
+`test-metacirc-run-k` runs the type-checking suites.
+
 ```sh
 # run all suites
 make test-metacirc-run-k TIMEOUT=300 TEST_LOG=logs
@@ -225,6 +229,8 @@ make test-metacirc-run-k TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-run-k SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-run-k SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
+
+`test-metacirc-sim-k` runs the simulation suites.
 
 ```sh
 # run all suites
@@ -236,6 +242,9 @@ make test-metacirc-sim-k SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
+
+> [!WARNING]
+> Running the entire test suites on P4ST^Redex and P4ST^K can take a very long time. `make test-metacirc-run-redex` and `make test-metacirc-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
 
 ### Grouped P4 simulation
 
