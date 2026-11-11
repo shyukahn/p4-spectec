@@ -49,7 +49,7 @@ ENV PATH="/usr/local/cargo/bin:${PATH}"
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
     | sh -s -- -y --no-modify-path --profile minimal --default-toolchain none
 
-WORKDIR /p4-spectec
+WORKDIR /meta
 
 COPY p4spectec/rust-toolchain.toml p4spectec/
 RUN cd p4spectec && rustup toolchain install && rustup default "$(rustup show active-toolchain | cut -d' ' -f1)"
@@ -62,5 +62,5 @@ RUN find . -exec touch -h -d "@$(date +%s)" {} + \
  && cd p4spectec \
  && cargo build --locked --release --manifest-path test-driver/Cargo.toml --target-dir target --bins
 
-ENV PATH="/p4-spectec/bin:${PATH}"
+ENV PATH="/meta/bin:${PATH}"
 CMD ["bash"]
