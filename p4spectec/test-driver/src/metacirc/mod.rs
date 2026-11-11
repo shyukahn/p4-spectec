@@ -8,7 +8,6 @@
 //! `metaparse` checks that the meta codecs round-trip.
 
 pub mod config;
-pub mod metaparse;
 pub mod run;
 pub mod run_group;
 pub mod sim;

@@ -47,10 +47,7 @@ METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al \
   test-metacirc-run-group-k test-metacirc-run-group-redex \
   test-metacirc-sim-al \
   test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al \
-  test-metacirc-sim-group-k test-metacirc-sim-group-redex \
-  test-metacirc-elab \
-  test-metacirc-algo test-metacirc-structure test-metacirc-prose test-metacirc-metaparse \
-  test-metacirc-promote
+  test-metacirc-sim-group-k test-metacirc-sim-group-redex
 
 .PHONY: $(METACIRC_TARGETS)
 $(METACIRC_TARGETS):

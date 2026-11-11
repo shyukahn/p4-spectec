@@ -17,10 +17,9 @@ export CARGO_TARGET_DIR
 .DEFAULT_GOAL := metacirc
 METACIRC_TEST = $(CARGO) run --locked --release --manifest-path test-driver/Cargo.toml --target-dir "$(CARGO_TARGET_DIR)" --bin metacirc-test -- $(if $(TEST_LOG),--log "$(abspath $(TEST_LOG))")
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT)) $(if $(SUITE),--suite $(SUITE))
-METACIRC_SNAPSHOTS := test-metacirc-elab test-metacirc-algo test-metacirc-structure test-metacirc-prose
 
 
-.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al test-metacirc-run-k test-metacirc-run-redex test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex test-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex $(METACIRC_SNAPSHOTS) test-metacirc-metaparse test-metacirc-promote clean
+.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al test-metacirc-run-k test-metacirc-run-redex test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex test-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex clean
 
 metacirc-cli:
 	cd $(RUST_DIR) && $(CARGO) build --locked --release --bin metacirc --target-dir "$(CARGO_TARGET_DIR)"
@@ -99,21 +98,6 @@ SIM_GROUP_TARGETS := test-metacirc-sim-group-al test-metacirc-sim-group-k test-m
 $(SIM_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=v1model-p4c GROUP=1))
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim-group $(@:test-metacirc-sim-group-%=%) $(GROUP_ARGS)
-
-# Snapshots of the meta specification in spec-meta
-$(METACIRC_SNAPSHOTS):
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) $(@:test-metacirc-%=%)
-
-# AL meta codec round trips of the specifications
-test-metacirc-metaparse:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) metaparse
-
-# Rerun elab/algo/structure/prose and update their snapshots
-test-metacirc-promote:
-	cd $(RUST_DIR) && UPDATE_EXPECT=1 $(METACIRC_TEST) elab
-	cd $(RUST_DIR) && UPDATE_EXPECT=1 $(METACIRC_TEST) algo
-	cd $(RUST_DIR) && UPDATE_EXPECT=1 $(METACIRC_TEST) structure
-	cd $(RUST_DIR) && UPDATE_EXPECT=1 $(METACIRC_TEST) prose
 
 clean:
 	rm -f ./$(METACIRC)

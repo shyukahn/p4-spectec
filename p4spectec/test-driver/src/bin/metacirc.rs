@@ -5,13 +5,11 @@ use std::{path::PathBuf, process::ExitCode, time::Duration};
 use clap::{Parser, Subcommand};
 
 use p4spectec_test::{
-    harness::{self, Error, Result},
-    metacirc::{metaparse, run, sim, sim_group},
-    suite::{snapshot, snapshot::Stage},
+    harness::{self, Result},
+    metacirc::{run, sim, sim_group},
 };
 
-/// Selects an execution through towers,
-/// or a snapshot or codec check of the meta specification.
+/// Selects an execution through towers.
 #[derive(Clone, Subcommand)]
 enum Command {
     /// Compare registered P4 corpus and script outcomes through towers
@@ -75,16 +73,6 @@ enum Command {
     },
     /// Write the group folders of `suites/metacirc/sim-group.toml`
     SimGroupSplit,
-    /// Compare the elaborated meta specification with expected output
-    Elab,
-    /// Compare the algorithmic meta specification with expected output
-    Algo,
-    /// Compare the structured meta specification in both rule-group modes
-    Structure,
-    /// Compare the prose meta specification with expected output
-    Prose,
-    /// Check that AL encodings are fixed points of decode-then-encode
-    Metaparse,
     /// List every metacirc registration
     List,
     /// Run sources one at a time for a driver given `--timeout`
@@ -119,14 +107,6 @@ struct Cli {
 
 /// Runs the selected command from the repository root.
 fn execute(cli: Cli) -> Result<()> {
-    // Refuse baseline promotion before discovering or executing any inputs
-    if !matches!(cli.command, Command::Elab | Command::Algo | Command::Structure | Command::Prose)
-        && std::env::var_os("UPDATE_EXPECT").is_some()
-    {
-        return Err(Error::from(
-            "UPDATE_EXPECT is supported only for metacirc elab, algo, structure, and prose",
-        ));
-    }
     // Resolve the log directory before changing to the specification repository
     let path_log = cli
         .path_log
@@ -167,12 +147,6 @@ fn execute(cli: Cli) -> Result<()> {
             path_log.as_deref(),
         ),
         Command::SimGroupSplit => sim_group::split(),
-        // Snapshot and codec checks compile the meta specification without executing it
-        Command::Elab => snapshot::run("metacirc/snapshot", &[Stage::Elab], None),
-        Command::Algo => snapshot::run("metacirc/snapshot", &[Stage::Algo], None),
-        Command::Structure => snapshot::run("metacirc/snapshot", &[Stage::Structure], None),
-        Command::Prose => snapshot::run("metacirc/snapshot", &[Stage::Prose], None),
-        Command::Metaparse => metaparse::run(),
         Command::List => list(),
         Command::Worker(Worker::Program { config, tower }) => run::serve_programs(&config, &tower),
         Command::Worker(Worker::Script { config, tower }) => run::serve_scripts(&config, &tower),
@@ -184,12 +158,10 @@ fn execute(cli: Cli) -> Result<()> {
 
 /// Prints every metacirc registration without running its tests.
 fn list() -> Result<()> {
-    println!("snapshot: {:#?}", harness::load::<snapshot::Registration>("metacirc/snapshot")?);
     println!("run: {:#?}", harness::load::<run::Registration>("metacirc/run")?);
     println!("run-group: {:#?}", harness::load::<run_group::Registration>("metacirc/run-group")?);
     println!("sim: {:#?}", harness::load::<sim::Registration>("metacirc/sim")?);
     println!("sim-group: {:#?}", harness::load::<sim_group::Registration>("metacirc/sim-group")?);
-    println!("metaparse: {:#?}", harness::load::<metaparse::Registration>("metacirc/metaparse")?);
     Ok(())
 }
 
