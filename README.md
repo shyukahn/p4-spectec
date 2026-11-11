@@ -5,6 +5,11 @@
 Choose one of the three options below.
 Options 1 and 2 require Docker; option 1 also requires BuildKit, the default builder since Docker Engine 23.0.
 
+> [!NOTE]
+> The artifact supports architectures x86_64 (amd64) and ARM64 (arm64).
+> On ARM64, the artifact comes without the K framework, which only supports x86_64 Linux-like systems, so P4ST^K is unavailable.
+> Everything else, including P4ST^P4ST and P4ST^Redex, works as on x86_64.
+
 ### Option 1: Build the Docker image
 
 Build the image from the repository root and open a shell in a container.
@@ -25,9 +30,10 @@ docker exec -it artifact bash
 
 The image build compiles the Rust implementation, the test drivers, and the meta specifications,
 so every command in Evaluation runs without further builds.
-You may download the Racket 9.3 installer for Linux (x86_64) from [here](https://download.racket-lang.org/racket-v9.3.html)
+You may download the Racket 9.3 installer for Linux from [here](https://download.racket-lang.org/racket-v9.3.html)
 to skip downloading it during the build;
-place `racket-9.3-x86_64-linux-buster-cs.sh` at the repository root before building.
+place `racket-9.3-x86_64-linux-buster-cs.sh` (x86_64) or `racket-9.3-aarch64-linux-buster-cs.sh` (ARM64)
+at the repository root before building.
 
 ### Option 2: Pull the Docker image from DockerHub
 
@@ -82,7 +88,12 @@ export PATH="/opt/racket/bin:$PATH"
 make redex
 ```
 
+On ARM64, install `racket-9.3-aarch64-linux-buster-cs.sh` with SHA256
+`26e4d1c3bf8954c4413fb6737af5d211d44c1e158e34e4c90e0af1cde6353c9a` instead.
+
 c. Install the K framework v7.1.337, and compile `spec-meta-k`.
+
+This step is for x86_64 only; K does not support ARM64.
 
 ```sh
 # install the K framework 7.1.337 and z3
