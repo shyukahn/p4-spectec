@@ -1,0 +1,23 @@
+/*
+ * Copyright 2020 Intel, Inc.
+ * SPDX-FileCopyrightText: 2020 Intel, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+#include <core.p4>
+
+control c(inout bit<16> x) {
+    action incx() { x = x + 1; }
+    action nop() { }
+    table x {
+        actions = { incx; nop; }
+    }
+    apply {
+        x.apply();
+    }
+}
+
+control C(inout bit<16> x);
+
+package top(C _c);
+top(c()) main;

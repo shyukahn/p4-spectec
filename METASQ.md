@@ -245,10 +245,10 @@ make test-metacirc-sim-al
 `testdata/spec/pos/run` and `testdata/spec/neg/run` through the AL tower,
 each expected to succeed or fail as its suite in `suites/metacirc/run.toml`
 registers. `test-metacirc-run-al` runs the `test-run-sl` corpus through the AL/P4
-tower and requires the p4c submodule. Both check determinism.
+tower. Both check determinism.
 `test-metacirc-sim-al` runs the `test-sim-sl` corpus, every suite of
 `suites/sim.toml`, through the AL/P4 tower that `suites/metacirc/sim.toml`
-names, against the native simulation expectations; it requires the p4c submodule.
+names, against the native simulation expectations.
 
 The driver's `run` and `sim` subcommands take a configuration name,
 `al`, `k`, or `redex`, which selects the towers' base; each suite registers a

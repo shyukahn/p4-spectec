@@ -51,10 +51,10 @@ On Linux, install the native build tools with your package manager, for example
 Xcode command line tools with `xcode-select --install`. On Windows, use WSL2
 and the Linux instructions.
 
-Initialize the `p4c` submodule for its P4 include files and test corpus:
+The P4 include files and test corpus taken from [p4c](https://github.com/p4lang/p4c)
+are vendored in `p4c/p4include/`, `p4c/testdata/p4_16_samples/`, and `p4c/testdata/p4_16_errors/`.
 
 ```shell
-git submodule update --init p4c
 make build
 ```
 
@@ -77,7 +77,7 @@ make build CARGO_TARGET_DIR=target
 
 A `Dockerfile` provides a development environment with the pinned toolchain
 and the document dependencies below.
-Initialize the `p4c` submodule first, then build and enter the image:
+Build and enter the image:
 
 ```shell
 docker build -t p4spectec .
