@@ -99,6 +99,9 @@ Add `/opt/racket/bin` to `PATH` in your shell profile to keep it in new shells.
 
 ## 2. File structure
 
+The tree below shows the artifact in the Docker container (options 1 and 2).
+For option 3, the same structure is at the repository root instead of `/meta/`.
+
 ```
 /meta/
 ├── p4spectec/          # Rust implementation of meta-meta execution, built on top of P4-SpecTec
