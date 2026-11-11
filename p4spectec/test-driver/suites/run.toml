@@ -34,7 +34,7 @@ det = true
 [[suites]]
 name = "pos"
 root = "p4c/testdata/p4_16_samples"
-relation = "Program_inst"
+relation = "Program_ok"
 expected = "p4spectec/test-driver/expected/run/pos.expected"
 
 [[suites]]
