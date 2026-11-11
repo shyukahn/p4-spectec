@@ -13,14 +13,6 @@ debug
 # MacOS
 *.DS_Store
 
-# Claude
-.claude/
-CLAUDE.local.md
-
-# Local agent planning artifacts
-/p4spectec/docs/superpowers/plans/
-/p4spectec/docs/superpowers/specs/
-
 # direnv
 .direnv
 .envrc
