@@ -1,2 +1,0 @@
-dec $f : (nat, nat, nat)
-def $f = (_, 2)

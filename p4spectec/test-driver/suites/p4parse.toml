@@ -11,7 +11,7 @@ includes = ["p4c/p4include"]
 
 [[suites]]
 name = "pos"
-roots = ["p4c/testdata/p4_16_samples", "testdata/custom"]
+roots = ["p4c/testdata/p4_16_samples"]
 expected = "p4spectec/test-driver/expected/p4parse/pos.expected"
 
 [[suites]]

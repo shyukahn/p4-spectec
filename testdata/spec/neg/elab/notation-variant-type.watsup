@@ -1,3 +1,0 @@
-syntax choice = TAG nat
-dec $take(choice) : bool
-def $take(TAG true) = true

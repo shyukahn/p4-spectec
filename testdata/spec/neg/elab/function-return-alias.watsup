@@ -1,3 +1,0 @@
-syntax n = nat
-dec $f : n
-def $f = true

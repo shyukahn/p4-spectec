@@ -1,4 +1,4 @@
-//! Interpreter construction shared by corpus and diagnostic suites
+//! Interpreter construction shared by corpus suites
 //!
 //! `Language::spec` converts specification sources for one interpreter,
 //! `build` builds a P4 runner from the result,
@@ -16,7 +16,7 @@ use p4spectec::runner::{self, Config, Extern, Runner, Spec};
 
 use super::{Error, Result};
 
-/// Selects the production interpreter used by a configuration or diagnostic case.
+/// Selects the production interpreter used by a configuration.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Language {
@@ -26,15 +26,6 @@ pub enum Language {
 }
 
 impl Language {
-    /// Returns the language's registration spelling.
-    pub fn name(self) -> &'static str {
-        match self {
-            Self::Al => "al",
-            Self::Sl => "sl",
-            Self::Pl => "pl",
-        }
-    }
-
     /// Converts specification sources into this language's runner specification.
     pub fn spec(self, paths: &[PathBuf]) -> Result<Spec> {
         let spec_lang = match self {

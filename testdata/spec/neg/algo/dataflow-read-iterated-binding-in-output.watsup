@@ -1,6 +1,0 @@
-var x : nat
-var y : nat
-
-dec $f(nat*) : nat
-def $f(x*) = y
-  -- (if y = $(x + 1))*

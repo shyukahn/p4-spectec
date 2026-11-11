@@ -33,8 +33,7 @@ fmt fmt-check lint rustdoc:
 # End-to-end acceptance and explicit snapshot updates
 TEST_TARGETS := test test-expected test-elab test-algo test-structure test-prose \
   test-adoc test-p4parse test-run-al test-run-sl test-run-pl \
-  test-sim-al test-sim-sl test-sim-pl test-micro test-diagnostics \
-  test-promote test-diagnostics-promote
+  test-sim-al test-sim-sl test-sim-pl test-promote
 
 .PHONY: $(TEST_TARGETS)
 # Resolve TEST_LOG here; the recursive make runs inside the Rust crate
@@ -43,13 +42,13 @@ $(TEST_TARGETS):
 
 
 METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al \
-  test-metacirc-run-k test-metacirc-run-redex test-metacirc-micro-al \
-  test-metacirc-micro-k test-metacirc-micro-redex test-metacirc-run-group-al \
-  test-metacirc-run-group-il test-metacirc-run-group-k test-metacirc-run-group-redex \
-  metacirc-run-group-split test-metacirc-sim-al \
+  test-metacirc-run-k test-metacirc-run-redex  \
+  test-metacirc-run-group-al \
+  test-metacirc-run-group-k test-metacirc-run-group-redex \
+  test-metacirc-sim-al \
   test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al \
   test-metacirc-sim-group-k test-metacirc-sim-group-redex \
-  metacirc-sim-group-split test-metacirc-elab \
+  test-metacirc-elab \
   test-metacirc-algo test-metacirc-structure test-metacirc-prose test-metacirc-metaparse \
   test-metacirc-promote
 

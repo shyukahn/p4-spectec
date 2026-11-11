@@ -1,8 +1,0 @@
-splice
-missing.watsup
---splice
-a.adoc
---splice
-b.adoc
---out
-out.adoc

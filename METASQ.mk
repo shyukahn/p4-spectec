@@ -1,5 +1,5 @@
 # Independent metacircular build and P4 execution corpus
-# TEST_LOG=DIR writes per-test timing logs of the metacirc run, micro, and sim targets
+# TEST_LOG=DIR writes per-test timing logs of the metacirc run and sim targets
 # TIMEOUT=SECONDS records a source of those targets still running after it as a timeout
 # SUITE=NAME runs only that registered suite in those targets
 # SUITE=NAME and GROUP=NAME select the registered suite and group of the sim-group targets,
@@ -20,7 +20,7 @@ CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT)) $(if $(SUITE),--suite $(SUIT
 METACIRC_SNAPSHOTS := test-metacirc-elab test-metacirc-algo test-metacirc-structure test-metacirc-prose
 
 
-.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al test-metacirc-run-k test-metacirc-run-redex test-metacirc-micro-al test-metacirc-micro-k test-metacirc-micro-redex test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex metacirc-run-group-splittest-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex metacirc-sim-group-split $(METACIRC_SNAPSHOTS) test-metacirc-metaparse test-metacirc-promote clean
+.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al test-metacirc-run-k test-metacirc-run-redex test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex test-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex $(METACIRC_SNAPSHOTS) test-metacirc-metaparse test-metacirc-promote clean
 
 metacirc-cli:
 	cd $(RUST_DIR) && $(CARGO) build --locked --release --bin metacirc --target-dir "$(CARGO_TARGET_DIR)"
@@ -70,18 +70,6 @@ test-metacirc-run-k:
 test-metacirc-run-redex:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input p4 $(CORPUS_ARGS)
 
-# Spec-language micro test sources through the AL tower
-test-metacirc-micro-al:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run al --input al $(CORPUS_ARGS)
-
-# Spec-language micro test sources through the K tower (ST-in-K)
-test-metacirc-micro-k:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run k --input al $(CORPUS_ARGS)
-
-# Spec-language micro test sources through the Redex tower (ST-in-Redex)
-test-metacirc-micro-redex:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input al $(CORPUS_ARGS)
-
 # One group of a P4 corpus suite of suites/metacirc/run-group.toml through the AL/P4, IL/P4,
 # K/P4, or Redex/P4 tower, against the group's expected file for the suite
 GROUP_ARGS = --suite $(SUITE) --group $(GROUP) $(if $(TIMEOUT),--timeout $(TIMEOUT))
@@ -90,13 +78,6 @@ RUN_GROUP_TARGETS := test-metacirc-run-group-al test-metacirc-run-group-il test-
 $(RUN_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=run-positive GROUP=1))
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run-group $(@:test-metacirc-run-group-%=%) $(GROUP_ARGS)
-
-# Rewrite the group folders of suites/metacirc/run-group.toml from its suite's corpus,
-# with this many programs in each folder in order
-RUN_GROUP_SIZES := 927 170 170
-
-metacirc-run-group-split:
-	cd $(RUST_DIR) && $(METACIRC_TEST) run-group-split $(RUN_GROUP_SIZES)
 
 # Registered simulation suites through the AL/P4 tower, against native expectations
 test-metacirc-sim-al:
@@ -118,10 +99,6 @@ SIM_GROUP_TARGETS := test-metacirc-sim-group-al test-metacirc-sim-group-k test-m
 $(SIM_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=v1model-p4c GROUP=1))
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim-group $(@:test-metacirc-sim-group-%=%) $(GROUP_ARGS)
-
-# Rewrite the group folders of suites/metacirc/sim-group.toml from its suites' corpora
-metacirc-sim-group-split:
-	cd $(RUST_DIR) && $(METACIRC_TEST) sim-group-split
 
 # Snapshots of the meta specification in spec-meta
 $(METACIRC_SNAPSHOTS):

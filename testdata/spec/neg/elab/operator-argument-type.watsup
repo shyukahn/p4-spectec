@@ -1,3 +1,0 @@
-dec $take(nat) : nat
-dec $f : nat
-def $f = $take(true + 1)

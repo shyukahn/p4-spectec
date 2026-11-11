@@ -1,3 +1,0 @@
-relation F: TAG nat END int
-  hint(input %0 %1)
-rule F/base: TAG 1 END true

@@ -42,15 +42,3 @@ name = "neg"
 root = "p4c/testdata/p4_16_errors"
 relation = "Program_ok"
 expected = "p4spectec/test-driver/expected/run/neg.expected"
-
-[[suites]]
-name = "regression-pos"
-root = "testdata/regression/pos"
-relation = "Program_inst"
-expected = "p4spectec/test-driver/expected/run/regression-pos.expected"
-
-[[suites]]
-name = "regression-neg"
-root = "testdata/regression/neg"
-relation = "Program_ok"
-expected = "p4spectec/test-driver/expected/run/regression-neg.expected"

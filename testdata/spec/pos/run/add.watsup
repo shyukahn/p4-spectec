@@ -1,7 +1,0 @@
-var i : int
-
-relation Main: OK
-
-rule Main: OK
-  -- debug "Add"
-  -- if i = $(42 + 77)

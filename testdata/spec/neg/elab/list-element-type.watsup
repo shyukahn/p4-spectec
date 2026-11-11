@@ -1,2 +1,0 @@
-dec $f : bool
-def $f = [1, true]

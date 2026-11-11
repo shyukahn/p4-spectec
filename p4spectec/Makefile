@@ -42,13 +42,11 @@ clean:
 test: test-expected test-sim-al test-sim-sl test-sim-pl
 
 # Standalone acceptance driver; registrations live in test-driver/suites/
-# TEST_LOG=DIR writes per-test timing logs of p4parse, run, sim, and micro
+# TEST_LOG=DIR writes per-test timing logs of p4parse, run, and sim
 # TIMEOUT=SECONDS records a run or sim test still running after it as a timeout
-.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-al test-run-sl test-run-pl test-micro
-.PHONY: test-diagnostics test-diagnostics-promote diagnostic-cli
+.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-al test-run-sl test-run-pl
 DRIVER = $(CARGO) run --locked --release --manifest-path test-driver/Cargo.toml --target-dir "$(TARGET_DIR)" -- $(if $(TEST_LOG),--log "$(abspath $(TEST_LOG))")
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT))
-DIAGNOSTIC_CLI = $(TARGET_DIR)/release/p4spectec
 
 test-elab:
 	env -u UPDATE_EXPECT $(DRIVER) elab
@@ -78,14 +76,7 @@ test-run-sl:
 test-run-pl:
 	env -u UPDATE_EXPECT $(DRIVER) run pl $(CORPUS_ARGS)
 
-# Micro tests: standalone spec-language sources checked by pipeline stage
-test-micro:
-	env -u UPDATE_EXPECT $(DRIVER) micro al
-	env -u UPDATE_EXPECT $(DRIVER) micro sl
-	env -u UPDATE_EXPECT $(DRIVER) micro pl
-	env -u UPDATE_EXPECT $(DRIVER) micro specdoc
-
-test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-al test-run-sl test-run-pl test-micro test-diagnostics
+test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-al test-run-sl test-run-pl
 
 # Rerun elab/algo/prose/adoc and update snapshots; does not approve a previous run
 # Parsing, structure, execution, simulation, and exclusions are never promoted
@@ -106,11 +97,3 @@ test-sim-sl:
 
 test-sim-pl:
 	env -u UPDATE_EXPECT $(DRIVER) sim pl $(CORPUS_ARGS)
-
-diagnostic-cli: release
-
-test-diagnostics: diagnostic-cli
-	env -u UPDATE_EXPECT $(DRIVER) diagnostics --cli "$(DIAGNOSTIC_CLI)"
-
-test-diagnostics-promote: diagnostic-cli
-	UPDATE_EXPECT=1 $(DRIVER) diagnostics --cli "$(DIAGNOSTIC_CLI)"

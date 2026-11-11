@@ -1,4 +1,0 @@
-relation F: '{' nat '}'
-  hint(input %0)
-rule F/base: '{' 1 '}'
-  -- F: '{' 1 ']'

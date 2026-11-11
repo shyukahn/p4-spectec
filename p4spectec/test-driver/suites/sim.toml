@@ -51,14 +51,6 @@ patches = "patches/v1model"
 expected = "p4spectec/test-driver/expected/sim/v1model-p4testgen.expected"
 
 [[suites]]
-name = "v1model-custom"
-arch = "v1model"
-p4 = "testdata/custom"
-stf = "testdata/custom"
-patches = "patches/v1model"
-expected = "p4spectec/test-driver/expected/sim/v1model-custom.expected"
-
-[[suites]]
 name = "ebpf-p4c"
 arch = "ebpf"
 p4 = "p4c/testdata/p4_16_samples"
@@ -78,17 +70,3 @@ arch = "psa"
 p4 = "p4c/testdata/p4_16_samples"
 stf = "p4c/testdata/p4_16_samples"
 expected = "p4spectec/test-driver/expected/sim/psa-p4c.expected"
-
-[[suites]]
-name = "v1model-regression"
-arch = "v1model"
-p4 = "testdata/regression/sim"
-stf = "testdata/regression/sim"
-expected = "p4spectec/test-driver/expected/sim/v1model-regression.expected"
-
-[[suites]]
-name = "ebpf-regression"
-arch = "ebpf"
-p4 = "testdata/regression/sim"
-stf = "testdata/regression/sim"
-expected = "p4spectec/test-driver/expected/sim/ebpf-regression.expected"

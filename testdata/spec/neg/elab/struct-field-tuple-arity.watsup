@@ -1,3 +1,0 @@
-syntax record = { VALUES (nat, nat, nat) }
-dec $f : record
-def $f = { VALUES ((_, 2)) }

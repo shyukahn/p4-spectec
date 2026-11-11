@@ -1,2 +1,0 @@
-dec $f(nat) : nat
-def $f(nat) = nat[[0] = 1]

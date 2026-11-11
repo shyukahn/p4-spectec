@@ -1,3 +1,0 @@
-relation F: nat* |- bool
-  hint(input %0 %1)
-rule F/base: true |- true

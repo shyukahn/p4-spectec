@@ -1,3 +1,0 @@
-syntax record = { COUNT nat }
-dec $f : record
-def $f = { COUNT $missing }

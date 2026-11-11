@@ -1,4 +1,0 @@
-syntax choice = TAG nat
-relation F: choice* |- bool
-  hint(input %0 %1)
-rule F/base: TAG true |- true

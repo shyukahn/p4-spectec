@@ -14,7 +14,7 @@
 # a timeout matches any expected outcome with a warning.
 # A configuration selects the `base` language of the tower in `towers`
 # (see `run.toml`), memoization (`cache`), and determinism checking (`det`).
-# `sim-group-split` (make metacirc-sim-group-split) numbers each suite's pairs
+# `sim-group-split` numbers each suite's pairs
 # not excluded by `split.excludes` in pair order, and lists the STF of pair i (from 1)
 # in `<suite>.exclude` of the folder `split.groups[(i - 1) mod n]`;
 # each group excludes the other groups' folders.

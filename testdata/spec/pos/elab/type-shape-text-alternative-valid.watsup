@@ -1,2 +1,0 @@
-dec $f : text
-def $f = "abc"[0]

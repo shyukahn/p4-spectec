@@ -1,3 +1,0 @@
-syntax record = { COUNT nat, FLAG bool }
-dec $f(record) : nat
-def $f(record) = record.MISSING

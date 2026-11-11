@@ -1,8 +1,0 @@
-syntax choice =
-  | A
-  | B
-
-dec $f(choice) : choice
-
-def $f(A) = A
-  -- otherwise

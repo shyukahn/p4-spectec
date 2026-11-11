@@ -32,14 +32,11 @@ use p4spectec::{
 };
 
 use super::config::{Base, ByBase, Configuration};
-use crate::{
-    harness::{
-        self, Error, Result,
-        corpus::{self, Outcome, Results},
-        log::TestLog,
-        worker::{self, Channel, Reply, Worker},
-    },
-    suite::diagnostic,
+use crate::harness::{
+    self, Error, Result,
+    corpus::{self, Outcome, Results},
+    log::TestLog,
+    worker::{self, Channel, Reply, Worker},
 };
 
 /// Supplies execution includes, exclusions per base, configurations, and suites.
@@ -65,7 +62,15 @@ pub struct RunSuite {
     pub towers: ByBase<PathBuf>,
     pub root: PathBuf,
     pub expected: Option<PathBuf>,
-    pub outcome: Option<diagnostic::Outcome>,
+    pub outcome: Option<ScriptOutcome>,
+}
+
+/// Selects the expected result of every script of a script suite.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub enum ScriptOutcome {
+    Success,
+    Failure,
 }
 
 /// Selects suites by the input language of their tower's top level.
@@ -496,13 +501,13 @@ fn execute_script(
     config_tower: &TowerConfig,
     config: &Configuration,
     path: &PathBuf,
-) -> Result<diagnostic::Outcome> {
+) -> Result<ScriptOutcome> {
     let paths_program = std::slice::from_ref(path);
     // Invalid scripts are test errors, not rejected executions
     p4spectec::algo(paths_program)
         .map_err(|error| Error::from(format!("{}: {error}", path.display())))?;
     let accepted = metacirc::run(config_tower, &[], paths_program, config.runner()).is_ok();
-    Ok(if accepted { diagnostic::Outcome::Success } else { diagnostic::Outcome::Failure })
+    Ok(if accepted { ScriptOutcome::Success } else { ScriptOutcome::Failure })
 }
 
 /// Serves `worker script <config> <tower>`: each request names one script.
@@ -518,18 +523,18 @@ pub fn serve_scripts(name_config: &str, path_tower: &Path) -> Result<()> {
 }
 
 /// Spells a script outcome in a worker answer.
-fn script_outcome_name(outcome: diagnostic::Outcome) -> &'static str {
+fn script_outcome_name(outcome: ScriptOutcome) -> &'static str {
     match outcome {
-        diagnostic::Outcome::Success => "success",
-        diagnostic::Outcome::Failure => "failure",
+        ScriptOutcome::Success => "success",
+        ScriptOutcome::Failure => "failure",
     }
 }
 
 /// Reads a script outcome from a worker answer.
-fn script_outcome_from_name(name: &str) -> Result<diagnostic::Outcome> {
+fn script_outcome_from_name(name: &str) -> Result<ScriptOutcome> {
     match name {
-        "success" => Ok(diagnostic::Outcome::Success),
-        "failure" => Ok(diagnostic::Outcome::Failure),
+        "success" => Ok(ScriptOutcome::Success),
+        "failure" => Ok(ScriptOutcome::Failure),
         _ => Err(Error::from(format!("unknown script outcome {name}"))),
     }
 }

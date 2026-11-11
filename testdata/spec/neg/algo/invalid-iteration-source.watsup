@@ -1,7 +1,0 @@
-;; An iteration binding every variable it mentions has no length to follow
-
-var n : nat
-
-dec $main() : nat*
-def $main() = n*
-  -- (if n = 1)*

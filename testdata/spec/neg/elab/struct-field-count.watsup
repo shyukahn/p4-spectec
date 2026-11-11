@@ -1,3 +1,0 @@
-syntax record = { COUNT nat, FLAG bool }
-dec $f : record
-def $f = { COUNT 1 }

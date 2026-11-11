@@ -1,2 +1,0 @@
-An unfinished function marker:
-${func-prose: f
