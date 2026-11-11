@@ -136,6 +136,26 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 
 Run every command from `/meta` in the container, or from the repository root for option 3.
 
+### Building
+
+The installation already builds everything below.
+Rebuild with these commands after modifying the implementation or the specifications.
+
+```sh
+# build the P4-SpecTec binary bin/p4spectec
+make
+# build the meta-meta execution binary bin/metacirc
+make metacirc
+# build bin/metacirc, and compile spec-meta-k into spec-meta-k/kompiled/
+make kompile
+# build bin/metacirc, and compile spec-meta-redex with raco make
+make redex
+# remove the binaries, the compiled meta specifications, and the Rust build outputs
+make clean
+```
+
+The test drivers are built automatically when a test command runs.
+
 ### Test suites
 
 The type-checking suites type-check (`Program_ok`) each P4 program.
@@ -157,6 +177,56 @@ Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
 | `ebpf-p4c` | ebpf | `p4c/testdata/p4_16_samples/` |
 | `ebpf-p4testgen` | ebpf | `testdata/p4testgen/` |
 | `psa-p4c` | psa | `p4c/testdata/p4_16_samples/` |
+
+### Running a single P4 program
+
+The `metacirc` binary runs a single P4 program or STF test through a tower.
+For installation option 3, either add the `bin` folder of the repository root to `PATH`,
+or run it as `./bin/metacirc` instead of `metacirc`.
+
+Run `metacirc run-meta --help` or `metacirc sim --help` for the full list of options.
+
+#### P4 type checking
+
+```sh
+metacirc run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
+```
+
+- `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
+- `<PROGRAM>`: the P4 program to type-check.
+- `<CONFIG>`: the tower configuration. Use `towers/al-p4-ok.json`, `towers/redex-p4-ok.json`,
+  or `towers/k-p4-ok.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+
+```sh
+# P4ST^P4ST
+metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/al-p4-ok.json
+# P4ST^Redex
+metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/redex-p4-ok.json
+# P4ST^K
+metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/k-p4-ok.json
+```
+
+#### P4 simulation
+
+```sh
+metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
+```
+
+- `<ARCH>`: the architecture of the P4 program, one of `v1model`, `ebpf`, or `psa`.
+- `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
+- `<PROGRAM>`: the P4 program to simulate.
+- `<STF>`: the STF test to run on the P4 program.
+- `<CONFIG>`: the tower configuration. Use `towers/al-p4.json`, `towers/redex-p4.json`,
+  or `towers/k-p4.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+
+```sh
+# P4ST^P4ST
+metacirc sim --arch psa -i p4c/p4include -p p4c/testdata/p4_16_samples/hash-extern-bmv2.p4 --stf p4c/testdata/p4_16_samples/hash-extern-bmv2.stf towers/al-p4.json
+# P4ST^Redex
+metacirc sim --arch ebpf -i p4c/p4include -p p4c/testdata/p4_16_samples/action_call_ebpf.p4 --stf p4c/testdata/p4_16_samples/action_call_ebpf.stf towers/redex-p4.json
+# P4ST^K
+metacirc sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/action-synth.p4 --stf testdata/p4testgen/action-synth/action-synth_1.stf towers/k-p4.json
+```
 
 ### Meta-execution of P4^P4ST
 
@@ -284,54 +354,4 @@ make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_
 make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
-```
-
-### Running a single P4 program
-
-The `metacirc` binary runs a single P4 program or STF test through a tower.
-For option 3, either add the `bin` folder of the repository root to `PATH`,
-or run it as `./bin/metacirc` instead of `metacirc`.
-
-Run `metacirc run-meta --help` or `metacirc sim --help` for the full list of options.
-
-#### P4 type checking
-
-```sh
-metacirc run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
-```
-
-- `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
-- `<PROGRAM>`: the P4 program to type-check.
-- `<CONFIG>`: the tower configuration. Use `towers/al-p4-ok.json`, `towers/redex-p4-ok.json`,
-  or `towers/k-p4-ok.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
-
-```sh
-# P4ST^P4ST
-metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/al-p4-ok.json
-# P4ST^Redex
-metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/redex-p4-ok.json
-# P4ST^K
-metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/k-p4-ok.json
-```
-
-#### P4 simulation
-
-```sh
-metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
-```
-
-- `<ARCH>`: the architecture of the P4 program, one of `v1model`, `ebpf`, or `psa`.
-- `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
-- `<PROGRAM>`: the P4 program to simulate.
-- `<STF>`: the STF test to run on the P4 program.
-- `<CONFIG>`: the tower configuration. Use `towers/al-p4.json`, `towers/redex-p4.json`,
-  or `towers/k-p4.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
-
-```sh
-# P4ST^P4ST
-metacirc sim --arch psa -i p4c/p4include -p p4c/testdata/p4_16_samples/hash-extern-bmv2.p4 --stf p4c/testdata/p4_16_samples/hash-extern-bmv2.stf towers/al-p4.json
-# P4ST^Redex
-metacirc sim --arch ebpf -i p4c/p4include -p p4c/testdata/p4_16_samples/action_call_ebpf.p4 --stf p4c/testdata/p4_16_samples/action_call_ebpf.stf towers/redex-p4.json
-# P4ST^K
-metacirc sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/action-synth.p4 --stf testdata/p4testgen/action-synth/action-synth_1.stf towers/k-p4.json
 ```
