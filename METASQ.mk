@@ -19,7 +19,7 @@ METACIRC_TEST = $(CARGO) run --locked --release --manifest-path test-driver/Carg
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT)) $(if $(SUITE),--suite $(SUITE))
 
 
-.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al-p4 test-metacirc-run-k-p4 test-metacirc-run-redex-p4 test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex test-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex clean
+.PHONY: metacirc metacirc-cli kompile redex test-metacirc-run-al-p4 test-metacirc-run-k-p4 test-metacirc-run-redex-p4 test-metacirc-run-al-st test-metacirc-run-k-st test-metacirc-run-redex-st test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex test-metacirc-sim-al test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al test-metacirc-sim-group-k test-metacirc-sim-group-redex clean
 
 metacirc-cli:
 	cd $(RUST_DIR) && $(CARGO) build --locked --release --bin metacirc --target-dir "$(CARGO_TARGET_DIR)"
@@ -68,6 +68,18 @@ test-metacirc-run-k-p4:
 # P4 corpus through the Redex/P4 towers, spec-meta-redex in racket (ST-in-Redex)
 test-metacirc-run-redex-p4:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input p4 $(CORPUS_ARGS)
+
+# Spec-language script suites through the AL tower
+test-metacirc-run-al-st:
+	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run al --input al $(CORPUS_ARGS)
+
+# Spec-language script suites through the K tower on spec-meta-k-detcheck (ST-in-K)
+test-metacirc-run-k-st:
+	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run k --input al $(CORPUS_ARGS)
+
+# Spec-language script suites through the Redex tower on spec-meta-redex-detcheck (ST-in-Redex)
+test-metacirc-run-redex-st:
+	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input al $(CORPUS_ARGS)
 
 # One group of a P4 corpus suite of suites/metacirc/run-group.toml through the AL/P4,
 # K/P4, or Redex/P4 tower, against the group's expected file for the suite

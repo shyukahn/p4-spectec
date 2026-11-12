@@ -32,7 +32,7 @@ fmt fmt-check lint rustdoc:
 
 # End-to-end acceptance and explicit snapshot updates
 TEST_TARGETS := test test-expected test-elab test-algo test-structure test-prose \
-  test-adoc test-p4parse test-run-p4 test-sim test-promote
+  test-adoc test-p4parse test-run-p4 test-run-st test-sim test-promote
 
 .PHONY: $(TEST_TARGETS)
 # Resolve TEST_LOG here; the recursive make runs inside the Rust crate
@@ -41,6 +41,7 @@ $(TEST_TARGETS):
 
 METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al-p4 \
   test-metacirc-run-k-p4 test-metacirc-run-redex-p4 \
+  test-metacirc-run-al-st test-metacirc-run-k-st test-metacirc-run-redex-st \
   test-metacirc-run-group-al \
   test-metacirc-run-group-k test-metacirc-run-group-redex \
   test-metacirc-sim-al \

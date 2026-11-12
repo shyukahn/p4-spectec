@@ -3,6 +3,7 @@
 //! Each module reads its `suites/<name>.toml` through `harness::load`
 //! and checks its sources with the shared harness.
 
+pub mod micro;
 pub mod p4parse;
 pub mod run;
 pub mod sim;

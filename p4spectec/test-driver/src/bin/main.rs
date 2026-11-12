@@ -4,13 +4,13 @@ use clap::{Parser, Subcommand};
 
 use p4spectec_test::{
     harness::{self, Error, Result},
-    suite::{p4parse, run, sim, snapshot, snapshot::Stage},
+    suite::{micro, p4parse, run, sim, snapshot, snapshot::Stage},
 };
 
 /// Source and expected-file acceptance for the Rust implementation
 #[derive(Parser)]
 struct Cli {
-    /// Write a per-test timing log of p4parse, run, or sim into a new file in this directory
+    /// Write a per-test timing log of p4parse, run, sim, or micro into a new file in this directory
     #[arg(long = "log", global = true, value_name = "DIR")]
     path_log: Option<PathBuf>,
     #[command(subcommand)]
@@ -53,6 +53,11 @@ enum Command {
         #[arg(long, value_name = "SECONDS")]
         timeout: Option<u64>,
     },
+    /// Run micro tests: standalone spec-language sources by pipeline stage
+    Micro {
+        /// Configuration name in `suites/micro.toml`
+        config: String,
+    },
     /// Run tests one at a time for a driver given `--timeout`
     #[command(hide = true, subcommand)]
     Worker(Worker),
@@ -71,7 +76,11 @@ fn execute(mut cli: Cli) -> Result<()> {
     let command = &mut cli.command;
     if matches!(
         command,
-        Command::Structure | Command::P4parse | Command::Run { .. } | Command::Sim { .. }
+        Command::Structure
+            | Command::P4parse
+            | Command::Run { .. }
+            | Command::Sim { .. }
+            | Command::Micro { .. }
     ) && std::env::var_os("UPDATE_EXPECT").is_some()
     {
         return Err(Error::from("UPDATE_EXPECT is supported only for elab, algo, prose, and adoc"));
@@ -105,6 +114,7 @@ fn execute(mut cli: Cli) -> Result<()> {
         Command::Sim { config, timeout } => {
             sim::run(config, timeout.map(Duration::from_secs), path_log.as_deref())
         }
+        Command::Micro { config } => micro::run(config, path_log.as_deref()),
         Command::Worker(Worker::Run { config }) => run::serve(config),
         Command::Worker(Worker::Sim { config, arch }) => sim::serve(config, arch),
     }
@@ -116,6 +126,7 @@ fn list() -> Result<()> {
     println!("p4parse: {:#?}", harness::load::<p4parse::Registration>("p4parse")?);
     println!("run: {:#?}", harness::load::<run::Registration>("run")?);
     println!("sim: {:#?}", harness::load::<sim::Registration>("sim")?);
+    println!("micro: {:#?}", harness::load::<micro::Registration>("micro")?);
     Ok(())
 }
 

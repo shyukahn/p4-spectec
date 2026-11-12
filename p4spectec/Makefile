@@ -42,9 +42,9 @@ clean:
 test: test-expected test-sim
 
 # Standalone acceptance driver; registrations live in test-driver/suites/
-# TEST_LOG=DIR writes per-test timing logs of p4parse, run, and sim
+# TEST_LOG=DIR writes per-test timing logs of p4parse, run, sim, and micro
 # TIMEOUT=SECONDS records a run or sim test still running after it as a timeout
-.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-p4
+.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-p4 test-run-st
 DRIVER = $(CARGO) run --locked --release --manifest-path test-driver/Cargo.toml --target-dir "$(TARGET_DIR)" -- $(if $(TEST_LOG),--log "$(abspath $(TEST_LOG))")
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT))
 
@@ -70,7 +70,11 @@ test-p4parse:
 test-run-p4:
 	env -u UPDATE_EXPECT $(DRIVER) run sl $(CORPUS_ARGS)
 
-test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-p4
+# Standalone spec-language sources checked by pipeline stage
+test-run-st:
+	env -u UPDATE_EXPECT $(DRIVER) micro sl
+
+test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-p4 test-run-st
 
 # Rerun elab/algo/prose/adoc and update snapshots; does not approve a previous run
 # Parsing, structure, execution, simulation, and exclusions are never promoted
