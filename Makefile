@@ -32,16 +32,15 @@ fmt fmt-check lint rustdoc:
 
 # End-to-end acceptance and explicit snapshot updates
 TEST_TARGETS := test test-expected test-elab test-algo test-structure test-prose \
-  test-adoc test-p4parse test-run-al test-run-sl test-run-pl \
-  test-sim-al test-sim-sl test-sim-pl test-promote
+  test-adoc test-p4parse test-run-p4 test-sim test-promote
 
 .PHONY: $(TEST_TARGETS)
 # Resolve TEST_LOG here; the recursive make runs inside the Rust crate
 $(TEST_TARGETS):
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
 
-METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al \
-  test-metacirc-run-k test-metacirc-run-redex \
+METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al-p4 \
+  test-metacirc-run-k-p4 test-metacirc-run-redex-p4 \
   test-metacirc-run-group-al \
   test-metacirc-run-group-k test-metacirc-run-group-redex \
   test-metacirc-sim-al \

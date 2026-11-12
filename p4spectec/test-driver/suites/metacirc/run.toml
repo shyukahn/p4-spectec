@@ -1,5 +1,5 @@
 # Corpus runs through metacircular towers: `run <config>`
-# (make test-metacirc-run-al, test-metacirc-run-k, and test-metacirc-run-redex).
+# (make test-metacirc-run-al-p4, test-metacirc-run-k-p4, and test-metacirc-run-redex-p4).
 #
 # A configuration selects the `base` language of the towers it runs,
 # memoization (`cache`), and determinism checking (`det`).

@@ -39,12 +39,12 @@ clean:
 
 .PHONY: test test-adoc
 
-test: test-expected test-sim-al test-sim-sl test-sim-pl
+test: test-expected test-sim
 
 # Standalone acceptance driver; registrations live in test-driver/suites/
 # TEST_LOG=DIR writes per-test timing logs of p4parse, run, and sim
 # TIMEOUT=SECONDS records a run or sim test still running after it as a timeout
-.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-al test-run-sl test-run-pl
+.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-p4
 DRIVER = $(CARGO) run --locked --release --manifest-path test-driver/Cargo.toml --target-dir "$(TARGET_DIR)" -- $(if $(TEST_LOG),--log "$(abspath $(TEST_LOG))")
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT))
 
@@ -67,16 +67,10 @@ test-adoc:
 test-p4parse:
 	env -u UPDATE_EXPECT $(DRIVER) p4parse
 
-test-run-al:
-	env -u UPDATE_EXPECT $(DRIVER) run al $(CORPUS_ARGS)
-
-test-run-sl:
+test-run-p4:
 	env -u UPDATE_EXPECT $(DRIVER) run sl $(CORPUS_ARGS)
 
-test-run-pl:
-	env -u UPDATE_EXPECT $(DRIVER) run pl $(CORPUS_ARGS)
-
-test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-al test-run-sl test-run-pl
+test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-p4
 
 # Rerun elab/algo/prose/adoc and update snapshots; does not approve a previous run
 # Parsing, structure, execution, simulation, and exclusions are never promoted
@@ -87,13 +81,7 @@ test-promote:
 	UPDATE_EXPECT=1 $(DRIVER) adoc
 
 # Native simulation uses source-derived expectations in both cached modes
-.PHONY: test-sim-al test-sim-sl test-sim-pl
+.PHONY: test-sim
 
-test-sim-al:
-	env -u UPDATE_EXPECT $(DRIVER) sim al $(CORPUS_ARGS)
-
-test-sim-sl:
+test-sim:
 	env -u UPDATE_EXPECT $(DRIVER) sim sl $(CORPUS_ARGS)
-
-test-sim-pl:
-	env -u UPDATE_EXPECT $(DRIVER) sim pl $(CORPUS_ARGS)

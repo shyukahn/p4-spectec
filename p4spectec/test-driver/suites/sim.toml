@@ -1,4 +1,4 @@
-# STF simulation: `sim <config>` (make test-sim-al, test-sim-sl, test-sim-pl).
+# STF simulation: `sim <config>` (make test-sim runs `sl`).
 #
 # A configuration selects the interpreter `language` for `spec`,
 # memoization (`cache`), and determinism checking (`det`).
