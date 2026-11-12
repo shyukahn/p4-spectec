@@ -34,4 +34,3 @@ logs/*.csv
 spec-meta-k/kompiled
 spec-meta-k-detcheck/kompiled
 **/compiled
-coverage

@@ -5,9 +5,6 @@
 # Python bytecode
 __pycache__/
 
-# coverage reports
-/coverage/
-
 # logs and debugs
 *.log
 log
