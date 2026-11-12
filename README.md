@@ -130,7 +130,7 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 ├── excludes/                  # Excluded tests from P4-SpecTec, and the folders splitting the grouped tests (metacirc-groups/)
 ├── patches/                   # Patched STF tests from P4-SpecTec
 ├── docs/                      # P4 specification documents from P4-SpecTec
-├── scripts/                   # Scripts printing statistics of spec-meta-redex and spec-meta-k (stat/), and the tables of the paper from the logs (evaluation/)
+├── scripts/                   # Scripts printing statistics of spec-meta-redex and spec-meta-k (stat/), and the tables of the paper from the logs and coverage reports (evaluation/)
 └── logs/                      # Logs recorded by our runs; TEST_LOG=logs also writes here
 ```
 
@@ -479,15 +479,18 @@ Each command prints the outcomes of the inputs and the coverage of each run last
 cover-run: programs 16 (pass 14, fail 2, crash 0), excluded 0; instruction coverage 1286/1998 (64.36%)
 ```
 
-### Reproducing Tables 1 and 2
+### Reproducing Tables 1, 2, and 3
 
 `scripts/evaluation/table1` and `scripts/evaluation/table2` print Tables 1 and 2 of the paper
-from the logs in the given directory.
+from the logs in the given directory,
+and `scripts/evaluation/table3` prints Table 3 from the coverage reports in the given directory.
 
 ```sh
 # print Table 1 and Table 2 from the logs in logs/
 scripts/evaluation/table1 logs
 scripts/evaluation/table2 logs
+# print Table 3 from the coverage reports in coverage/
+scripts/evaluation/table3 coverage
 ```
 
 `logs/` already contains the logs of our runs.
@@ -513,3 +516,15 @@ k = ["metacirc-p4-k-run-negative"]
 ```
 
 The comments at the top of `scripts/evaluation/suites.toml` describe the format of the sources.
+
+#### Selecting the coverage reports of each row
+
+`scripts/evaluation/coverage.toml` decides which coverage reports make up the rows of Table 3.
+`static`, `dynamic`, and `custom` list the reports without `.cov`;
+row `Both` takes the reports of `static` and `dynamic`, and row `+ Custom` takes those of `custom` in addition.
+
+```toml
+static = ["run-p4"]
+dynamic = ["sim-ebpf", "sim-v1model", "sim-psa"]
+custom = ["run-st-rel", "run-st-func"]
+```
