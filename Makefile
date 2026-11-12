@@ -46,7 +46,8 @@ METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al-p4 \
   test-metacirc-run-group-k test-metacirc-run-group-redex \
   test-metacirc-sim-al \
   test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al \
-  test-metacirc-sim-group-k test-metacirc-sim-group-redex
+  test-metacirc-sim-group-k test-metacirc-sim-group-redex \
+  metacirc-cover-run-p4 metacirc-cover-run-st metacirc-cover-sim
 
 .PHONY: $(METACIRC_TARGETS)
 $(METACIRC_TARGETS):
