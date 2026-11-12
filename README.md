@@ -130,7 +130,7 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 ├── excludes/                  # Excluded tests from P4-SpecTec, and the folders splitting the grouped tests (metacirc-groups/)
 ├── patches/                   # Patched STF tests from P4-SpecTec
 ├── docs/                      # P4 specification documents from P4-SpecTec
-├── scripts/                   # Scripts printing statistics of spec-meta-redex and spec-meta-k
+├── scripts/                   # Scripts printing statistics of spec-meta-redex and spec-meta-k (stat/), and the tables of the paper from the logs (evaluation/)
 └── logs/                      # Logs recorded by our runs; TEST_LOG=logs also writes here
 ```
 
@@ -475,3 +475,38 @@ Each command prints the outcomes of the inputs and the coverage of each run last
 ```
 cover-run: programs 16 (pass 14, fail 2, crash 0), excluded 0; instruction coverage 1286/1998 (64.36%)
 ```
+
+### Reproducing Tables 1 and 2
+
+`scripts/evaluation/table1` and `scripts/evaluation/table2` print Tables 1 and 2 of the paper
+from the logs in the given directory.
+
+```sh
+# print Table 1 and Table 2 from the logs in logs/
+scripts/evaluation/table1 logs
+scripts/evaluation/table2 logs
+```
+
+`logs/` already contains the logs of our runs.
+To print the tables from your own runs, run the tests with `TEST_LOG=logs` as above.
+A run writes `<name>-1.log` instead of `<name>.log` when it already exists,
+so either remove our log first, or list the new log in `scripts/evaluation/suites.toml` as described below.
+
+#### Selecting the logs of each suite
+
+`scripts/evaluation/suites.toml` decides which logs make up each row and column of the tables.
+`[columns]` names the columns: `meta` for P4^P4ST, shown only in Table 2,
+and `al`, `redex`, and `k` for the towers.
+Each `[[suites]]` entry is a row of the tables, in order:
+
+```toml
+[[suites]]
+name = "NEG"                                  # row name
+pass = ["fail"]                               # results counted as a pass
+meta = ["run-sl#neg"]                         # sources of each column
+al = ["metacirc-p4-al-run-negative"]
+redex = ["metacirc-p4-redex-run-negative"]
+k = ["metacirc-p4-k-run-negative"]
+```
+
+The comments at the top of `scripts/evaluation/suites.toml` describe the format of the sources.
