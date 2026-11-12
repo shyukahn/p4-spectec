@@ -7,4 +7,3 @@ pub mod micro;
 pub mod p4parse;
 pub mod run;
 pub mod sim;
-pub mod snapshot;

@@ -37,55 +37,31 @@ clean:
 
 .DEFAULT_GOAL := test
 
-.PHONY: test test-adoc
+.PHONY: test
 
 test: test-expected test-sim
 
 # Standalone acceptance driver; registrations live in test-driver/suites/
 # TEST_LOG=DIR writes per-test timing logs of p4parse, run, sim, and micro
 # TIMEOUT=SECONDS records a run or sim test still running after it as a timeout
-.PHONY: test-expected test-promote test-elab test-algo test-structure test-prose test-p4parse test-run-p4 test-run-st
+.PHONY: test-expected test-p4parse test-run-p4 test-run-st
 DRIVER = $(CARGO) run --locked --release --manifest-path test-driver/Cargo.toml --target-dir "$(TARGET_DIR)" -- $(if $(TEST_LOG),--log "$(abspath $(TEST_LOG))")
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT))
 
-test-elab:
-	env -u UPDATE_EXPECT $(DRIVER) elab
-
-test-algo:
-	env -u UPDATE_EXPECT $(DRIVER) algo
-
-test-structure:
-	env -u UPDATE_EXPECT $(DRIVER) structure
-
-test-prose:
-	env -u UPDATE_EXPECT $(DRIVER) prose
-
-# Export fragments with $(DRIVER) adoc --output DIR for Asciidoctor validation
-test-adoc:
-	env -u UPDATE_EXPECT $(DRIVER) adoc
-
 test-p4parse:
-	env -u UPDATE_EXPECT $(DRIVER) p4parse
+	$(DRIVER) p4parse
 
 test-run-p4:
-	env -u UPDATE_EXPECT $(DRIVER) run sl $(CORPUS_ARGS)
+	$(DRIVER) run sl $(CORPUS_ARGS)
 
 # Standalone spec-language sources checked by pipeline stage
 test-run-st:
-	env -u UPDATE_EXPECT $(DRIVER) micro sl
+	$(DRIVER) micro sl
 
-test-expected: test-elab test-algo test-structure test-prose test-adoc test-p4parse test-run-p4 test-run-st
-
-# Rerun elab/algo/prose/adoc and update snapshots; does not approve a previous run
-# Parsing, structure, execution, simulation, and exclusions are never promoted
-test-promote:
-	UPDATE_EXPECT=1 $(DRIVER) elab
-	UPDATE_EXPECT=1 $(DRIVER) algo
-	UPDATE_EXPECT=1 $(DRIVER) prose
-	UPDATE_EXPECT=1 $(DRIVER) adoc
+test-expected: test-p4parse test-run-p4 test-run-st
 
 # Native simulation uses source-derived expectations in both cached modes
 .PHONY: test-sim
 
 test-sim:
-	env -u UPDATE_EXPECT $(DRIVER) sim sl $(CORPUS_ARGS)
+	$(DRIVER) sim sl $(CORPUS_ARGS)

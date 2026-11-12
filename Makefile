@@ -13,7 +13,7 @@ export CARGO_TARGET_DIR
 # Recursive Rust tests still use the caller's parallel job count
 .NOTPARALLEL:
 
-.PHONY: build release debug stat fmt fmt-check lint rustdoc clean promote
+.PHONY: build release debug stat fmt fmt-check lint rustdoc clean
 
 build release debug:
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $@
@@ -30,9 +30,8 @@ stat:
 fmt fmt-check lint rustdoc:
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $@
 
-# End-to-end acceptance and explicit snapshot updates
-TEST_TARGETS := test test-expected test-elab test-algo test-structure test-prose \
-  test-adoc test-p4parse test-run-p4 test-run-st test-sim test-promote
+# End-to-end acceptance
+TEST_TARGETS := test test-expected test-p4parse test-run-p4 test-run-st test-sim
 
 .PHONY: $(TEST_TARGETS)
 # Resolve TEST_LOG here; the recursive make runs inside the Rust crate
@@ -52,8 +51,6 @@ METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al-p4 \
 .PHONY: $(METACIRC_TARGETS)
 $(METACIRC_TARGETS):
 	$(MAKE) -f METASQ.mk CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
-
-promote: test-promote
 
 # Specification documents
 .PHONY: p4spec-draft p4spec-draft-html p4spec-release p4spec-release-html

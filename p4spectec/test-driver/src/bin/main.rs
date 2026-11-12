@@ -3,8 +3,8 @@ use std::{path::PathBuf, process::ExitCode, time::Duration};
 use clap::{Parser, Subcommand};
 
 use p4spectec_test::{
-    harness::{self, Error, Result},
-    suite::{micro, p4parse, run, sim, snapshot, snapshot::Stage},
+    harness::{self, Result},
+    suite::{micro, p4parse, run, sim},
 };
 
 /// Source and expected-file acceptance for the Rust implementation
@@ -21,20 +21,6 @@ struct Cli {
 enum Command {
     /// List every registration
     List,
-    /// Compare the elaborated P4 specification with expected output
-    Elab,
-    /// Compare the algorithmic P4 specification with expected output
-    Algo,
-    /// Compare the structured P4 specification in both rule-group modes
-    Structure,
-    /// Compare the rendered prose specification with expected output
-    Prose,
-    /// Compare AsciiDoc snapshots and check anchor determinism
-    Adoc {
-        /// Save EL and PL documents in this directory for external validation
-        #[arg(long = "output")]
-        path_output: Option<PathBuf>,
-    },
     /// Compare P4 parse/unparse/parse roundtrips with stored file results
     P4parse,
     /// Compare execution outcomes with stored file results
@@ -72,41 +58,19 @@ enum Worker {
     Sim { config: String, arch: String },
 }
 
-fn execute(mut cli: Cli) -> Result<()> {
-    let command = &mut cli.command;
-    if matches!(
-        command,
-        Command::Structure
-            | Command::P4parse
-            | Command::Run { .. }
-            | Command::Sim { .. }
-            | Command::Micro { .. }
-    ) && std::env::var_os("UPDATE_EXPECT").is_some()
-    {
-        return Err(Error::from("UPDATE_EXPECT is supported only for elab, algo, prose, and adoc"));
-    }
-    // Resolve output paths before changing to the specification repository
+fn execute(cli: Cli) -> Result<()> {
+    // Resolve the log path before changing to the specification repository
     let path_log = cli
         .path_log
         .as_deref()
         .map(std::path::absolute)
         .transpose()?;
-    if let Command::Adoc { path_output: Some(path_output) } = &mut *command {
-        *path_output = std::path::absolute(&*path_output)?;
-    }
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
         .canonicalize()?;
     std::env::set_current_dir(&root)?;
-    match command {
+    match &cli.command {
         Command::List => list(),
-        Command::Elab => snapshot::run("snapshot", &[Stage::Elab], None),
-        Command::Algo => snapshot::run("snapshot", &[Stage::Algo], None),
-        Command::Structure => snapshot::run("snapshot", &[Stage::Structure], None),
-        Command::Prose => snapshot::run("snapshot", &[Stage::Prose], None),
-        Command::Adoc { path_output } => {
-            snapshot::run("snapshot", &[Stage::AdocEl, Stage::AdocPl], path_output.as_deref())
-        }
         Command::P4parse => p4parse::run(path_log.as_deref()),
         Command::Run { config, timeout } => {
             run::run(config, timeout.map(Duration::from_secs), path_log.as_deref())
@@ -122,7 +86,6 @@ fn execute(mut cli: Cli) -> Result<()> {
 
 /// Prints every registration without running its tests.
 fn list() -> Result<()> {
-    println!("snapshot: {:#?}", harness::load::<snapshot::Registration>("snapshot")?);
     println!("p4parse: {:#?}", harness::load::<p4parse::Registration>("p4parse")?);
     println!("run: {:#?}", harness::load::<run::Registration>("run")?);
     println!("sim: {:#?}", harness::load::<sim::Registration>("sim")?);

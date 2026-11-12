@@ -61,27 +61,27 @@ redex: metacirc
 
 # P4 corpus through the AL/P4 towers
 test-metacirc-run-al-p4:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run al --input p4 $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run al --input p4 $(CORPUS_ARGS)
 
 # P4 corpus through the K/P4 towers, spec-meta-k on its K library (ST-in-K)
 test-metacirc-run-k-p4:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run k --input p4 $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run k --input p4 $(CORPUS_ARGS)
 
 # P4 corpus through the Redex/P4 towers, spec-meta-redex in racket (ST-in-Redex)
 test-metacirc-run-redex-p4:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input p4 $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run redex --input p4 $(CORPUS_ARGS)
 
 # Spec-language script suites through the AL tower
 test-metacirc-run-al-st:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run al --input al $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run al --input al $(CORPUS_ARGS)
 
 # Spec-language script suites through the K tower on spec-meta-k-detcheck (ST-in-K)
 test-metacirc-run-k-st:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run k --input al $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run k --input al $(CORPUS_ARGS)
 
 # Spec-language script suites through the Redex tower on spec-meta-redex-detcheck (ST-in-Redex)
 test-metacirc-run-redex-st:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input al $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run redex --input al $(CORPUS_ARGS)
 
 # One group of a P4 corpus suite of suites/metacirc/run-group.toml through the AL/P4,
 # K/P4, or Redex/P4 tower, against the group's expected file for the suite
@@ -90,19 +90,19 @@ RUN_GROUP_TARGETS := test-metacirc-run-group-al test-metacirc-run-group-k test-m
 
 $(RUN_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=run-positive GROUP=1))
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run-group $(@:test-metacirc-run-group-%=%) $(GROUP_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) run-group $(@:test-metacirc-run-group-%=%) $(GROUP_ARGS)
 
 # Registered simulation suites through the AL/P4 tower, against native expectations
 test-metacirc-sim-al:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim al $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) sim al $(CORPUS_ARGS)
 
 # Registered simulation suites through the K/P4 tower (ST-in-K), against native expectations
 test-metacirc-sim-k:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim k $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) sim k $(CORPUS_ARGS)
 
 # Registered simulation suites through the Redex/P4 tower (ST-in-Redex), against native expectations
 test-metacirc-sim-redex:
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim redex $(CORPUS_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) sim redex $(CORPUS_ARGS)
 
 # One group of a simulation suite of suites/metacirc/sim-group.toml through the AL/P4,
 # K/P4, or Redex/P4 tower, against the group's expected file for the suite
@@ -111,7 +111,7 @@ SIM_GROUP_TARGETS := test-metacirc-sim-group-al test-metacirc-sim-group-k test-m
 
 $(SIM_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=v1model-p4c GROUP=1))
-	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) sim-group $(@:test-metacirc-sim-group-%=%) $(GROUP_ARGS)
+	cd $(RUST_DIR) && $(METACIRC_TEST) sim-group $(@:test-metacirc-sim-group-%=%) $(GROUP_ARGS)
 
 # SL instruction coverage of spec-meta, the base of the AL towers, written to $(COV_DIR)/*.cov
 COV_DIR = coverage
