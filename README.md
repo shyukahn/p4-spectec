@@ -115,21 +115,23 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 
 ```
 /meta/
-├── p4spectec/          # Rust implementation of meta-meta execution, built on top of P4-SpecTec
-│   ├── src/            # P4-SpecTec, with metacircular towers in src/metacirc/
-│   └── test-driver/    # Test drivers, with test suite registrations (suites/) and expected results (expected/)
-├── spec/               # P4^P4ST: the P4 specification from P4-SpecTec
-├── spec-meta/          # P4ST^P4ST: the P4-SpecTec AL specification in P4-SpecTec
-├── spec-meta-redex/    # P4ST^Redex: the P4-SpecTec AL specification in PLT Redex
-├── spec-meta-k/        # P4ST^K: the P4-SpecTec AL specification in K
-├── towers/             # Tower configurations running P4^P4ST on P4ST^P4ST, P4ST^Redex, or P4ST^K
-├── p4c/                # P4 include files (p4include/) and test programs (testdata/) from p4c
-├── testdata/           # STF tests from P4-SpecTec
-├── excludes/           # Excluded tests from P4-SpecTec
-├── patches/            # Patched STF tests from P4-SpecTec
-├── docs/               # P4 specification documents from P4-SpecTec
-├── scripts/            # Scripts printing statistics of spec-meta-redex and spec-meta-k
-└── logs/               # Logs recorded by our runs; TEST_LOG=logs also writes here
+├── p4spectec/                 # Rust implementation of meta-meta execution, built on top of P4-SpecTec
+│   ├── src/                   # P4-SpecTec, with metacircular towers in src/metacirc/
+│   └── test-driver/           # Test drivers, with test suite registrations (suites/) and expected results (expected/)
+├── spec/                      # P4^P4ST: the P4 specification from P4-SpecTec
+├── spec-meta/                 # P4ST^P4ST: the P4-SpecTec AL specification in P4-SpecTec
+├── spec-meta-redex/           # P4ST^Redex: the P4-SpecTec AL specification in PLT Redex
+├── spec-meta-redex-detcheck/  # P4ST^Redex with the determinism check of clauses and rules enabled
+├── spec-meta-k/               # P4ST^K: the P4-SpecTec AL specification in K
+├── spec-meta-k-detcheck/      # P4ST^K with the determinism check of clauses and rules enabled
+├── towers/                    # Tower configurations running P4^P4ST or P4-SpecTec scripts on P4ST^P4ST, P4ST^Redex, or P4ST^K
+├── p4c/                       # P4 include files (p4include/) and test programs (testdata/) from p4c
+├── testdata/                  # P4-SpecTec scripts testing P4ST^P4ST (spec-meta/), and STF tests from P4-SpecTec (p4testgen/)
+├── excludes/                  # Excluded tests from P4-SpecTec, and the folders splitting the grouped tests (metacirc-groups/)
+├── patches/                   # Patched STF tests from P4-SpecTec
+├── docs/                      # P4 specification documents from P4-SpecTec
+├── scripts/                   # Scripts printing statistics of spec-meta-redex and spec-meta-k
+└── logs/                      # Logs recorded by our runs; TEST_LOG=logs also writes here
 ```
 
 ## 3. Evaluation
@@ -146,9 +148,9 @@ Rebuild with these commands after modifying the implementation or the specificat
 make
 # build the meta-meta execution binary bin/metacirc
 make metacirc
-# build bin/metacirc, and compile spec-meta-k into spec-meta-k/kompiled/
+# build bin/metacirc, and compile spec-meta-k and spec-meta-k-detcheck
 make kompile
-# build bin/metacirc, and compile spec-meta-redex with raco make
+# build bin/metacirc, and compile spec-meta-redex and spec-meta-redex-detcheck
 make redex
 # remove the binaries, the compiled meta specifications, and the Rust build outputs
 make clean
@@ -157,6 +159,17 @@ make clean
 The test drivers are built automatically when a test command runs.
 
 ### Test suites
+
+The script suites run each P4-SpecTec script (`.watsup`) testing the behavior of P4ST^P4ST
+that P4^P4ST does not reach.
+A script enters at the relation `Main` or the function `$main`.
+Scripts in `spec-meta-rel-err` are intended to fail.
+
+| suite | expected outcome | P4-SpecTec scripts |
+|---|---|---|
+| `spec-meta-rel-succ` | success | `testdata/spec-meta/rel/succ/` |
+| `spec-meta-rel-err` | failure | `testdata/spec-meta/rel/err/` |
+| `spec-meta-func-succ` | success | `testdata/spec-meta/func/succ/` |
 
 The type-checking suites type-check (`Program_ok`) each P4 program.
 Programs listed in `excludes/static/` are skipped.
@@ -178,13 +191,35 @@ Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
 | `ebpf-p4testgen` | ebpf | `testdata/p4testgen/` |
 | `psa-p4c` | psa | `p4c/testdata/p4_16_samples/` |
 
-### Running a single P4 program
+### Running a single program
 
-The `metacirc` binary runs a single P4 program or STF test through a tower.
+The `metacirc` binary runs a single P4-SpecTec script, P4 program, or STF test through a tower.
 For installation option 3, either add the `bin` folder of the repository root to `PATH`,
 or run it as `./bin/metacirc` instead of `metacirc`.
 
 Run `metacirc run-meta --help` or `metacirc sim --help` for the full list of options.
+
+#### P4-SpecTec script
+
+```sh
+metacirc run-meta -p <SCRIPT> <CONFIG>
+```
+
+- `<SCRIPT>`: the P4-SpecTec script to run.
+- `<CONFIG>`: the tower configuration. For a script entering at the relation `Main`,
+  use `towers/al-rel.json`, `towers/redex-detcheck.json`, or `towers/k-detcheck.json`
+  to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+  For a script entering at the function `$main`, use `towers/al-func.json`,
+  `towers/redex-detcheck-func.json`, or `towers/k-detcheck-func.json` instead.
+
+```sh
+# P4ST^P4ST
+metacirc run-meta -p testdata/spec-meta/rel/succ/exp-iter.watsup towers/al-rel.json
+# P4ST^Redex
+metacirc run-meta -p testdata/spec-meta/rel/succ/exp-iter.watsup towers/redex-detcheck.json
+# P4ST^K
+metacirc run-meta -p testdata/spec-meta/func/succ/entry-func.watsup towers/k-detcheck-func.json
+```
 
 #### P4 type checking
 
@@ -230,11 +265,14 @@ metacirc sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/actio
 
 ### Meta-execution of P4^P4ST
 
-For comparison, `test-run-p4` and `test-sim` run P4^P4ST directly on the SL interpreter
-of P4-SpecTec, without a tower.
-`test-run-p4` runs all type-checking suites, and `test-sim` runs all simulation suites.
+For comparison, `test-run-st`, `test-run-p4`, and `test-sim` run the P4-SpecTec scripts
+and P4^P4ST directly on the SL interpreter of P4-SpecTec, without a tower.
+`test-run-st` runs all script suites, `test-run-p4` runs all type-checking suites,
+and `test-sim` runs all simulation suites.
 
 ```sh
+# run the P4-SpecTec script tests
+make test-run-st TEST_LOG=logs
 # run the type-checking tests
 make test-run-p4 TEST_LOG=logs
 # run the STF packet tests
@@ -243,13 +281,25 @@ make test-sim TEST_LOG=logs
 
 ### Meta-meta-execution of P4ST^P4ST
 
-The commands below run P4^P4ST on P4ST^P4ST in `spec-meta`, through the tower
-`towers/al-p4-ok.json` for type checking and `towers/al-p4.json` for simulation.
+The commands below run the P4-SpecTec scripts and P4^P4ST on P4ST^P4ST in `spec-meta`,
+through the towers `towers/al-rel.json` and `towers/al-func.json` for the scripts,
+`towers/al-p4-ok.json` for type checking, and `towers/al-p4.json` for simulation.
 They take the options below:
 
 - `SUITE=<NAME>` runs only the named test suite.
 - `TIMEOUT=300` runs each test case with a timeout of 300 seconds.
 - `TEST_LOG=logs` writes a per-test timing log into `logs/`.
+
+`test-metacirc-run-al-st` runs the script suites.
+
+```sh
+# run all suites
+make test-metacirc-run-al-st TEST_LOG=logs
+# run each suite separately
+make test-metacirc-run-al-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-metacirc-run-al-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-metacirc-run-al-st SUITE=spec-meta-func-succ TEST_LOG=logs
+```
 
 `test-metacirc-run-al-p4` runs the type-checking suites.
 
@@ -276,10 +326,24 @@ make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 
 ### Meta-meta-execution of P4ST^Redex and P4ST^K
 
-The commands below run P4^P4ST on P4ST^Redex in `spec-meta-redex`, through the towers
-`towers/redex-p4-ok.json` and `towers/redex-p4.json`, and on P4ST^K in `spec-meta-k`,
-through the towers `towers/k-p4-ok.json` and `towers/k-p4.json`.
+The commands below run the P4-SpecTec scripts and P4^P4ST on P4ST^Redex and P4ST^K.
+The scripts run on `spec-meta-redex-detcheck` and `spec-meta-k-detcheck`,
+through the towers `towers/redex-detcheck*.json` and `towers/k-detcheck*.json`,
+since the expected outputs of the scripts rely on determinism checking.
+P4^P4ST runs on `spec-meta-redex`, through the towers `towers/redex-p4-ok.json` and `towers/redex-p4.json`,
+and on `spec-meta-k`, through the towers `towers/k-p4-ok.json` and `towers/k-p4.json`.
 They take the same options as the commands for P4ST^P4ST.
+
+`test-metacirc-run-redex-st` runs the script suites.
+
+```sh
+# run all suites
+make test-metacirc-run-redex-st TEST_LOG=logs
+# run each suite separately
+make test-metacirc-run-redex-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-metacirc-run-redex-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-metacirc-run-redex-st SUITE=spec-meta-func-succ TEST_LOG=logs
+```
 
 `test-metacirc-run-redex-p4` runs the type-checking suites.
 
@@ -302,6 +366,17 @@ make test-metacirc-sim-redex SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
+```
+
+`test-metacirc-run-k-st` runs the script suites.
+
+```sh
+# run all suites
+make test-metacirc-run-k-st TEST_LOG=logs
+# run each suite separately
+make test-metacirc-run-k-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-metacirc-run-k-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-metacirc-run-k-st SUITE=spec-meta-func-succ TEST_LOG=logs
 ```
 
 `test-metacirc-run-k-p4` runs the type-checking suites.
@@ -328,15 +403,29 @@ make test-metacirc-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
 > [!WARNING]
-> Running the entire test suites on P4ST^Redex and P4ST^K can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
+> Running the entire test suites on P4ST^Redex and P4ST^K can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 80 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
 
-### Grouped P4 simulation
+### Grouped P4 type checking and simulation
+
+`test-metacirc-run-group-<base>` runs one of three groups of the `run-positive`
+type-checking suite, so that the suite can be split over three commands.
+`SUITE` and `GROUP` are required. Group `<n>` skips the programs listed in
+`excludes/static/` and the other groups' folders under `excludes/metacirc-groups/run/`,
+and compares the outcomes with `p4spectec/test-driver/expected/run-group/run-positive-<n>.expected`.
+Groups 1, 2, and 3 have 927, 170, and 170 programs, respectively.
+
+```sh
+# run each group separately
+make test-metacirc-run-group-redex SUITE=run-positive GROUP=1 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-run-group-redex SUITE=run-positive GROUP=2 TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-run-group-redex SUITE=run-positive GROUP=3 TIMEOUT=300 TEST_LOG=logs
+```
 
 `test-metacirc-sim-group-<base>` runs one of four groups of the `v1model-p4testgen`
 simulation suite, so that the suite can be split over four commands.
 `SUITE` and `GROUP` are required. Group `<n>` skips the tests listed in
 `excludes/static/`, `excludes/dynamic/`, and the other groups' folders under
-`excludes/metacirc-groups/`.
+`excludes/metacirc-groups/sim/`.
 Since P4ST^Redex and P4ST^K take a long time, we recommend running the 1870 tests of
 `v1model-p4testgen` on them group by group with these commands.
 
@@ -354,4 +443,35 @@ make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_
 make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
+```
+
+### P4ST^P4ST coverage
+
+`metacirc cover-run` and `metacirc cover-sim` measure the SL instruction coverage of
+P4ST^P4ST over many inputs.
+The commands below run them on the test suites through the towers of P4ST^P4ST,
+and write one report per run into `coverage/`; `COV_DIR=<DIR>` writes them into `<DIR>` instead.
+
+- `metacirc-cover-run-st` runs the scripts of the script suites through `towers/al-rel.json`
+  and `towers/al-func.json`, and writes `run-st-rel.cov` and `run-st-func.cov`.
+- `metacirc-cover-run-p4` type-checks the programs of `run-positive` and `run-negative`
+  through `towers/al-p4-ok.json`, and writes `run-p4.cov`.
+- `metacirc-cover-sim` runs the STF tests of the simulation suites through `towers/al-p4.json`,
+  one architecture at a time, and writes `sim-v1model.cov`, `sim-ebpf.cov`, and `sim-psa.cov`.
+  `ARCH=<ARCH>` runs only one of `v1model`, `ebpf`, or `psa`.
+
+```sh
+# measure coverage of the script suites
+make metacirc-cover-run-st
+# measure coverage of the type-checking suites
+make metacirc-cover-run-p4
+# measure coverage of the simulation suites, for all architectures or only one
+make metacirc-cover-sim
+make metacirc-cover-sim ARCH=psa
+```
+
+Each command prints the outcomes of the inputs and the coverage of each run last, for example:
+
+```
+cover-run: programs 16 (pass 14, fail 2, crash 0), excluded 0; instruction coverage 1286/1998 (64.36%)
 ```
