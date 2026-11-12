@@ -1,9 +1,10 @@
-# Suites of Tables 1 and 2, read from the CSVs that `log2csv` writes into logs/.
+# Suites of Tables 1 and 2, read from the logs in the directory given to table1 and table2.
 #
 # Each column key of a suite lists its sources: the name of a log without its extension,
 # optionally `<log>#<section>` to take only one `== <section> (...)` part of that log.
 # A suite's results under a column are the union of the tests in its sources.
-# `pass` lists the results counted as a pass (a negative test passes by failing).
+# `pass` lists the results counted as a pass (a negative test passes by failing);
+# `timeout` is counted as a timeout, and any other result as a fail.
 # `rule = true` draws a horizontal rule above the suite.
 
 # Seconds after which a test is recorded as a timeout

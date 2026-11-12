@@ -58,6 +58,13 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
+def convert_log(path):
+    """Writes `<log>.csv` beside a log and returns its rows."""
+    rows = parse_log(path)
+    write_csv(path.with_suffix(".csv"), rows)
+    return rows
+
+
 def read_csv(path):
     with path.open(newline="") as file:
         return list(csv.DictReader(file))
@@ -70,7 +77,7 @@ def read_csv(path):
 class Cell:
     """Union of the test results of one suite under one column."""
     results: dict  # test -> (result, seconds)
-    missing: list  # sources without a CSV
+    missing: list  # sources without a log
 
     def __len__(self):
         return len(self.results)
@@ -82,12 +89,21 @@ def load_config(path=PATH_CONFIG):
 
 
 def load_source(dir_logs, source):
-    """Returns the rows of a `<log>` or `<log>#<section>` source, or None without its CSV."""
+    """Returns the rows of a `<log>` or `<log>#<section>` source, or None without its log.
+
+    Converts the log first when its CSV is missing or older than the log.
+    """
     name, _, section = source.partition("#")
-    path = dir_logs / f"{name.removesuffix('.csv')}.csv"
-    if not path.exists():
+    path_log = dir_logs / f"{name}.log"
+    path_csv = path_log.with_suffix(".csv")
+    if path_log.exists() and (not path_csv.exists()
+                              or path_csv.stat().st_mtime < path_log.stat().st_mtime):
+        print(f"converting {path_log}", file=sys.stderr)
+        rows = convert_log(path_log)
+    elif path_csv.exists():
+        rows = read_csv(path_csv)
+    else:
         return None
-    rows = read_csv(path)
     if section:
         rows = [row for row in rows if row["section"] == section]
     return rows
@@ -139,8 +155,10 @@ def notes_incomplete(config, loaded, keys):
                 continue
             text = f"* {suite['name']} {config['columns'][key]}: {len(cell):,} of {n_total:,} tests"
             if cell.missing:
-                text += f" (no CSV for {', '.join(cell.missing)})"
+                text += f" (no log for {', '.join(cell.missing)})"
             notes.append(text)
+    if any(len(cells[key]) == 0 for _, cells in loaded for key in keys):
+        notes.append("- no log for the cell")
     return notes
 
 

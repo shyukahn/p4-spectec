@@ -5,7 +5,7 @@ import argparse
 import math
 from pathlib import Path
 
-from evaluation import (DIR_LOGS, META, PATH_CONFIG, is_incomplete, load_config, load_suites,
+from evaluation import (META, PATH_CONFIG, is_incomplete, load_config, load_suites,
                         median_time, notes_incomplete, render, rules, towers)
 
 
@@ -21,7 +21,7 @@ def format_time(secs, timeout):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--logs", type=Path, default=DIR_LOGS, help="directory of the CSVs")
+    parser.add_argument("logs", type=Path, help="directory of the logs, such as logs")
     parser.add_argument("--config", type=Path, default=PATH_CONFIG, help="suite config")
     args = parser.parse_args()
     config = load_config(args.config)
