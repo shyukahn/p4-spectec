@@ -13,6 +13,32 @@ __pycache__/
 log
 debug
 
+# recorded logs
+!/logs/metacirc-p4-al-run-negative.log
+!/logs/metacirc-p4-al-run-positive.log
+!/logs/metacirc-p4-k-run-negative.log
+!/logs/metacirc-p4-k-run-positive.log
+!/logs/metacirc-p4-redex-run-negative.log
+!/logs/metacirc-sim-al-ebpf-p4c.log
+!/logs/metacirc-sim-al-ebpf-p4testgen.log
+!/logs/metacirc-sim-al-psa-p4c.log
+!/logs/metacirc-sim-al-v1model-p4c.log
+!/logs/metacirc-sim-al-v1model-p4testgen.log
+!/logs/metacirc-sim-group-k-v1model-p4testgen-group1.log
+!/logs/metacirc-sim-group-k-v1model-p4testgen-group2.log
+!/logs/metacirc-sim-group-k-v1model-p4testgen-group3.log
+!/logs/metacirc-sim-group-redex-v1model-p4testgen-group1.log
+!/logs/metacirc-sim-group-redex-v1model-p4testgen-group2.log
+!/logs/metacirc-sim-group-redex-v1model-p4testgen-group3.log
+!/logs/metacirc-sim-k-ebpf-p4c.log
+!/logs/metacirc-sim-k-ebpf-p4testgen.log
+!/logs/metacirc-sim-k-psa-p4c.log
+!/logs/metacirc-sim-k-v1model-p4c.log
+!/logs/metacirc-sim-redex-ebpf-p4c.log
+!/logs/metacirc-sim-redex-ebpf-p4testgen.log
+!/logs/metacirc-sim-redex-psa-p4c.log
+!/logs/metacirc-sim-redex-v1model-p4c.log
+
 # MacOS
 *.DS_Store
 

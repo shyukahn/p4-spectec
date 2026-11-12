@@ -1,0 +1,2000 @@
+p4spectec-test metacirc-sim-group-redex-v1model-p4testgen-group1
+metacirc sim-group redex cache=true det=true v1model-p4testgen group 1: collected=1982 excluded=1514; preparing specification
+
+== v1model-p4testgen (testdata/p4testgen)
+[   1/1982] action-synth/action-synth_1.stf ... timeout  300.55s  (300.6s)
+[   2/1982] action-two-params/action-two-params_1.stf ... exclude
+[   3/1982] action_profile-bmv2/action_profile-bmv2_1.stf ... exclude
+[   4/1982] action_profile_max_group_size_annotation/action_profile_max_group_size_annotation_1.stf ... exclude
+[   5/1982] action_profile_sum_of_members_annotation/action_profile_sum_of_members_annotation_1.stf ... timeout  300.55s  (601.1s)
+[   6/1982] action_selector_shared-bmv2/action_selector_shared-bmv2_1.stf ... exclude
+[   7/1982] action_selector_unused-bmv2/action_selector_unused-bmv2_1.stf ... exclude
+[   8/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_1.stf ... exclude
+[   9/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_10.stf ... timeout  300.57s  (901.7s)
+[  10/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_2.stf ... exclude
+[  11/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_3.stf ... exclude
+[  12/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_4.stf ... exclude
+[  13/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_5.stf ... timeout  300.59s  (1202.3s)
+[  14/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_6.stf ... exclude
+[  15/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_7.stf ... exclude
+[  16/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_8.stf ... exclude
+[  17/1982] actions-almost-duplicate-names1/actions-almost-duplicate-names1_9.stf ... timeout  300.57s  (1502.8s)
+[  18/1982] annotation-inline-propagate/annotation-inline-propagate_1.stf ... exclude
+[  19/1982] annotation-inline-propagate/annotation-inline-propagate_2.stf ... exclude
+[  20/1982] arith-bmv2/arith-bmv2_1.stf ... exclude
+[  21/1982] arith-bmv2/arith-bmv2_2.stf ... timeout  300.59s  (1803.4s)
+[  22/1982] arith-inline-bmv2/arith-inline-bmv2_1.stf ... exclude
+[  23/1982] arith-inline-bmv2/arith-inline-bmv2_2.stf ... exclude
+[  24/1982] arith1-bmv2/arith1-bmv2_1.stf ... exclude
+[  25/1982] arith1-bmv2/arith1-bmv2_2.stf ... timeout  300.59s  (2104.0s)
+[  26/1982] arith2-bmv2/arith2-bmv2_1.stf ... exclude
+[  27/1982] arith2-bmv2/arith2-bmv2_2.stf ... exclude
+[  28/1982] arith2-inline-bmv2/arith2-inline-bmv2_1.stf ... exclude
+[  29/1982] arith2-inline-bmv2/arith2-inline-bmv2_2.stf ... timeout  300.59s  (2404.6s)
+[  30/1982] arith2-inline-bmv2/arith2-inline-bmv2_3.stf ... exclude
+[  31/1982] arith3-bmv2/arith3-bmv2_1.stf ... exclude
+[  32/1982] arith3-bmv2/arith3-bmv2_2.stf ... exclude
+[  33/1982] arith4-bmv2/arith4-bmv2_1.stf ... timeout  300.59s  (2705.2s)
+[  34/1982] arith4-bmv2/arith4-bmv2_2.stf ... exclude
+[  35/1982] arith5-bmv2/arith5-bmv2_1.stf ... exclude
+[  36/1982] arith5-bmv2/arith5-bmv2_2.stf ... exclude
+[  37/1982] array-copy-bmv2/array-copy-bmv2_1.stf ... timeout  300.60s  (3005.8s)
+[  38/1982] array1/array1_1.stf ... exclude
+[  39/1982] array1/array1_2.stf ... exclude
+[  40/1982] array2/array2_1.stf ... exclude
+[  41/1982] array2/array2_2.stf ... exclude
+[  42/1982] basic2-bmv2/basic2-bmv2_1.stf ... exclude
+[  43/1982] basic2-bmv2/basic2-bmv2_2.stf ... timeout  300.56s  (3306.4s)
+[  44/1982] basic2-bmv2/basic2-bmv2_3.stf ... exclude
+[  45/1982] basic2-bmv2/basic2-bmv2_4.stf ... exclude
+[  46/1982] basic_routing-bmv2/basic_routing-bmv2_1.stf ... exclude
+[  47/1982] basic_routing-bmv2/basic_routing-bmv2_10.stf ... timeout  300.57s  (3607.0s)
+[  48/1982] basic_routing-bmv2/basic_routing-bmv2_2.stf ... exclude
+[  49/1982] basic_routing-bmv2/basic_routing-bmv2_3.stf ... exclude
+[  50/1982] basic_routing-bmv2/basic_routing-bmv2_4.stf ... exclude
+[  51/1982] basic_routing-bmv2/basic_routing-bmv2_5.stf ... timeout  300.55s  (3907.5s)
+[  52/1982] basic_routing-bmv2/basic_routing-bmv2_6.stf ... exclude
+[  53/1982] basic_routing-bmv2/basic_routing-bmv2_7.stf ... exclude
+[  54/1982] basic_routing-bmv2/basic_routing-bmv2_8.stf ... exclude
+[  55/1982] basic_routing-bmv2/basic_routing-bmv2_9.stf ... timeout  300.56s  (4208.1s)
+[  56/1982] bool_to_bit_cast/bool_to_bit_cast_1.stf ... exclude
+[  57/1982] bool_to_bit_cast/bool_to_bit_cast_2.stf ... exclude
+[  58/1982] bvec-hdr-bmv2/bvec-hdr-bmv2_1.stf ... exclude
+[  59/1982] bvec-hdr-bmv2/bvec-hdr-bmv2_2.stf ... timeout  300.55s  (4508.6s)
+[  60/1982] bvec-hdr-bmv2/bvec-hdr-bmv2_3.stf ... exclude
+[  61/1982] bvec_union-bmv2/bvec_union-bmv2_1.stf ... exclude
+[  62/1982] bvec_union-bmv2/bvec_union-bmv2_2.stf ... exclude
+[  63/1982] bvec_union-bmv2/bvec_union-bmv2_3.stf ... timeout  300.56s  (4809.2s)
+[  64/1982] bvec_union-bmv2/bvec_union-bmv2_4.stf ... exclude
+[  65/1982] bvec_union-bmv2/bvec_union-bmv2_5.stf ... exclude
+[  66/1982] checksum-l4-bmv2/checksum-l4-bmv2_1.stf ... exclude
+[  67/1982] checksum-l4-bmv2/checksum-l4-bmv2_10.stf ... timeout  300.55s  (5109.7s)
+[  68/1982] checksum-l4-bmv2/checksum-l4-bmv2_2.stf ... exclude
+[  69/1982] checksum-l4-bmv2/checksum-l4-bmv2_3.stf ... exclude
+[  70/1982] checksum-l4-bmv2/checksum-l4-bmv2_4.stf ... exclude
+[  71/1982] checksum-l4-bmv2/checksum-l4-bmv2_5.stf ... timeout  300.60s  (5410.3s)
+[  72/1982] checksum-l4-bmv2/checksum-l4-bmv2_6.stf ... exclude
+[  73/1982] checksum-l4-bmv2/checksum-l4-bmv2_7.stf ... exclude
+[  74/1982] checksum-l4-bmv2/checksum-l4-bmv2_8.stf ... exclude
+[  75/1982] checksum-l4-bmv2/checksum-l4-bmv2_9.stf ... timeout  300.60s  (5710.9s)
+[  76/1982] checksum1-bmv2/checksum1-bmv2_1.stf ... exclude
+[  77/1982] checksum1-bmv2/checksum1-bmv2_10.stf ... exclude
+[  78/1982] checksum1-bmv2/checksum1-bmv2_2.stf ... exclude
+[  79/1982] checksum1-bmv2/checksum1-bmv2_3.stf ... timeout  300.60s  (6011.5s)
+[  80/1982] checksum1-bmv2/checksum1-bmv2_4.stf ... exclude
+[  81/1982] checksum1-bmv2/checksum1-bmv2_5.stf ... exclude
+[  82/1982] checksum1-bmv2/checksum1-bmv2_6.stf ... exclude
+[  83/1982] checksum1-bmv2/checksum1-bmv2_7.stf ... timeout  300.60s  (6312.1s)
+[  84/1982] checksum1-bmv2/checksum1-bmv2_8.stf ... exclude
+[  85/1982] checksum1-bmv2/checksum1-bmv2_9.stf ... exclude
+[  86/1982] checksum2-bmv2/checksum2-bmv2_1.stf ... exclude
+[  87/1982] checksum2-bmv2/checksum2-bmv2_10.stf ... timeout  300.56s  (6612.7s)
+[  88/1982] checksum2-bmv2/checksum2-bmv2_2.stf ... exclude
+[  89/1982] checksum2-bmv2/checksum2-bmv2_3.stf ... exclude
+[  90/1982] checksum2-bmv2/checksum2-bmv2_4.stf ... exclude
+[  91/1982] checksum2-bmv2/checksum2-bmv2_5.stf ... timeout  300.60s  (6913.3s)
+[  92/1982] checksum2-bmv2/checksum2-bmv2_6.stf ... exclude
+[  93/1982] checksum2-bmv2/checksum2-bmv2_7.stf ... exclude
+[  94/1982] checksum2-bmv2/checksum2-bmv2_8.stf ... exclude
+[  95/1982] checksum2-bmv2/checksum2-bmv2_9.stf ... timeout  300.60s  (7213.9s)
+[  96/1982] checksum3-bmv2/checksum3-bmv2_1.stf ... exclude
+[  97/1982] checksum3-bmv2/checksum3-bmv2_10.stf ... exclude
+[  98/1982] checksum3-bmv2/checksum3-bmv2_2.stf ... exclude
+[  99/1982] checksum3-bmv2/checksum3-bmv2_3.stf ... timeout  300.60s  (7514.5s)
+[ 100/1982] checksum3-bmv2/checksum3-bmv2_4.stf ... exclude
+[ 101/1982] checksum3-bmv2/checksum3-bmv2_5.stf ... exclude
+[ 102/1982] checksum3-bmv2/checksum3-bmv2_6.stf ... exclude
+[ 103/1982] checksum3-bmv2/checksum3-bmv2_7.stf ... timeout  300.60s  (7815.1s)
+[ 104/1982] checksum3-bmv2/checksum3-bmv2_8.stf ... exclude
+[ 105/1982] checksum3-bmv2/checksum3-bmv2_9.stf ... exclude
+[ 106/1982] concat-bmv2/concat-bmv2_1.stf ... exclude
+[ 107/1982] concat-bmv2/concat-bmv2_2.stf ... timeout  300.59s  (8115.7s)
+[ 108/1982] constant-in-calculation-bmv2/constant-in-calculation-bmv2_1.stf ... exclude
+[ 109/1982] control-hs-index-test1/control-hs-index-test1_1.stf ... exclude
+[ 110/1982] control-hs-index-test1/control-hs-index-test1_10.stf ... exclude
+[ 111/1982] control-hs-index-test1/control-hs-index-test1_2.stf ... timeout  300.55s  (8416.2s)
+[ 112/1982] control-hs-index-test1/control-hs-index-test1_3.stf ... exclude
+[ 113/1982] control-hs-index-test1/control-hs-index-test1_4.stf ... exclude
+[ 114/1982] control-hs-index-test1/control-hs-index-test1_5.stf ... exclude
+[ 115/1982] control-hs-index-test1/control-hs-index-test1_6.stf ... timeout  300.59s  (8716.8s)
+[ 116/1982] control-hs-index-test1/control-hs-index-test1_7.stf ... exclude
+[ 117/1982] control-hs-index-test1/control-hs-index-test1_8.stf ... exclude
+[ 118/1982] control-hs-index-test1/control-hs-index-test1_9.stf ... exclude
+[ 119/1982] control-hs-index-test2/control-hs-index-test2_1.stf ... timeout  300.56s  (9017.4s)
+[ 120/1982] control-hs-index-test2/control-hs-index-test2_2.stf ... exclude
+[ 121/1982] control-hs-index-test2/control-hs-index-test2_3.stf ... exclude
+[ 122/1982] control-hs-index-test2/control-hs-index-test2_4.stf ... exclude
+[ 123/1982] control-hs-index-test2/control-hs-index-test2_5.stf ... timeout  300.55s  (9318.0s)
+[ 124/1982] control-hs-index-test2/control-hs-index-test2_6.stf ... exclude
+[ 125/1982] control-hs-index-test2/control-hs-index-test2_7.stf ... exclude
+[ 126/1982] control-hs-index-test2/control-hs-index-test2_8.stf ... exclude
+[ 127/1982] control-hs-index-test2/control-hs-index-test2_9.stf ... timeout  300.56s  (9618.5s)
+[ 128/1982] control-hs-index-test3/control-hs-index-test3_1.stf ... exclude
+[ 129/1982] control-hs-index-test3/control-hs-index-test3_10.stf ... exclude
+[ 130/1982] control-hs-index-test3/control-hs-index-test3_2.stf ... exclude
+[ 131/1982] control-hs-index-test3/control-hs-index-test3_3.stf ... timeout  300.55s  (9919.1s)
+[ 132/1982] control-hs-index-test3/control-hs-index-test3_4.stf ... exclude
+[ 133/1982] control-hs-index-test3/control-hs-index-test3_5.stf ... exclude
+[ 134/1982] control-hs-index-test3/control-hs-index-test3_6.stf ... exclude
+[ 135/1982] control-hs-index-test3/control-hs-index-test3_7.stf ... timeout  300.56s  (10219.6s)
+[ 136/1982] control-hs-index-test3/control-hs-index-test3_8.stf ... exclude
+[ 137/1982] control-hs-index-test3/control-hs-index-test3_9.stf ... exclude
+[ 138/1982] control-hs-index-test4/control-hs-index-test4_1.stf ... exclude
+[ 139/1982] control-hs-index-test4/control-hs-index-test4_10.stf ... timeout  300.57s  (10520.2s)
+[ 140/1982] control-hs-index-test4/control-hs-index-test4_2.stf ... exclude
+[ 141/1982] control-hs-index-test4/control-hs-index-test4_3.stf ... exclude
+[ 142/1982] control-hs-index-test4/control-hs-index-test4_4.stf ... exclude
+[ 143/1982] control-hs-index-test4/control-hs-index-test4_5.stf ... timeout  300.57s  (10820.8s)
+[ 144/1982] control-hs-index-test4/control-hs-index-test4_6.stf ... exclude
+[ 145/1982] control-hs-index-test4/control-hs-index-test4_7.stf ... exclude
+[ 146/1982] control-hs-index-test4/control-hs-index-test4_8.stf ... exclude
+[ 147/1982] control-hs-index-test4/control-hs-index-test4_9.stf ... timeout  300.56s  (11121.3s)
+[ 148/1982] control-hs-index-test5/control-hs-index-test5_1.stf ... exclude
+[ 149/1982] control-hs-index-test5/control-hs-index-test5_2.stf ... exclude
+[ 150/1982] control-hs-index-test5/control-hs-index-test5_3.stf ... exclude
+[ 151/1982] control-hs-index-test6/control-hs-index-test6_1.stf ... timeout  300.56s  (11421.9s)
+[ 152/1982] control-hs-index-test6/control-hs-index-test6_10.stf ... exclude
+[ 153/1982] control-hs-index-test6/control-hs-index-test6_2.stf ... exclude
+[ 154/1982] control-hs-index-test6/control-hs-index-test6_3.stf ... exclude
+[ 155/1982] control-hs-index-test6/control-hs-index-test6_4.stf ... timeout  300.57s  (11722.5s)
+[ 156/1982] control-hs-index-test6/control-hs-index-test6_5.stf ... exclude
+[ 157/1982] control-hs-index-test6/control-hs-index-test6_6.stf ... exclude
+[ 158/1982] control-hs-index-test6/control-hs-index-test6_7.stf ... exclude
+[ 159/1982] control-hs-index-test6/control-hs-index-test6_8.stf ... timeout  300.56s  (12023.0s)
+[ 160/1982] control-hs-index-test6/control-hs-index-test6_9.stf ... exclude
+[ 161/1982] copyprop1/copyprop1_1.stf ... exclude
+[ 162/1982] copyprop1/copyprop1_2.stf ... exclude
+[ 163/1982] copyprop1/copyprop1_3.stf ... timeout  300.56s  (12323.6s)
+[ 164/1982] copyprop1/copyprop1_4.stf ... exclude
+[ 165/1982] crc32-bmv2/crc32-bmv2_1.stf ... exclude
+[ 166/1982] crc32-bmv2/crc32-bmv2_10.stf ... exclude
+[ 167/1982] crc32-bmv2/crc32-bmv2_2.stf ... timeout  300.59s  (12624.2s)
+[ 168/1982] crc32-bmv2/crc32-bmv2_3.stf ... exclude
+[ 169/1982] crc32-bmv2/crc32-bmv2_4.stf ... exclude
+[ 170/1982] crc32-bmv2/crc32-bmv2_5.stf ... exclude
+[ 171/1982] crc32-bmv2/crc32-bmv2_6.stf ... timeout  300.56s  (12924.7s)
+[ 172/1982] crc32-bmv2/crc32-bmv2_7.stf ... exclude
+[ 173/1982] crc32-bmv2/crc32-bmv2_8.stf ... exclude
+[ 174/1982] crc32-bmv2/crc32-bmv2_9.stf ... exclude
+[ 175/1982] custom-type-restricted-fields/custom-type-restricted-fields_1.stf ... exclude
+[ 176/1982] custom-type-restricted-fields/custom-type-restricted-fields_10.stf ... exclude
+[ 177/1982] custom-type-restricted-fields/custom-type-restricted-fields_2.stf ... exclude
+[ 178/1982] custom-type-restricted-fields/custom-type-restricted-fields_3.stf ... exclude
+[ 179/1982] custom-type-restricted-fields/custom-type-restricted-fields_4.stf ... exclude
+[ 180/1982] custom-type-restricted-fields/custom-type-restricted-fields_5.stf ... exclude
+[ 181/1982] custom-type-restricted-fields/custom-type-restricted-fields_6.stf ... exclude
+[ 182/1982] custom-type-restricted-fields/custom-type-restricted-fields_7.stf ... exclude
+[ 183/1982] custom-type-restricted-fields/custom-type-restricted-fields_8.stf ... exclude
+[ 184/1982] custom-type-restricted-fields/custom-type-restricted-fields_9.stf ... exclude
+[ 185/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_1.stf ... timeout  300.55s  (13225.3s)
+[ 186/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_10.stf ... exclude
+[ 187/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_2.stf ... exclude
+[ 188/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_3.stf ... exclude
+[ 189/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_4.stf ... timeout  300.58s  (13525.8s)
+[ 190/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_5.stf ... exclude
+[ 191/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_6.stf ... exclude
+[ 192/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_7.stf ... exclude
+[ 193/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_8.stf ... timeout  300.58s  (13826.4s)
+[ 194/1982] dash-pipeline-v1model-bmv2/dash-pipeline-v1model-bmv2_9.stf ... exclude
+[ 195/1982] def-use/def-use_1.stf ... exclude
+[ 196/1982] default-action-arg-bmv2/default-action-arg-bmv2_1.stf ... exclude
+[ 197/1982] default-action-arg-bmv2/default-action-arg-bmv2_2.stf ... timeout  300.58s  (14127.0s)
+[ 198/1982] default-action-arg-bmv2/default-action-arg-bmv2_3.stf ... exclude
+[ 199/1982] default_action-bmv2/default_action-bmv2_1.stf ... exclude
+[ 200/1982] default_action-bmv2/default_action-bmv2_2.stf ... exclude
+[ 201/1982] drop-bmv2/drop-bmv2_1.stf ... timeout  300.60s  (14427.6s)
+[ 202/1982] empty-bmv2/empty-bmv2_1.stf ... exclude
+[ 203/1982] enum-bmv2/enum-bmv2_1.stf ... exclude
+[ 204/1982] enum-bmv2/enum-bmv2_2.stf ... exclude
+[ 205/1982] equality-bmv2/equality-bmv2_1.stf ... timeout  300.60s  (14728.2s)
+[ 206/1982] equality-bmv2/equality-bmv2_10.stf ... exclude
+[ 207/1982] equality-bmv2/equality-bmv2_2.stf ... exclude
+[ 208/1982] equality-bmv2/equality-bmv2_3.stf ... exclude
+[ 209/1982] equality-bmv2/equality-bmv2_4.stf ... timeout  300.56s  (15028.8s)
+[ 210/1982] equality-bmv2/equality-bmv2_5.stf ... exclude
+[ 211/1982] equality-bmv2/equality-bmv2_6.stf ... exclude
+[ 212/1982] equality-bmv2/equality-bmv2_7.stf ... exclude
+[ 213/1982] equality-bmv2/equality-bmv2_8.stf ... timeout  300.56s  (15329.3s)
+[ 214/1982] equality-bmv2/equality-bmv2_9.stf ... exclude
+[ 215/1982] equality-varbit-bmv2/equality-varbit-bmv2_1.stf ... exclude
+[ 216/1982] extract_for_header_union/extract_for_header_union_1.stf ... exclude
+[ 217/1982] extract_for_header_union/extract_for_header_union_2.stf ... timeout  300.58s  (15629.9s)
+[ 218/1982] fabric/fabric_1.stf ... exclude
+[ 219/1982] fabric/fabric_10.stf ... exclude
+[ 220/1982] fabric/fabric_2.stf ... exclude
+[ 221/1982] fabric/fabric_3.stf ... timeout  300.55s  (15930.5s)
+[ 222/1982] fabric/fabric_4.stf ... exclude
+[ 223/1982] fabric/fabric_5.stf ... exclude
+[ 224/1982] fabric/fabric_6.stf ... exclude
+[ 225/1982] fabric/fabric_7.stf ... timeout  300.56s  (16231.0s)
+[ 226/1982] fabric/fabric_8.stf ... exclude
+[ 227/1982] fabric/fabric_9.stf ... exclude
+[ 228/1982] flag_lost-bmv2/flag_lost-bmv2_1.stf ... exclude
+[ 229/1982] flag_lost-bmv2/flag_lost-bmv2_2.stf ... timeout  300.57s  (16531.6s)
+[ 230/1982] flag_lost-bmv2/flag_lost-bmv2_3.stf ... exclude
+[ 231/1982] flag_lost-bmv2/flag_lost-bmv2_4.stf ... exclude
+[ 232/1982] flag_lost-bmv2/flag_lost-bmv2_5.stf ... exclude
+[ 233/1982] flag_lost-bmv2/flag_lost-bmv2_6.stf ... timeout  300.56s  (16832.1s)
+[ 234/1982] flag_lost-bmv2/flag_lost-bmv2_7.stf ... exclude
+[ 235/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_1.stf ... exclude
+[ 236/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_10.stf ... exclude
+[ 237/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_2.stf ... timeout  300.59s  (17132.7s)
+[ 238/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_3.stf ... exclude
+[ 239/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_4.stf ... exclude
+[ 240/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_5.stf ... exclude
+[ 241/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_6.stf ... timeout  300.56s  (17433.3s)
+[ 242/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_7.stf ... exclude
+[ 243/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_8.stf ... exclude
+[ 244/1982] flowlet_switching-bmv2/flowlet_switching-bmv2_9.stf ... exclude
+[ 245/1982] free-form-annotation/free-form-annotation_1.stf ... timeout  300.55s  (17733.8s)
+[ 246/1982] gauntlet_action_mux-bmv2/gauntlet_action_mux-bmv2_1.stf ... exclude
+[ 247/1982] gauntlet_action_mux-bmv2/gauntlet_action_mux-bmv2_2.stf ... exclude
+[ 248/1982] gauntlet_action_mux-bmv2/gauntlet_action_mux-bmv2_3.stf ... exclude
+[ 249/1982] gauntlet_action_mux-bmv2/gauntlet_action_mux-bmv2_4.stf ... timeout  300.58s  (18034.4s)
+[ 250/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_1.stf ... exclude
+[ 251/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_2.stf ... exclude
+[ 252/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_3.stf ... exclude
+[ 253/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_4.stf ... timeout  300.60s  (18335.0s)
+[ 254/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_5.stf ... exclude
+[ 255/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_6.stf ... exclude
+[ 256/1982] gauntlet_action_return-bmv2/gauntlet_action_return-bmv2_7.stf ... exclude
+[ 257/1982] gauntlet_arithref_cast-bmv2/gauntlet_arithref_cast-bmv2_1.stf ... timeout  300.60s  (18635.6s)
+[ 258/1982] gauntlet_arithref_cast-bmv2/gauntlet_arithref_cast-bmv2_2.stf ... exclude
+[ 259/1982] gauntlet_arithref_cast-bmv2/gauntlet_arithref_cast-bmv2_3.stf ... exclude
+[ 260/1982] gauntlet_complex_initialization-bmv2/gauntlet_complex_initialization-bmv2_1.stf ... exclude
+[ 261/1982] gauntlet_complex_initialization-bmv2/gauntlet_complex_initialization-bmv2_2.stf ... timeout  300.56s  (18936.2s)
+[ 262/1982] gauntlet_copy_out-bmv2/gauntlet_copy_out-bmv2_1.stf ... exclude
+[ 263/1982] gauntlet_copy_out-bmv2/gauntlet_copy_out-bmv2_2.stf ... exclude
+[ 264/1982] gauntlet_copy_out-bmv2/gauntlet_copy_out-bmv2_3.stf ... exclude
+[ 265/1982] gauntlet_enum_assign-bmv2/gauntlet_enum_assign-bmv2_1.stf ... timeout  300.60s  (19236.8s)
+[ 266/1982] gauntlet_exit_after_valid-bmv2/gauntlet_exit_after_valid-bmv2_1.stf ... exclude
+[ 267/1982] gauntlet_exit_after_valid-bmv2/gauntlet_exit_after_valid-bmv2_2.stf ... exclude
+[ 268/1982] gauntlet_exit_after_valid-bmv2/gauntlet_exit_after_valid-bmv2_3.stf ... exclude
+[ 269/1982] gauntlet_exit_combination_1-bmv2/gauntlet_exit_combination_1-bmv2_1.stf ... timeout  300.55s  (19537.3s)
+[ 270/1982] gauntlet_exit_combination_1-bmv2/gauntlet_exit_combination_1-bmv2_2.stf ... exclude
+[ 271/1982] gauntlet_exit_combination_1-bmv2/gauntlet_exit_combination_1-bmv2_3.stf ... exclude
+[ 272/1982] gauntlet_exit_combination_1-bmv2/gauntlet_exit_combination_1-bmv2_4.stf ... exclude
+[ 273/1982] gauntlet_exit_combination_1-bmv2/gauntlet_exit_combination_1-bmv2_5.stf ... timeout  300.60s  (19837.9s)
+[ 274/1982] gauntlet_exit_combination_1-bmv2/gauntlet_exit_combination_1-bmv2_6.stf ... exclude
+[ 275/1982] gauntlet_exit_combination_10-bmv2/gauntlet_exit_combination_10-bmv2_1.stf ... exclude
+[ 276/1982] gauntlet_exit_combination_10-bmv2/gauntlet_exit_combination_10-bmv2_2.stf ... exclude
+[ 277/1982] gauntlet_exit_combination_10-bmv2/gauntlet_exit_combination_10-bmv2_3.stf ... timeout  300.59s  (20138.5s)
+[ 278/1982] gauntlet_exit_combination_10-bmv2/gauntlet_exit_combination_10-bmv2_4.stf ... exclude
+[ 279/1982] gauntlet_exit_combination_11-bmv2/gauntlet_exit_combination_11-bmv2_1.stf ... exclude
+[ 280/1982] gauntlet_exit_combination_11-bmv2/gauntlet_exit_combination_11-bmv2_2.stf ... exclude
+[ 281/1982] gauntlet_exit_combination_11-bmv2/gauntlet_exit_combination_11-bmv2_3.stf ... timeout  300.60s  (20439.1s)
+[ 282/1982] gauntlet_exit_combination_11-bmv2/gauntlet_exit_combination_11-bmv2_4.stf ... exclude
+[ 283/1982] gauntlet_exit_combination_13-bmv2/gauntlet_exit_combination_13-bmv2_1.stf ... exclude
+[ 284/1982] gauntlet_exit_combination_13-bmv2/gauntlet_exit_combination_13-bmv2_2.stf ... exclude
+[ 285/1982] gauntlet_exit_combination_13-bmv2/gauntlet_exit_combination_13-bmv2_3.stf ... timeout  300.60s  (20739.7s)
+[ 286/1982] gauntlet_exit_combination_13-bmv2/gauntlet_exit_combination_13-bmv2_4.stf ... exclude
+[ 287/1982] gauntlet_exit_combination_14-bmv2/gauntlet_exit_combination_14-bmv2_1.stf ... exclude
+[ 288/1982] gauntlet_exit_combination_14-bmv2/gauntlet_exit_combination_14-bmv2_2.stf ... exclude
+[ 289/1982] gauntlet_exit_combination_14-bmv2/gauntlet_exit_combination_14-bmv2_3.stf ... timeout  300.60s  (21040.3s)
+[ 290/1982] gauntlet_exit_combination_14-bmv2/gauntlet_exit_combination_14-bmv2_4.stf ... exclude
+[ 291/1982] gauntlet_exit_combination_15-bmv2/gauntlet_exit_combination_15-bmv2_1.stf ... exclude
+[ 292/1982] gauntlet_exit_combination_15-bmv2/gauntlet_exit_combination_15-bmv2_2.stf ... exclude
+[ 293/1982] gauntlet_exit_combination_15-bmv2/gauntlet_exit_combination_15-bmv2_3.stf ... timeout  300.59s  (21340.9s)
+[ 294/1982] gauntlet_exit_combination_15-bmv2/gauntlet_exit_combination_15-bmv2_4.stf ... exclude
+[ 295/1982] gauntlet_exit_combination_15-bmv2/gauntlet_exit_combination_15-bmv2_5.stf ... exclude
+[ 296/1982] gauntlet_exit_combination_15-bmv2/gauntlet_exit_combination_15-bmv2_6.stf ... exclude
+[ 297/1982] gauntlet_exit_combination_16-bmv2/gauntlet_exit_combination_16-bmv2_1.stf ... timeout  300.57s  (21641.5s)
+[ 298/1982] gauntlet_exit_combination_16-bmv2/gauntlet_exit_combination_16-bmv2_2.stf ... exclude
+[ 299/1982] gauntlet_exit_combination_16-bmv2/gauntlet_exit_combination_16-bmv2_3.stf ... exclude
+[ 300/1982] gauntlet_exit_combination_16-bmv2/gauntlet_exit_combination_16-bmv2_4.stf ... exclude
+[ 301/1982] gauntlet_exit_combination_17-bmv2/gauntlet_exit_combination_17-bmv2_1.stf ... timeout  300.60s  (21942.1s)
+[ 302/1982] gauntlet_exit_combination_17-bmv2/gauntlet_exit_combination_17-bmv2_2.stf ... exclude
+[ 303/1982] gauntlet_exit_combination_17-bmv2/gauntlet_exit_combination_17-bmv2_3.stf ... exclude
+[ 304/1982] gauntlet_exit_combination_17-bmv2/gauntlet_exit_combination_17-bmv2_4.stf ... exclude
+[ 305/1982] gauntlet_exit_combination_17-bmv2/gauntlet_exit_combination_17-bmv2_5.stf ... timeout  300.59s  (22242.6s)
+[ 306/1982] gauntlet_exit_combination_17-bmv2/gauntlet_exit_combination_17-bmv2_6.stf ... exclude
+[ 307/1982] gauntlet_exit_combination_18-bmv2/gauntlet_exit_combination_18-bmv2_1.stf ... exclude
+[ 308/1982] gauntlet_exit_combination_18-bmv2/gauntlet_exit_combination_18-bmv2_2.stf ... exclude
+[ 309/1982] gauntlet_exit_combination_19-bmv2/gauntlet_exit_combination_19-bmv2_1.stf ... timeout  300.56s  (22543.2s)
+[ 310/1982] gauntlet_exit_combination_19-bmv2/gauntlet_exit_combination_19-bmv2_2.stf ... exclude
+[ 311/1982] gauntlet_exit_combination_19-bmv2/gauntlet_exit_combination_19-bmv2_3.stf ... exclude
+[ 312/1982] gauntlet_exit_combination_19-bmv2/gauntlet_exit_combination_19-bmv2_4.stf ... exclude
+[ 313/1982] gauntlet_exit_combination_2-bmv2/gauntlet_exit_combination_2-bmv2_1.stf ... timeout  300.58s  (22843.8s)
+[ 314/1982] gauntlet_exit_combination_2-bmv2/gauntlet_exit_combination_2-bmv2_2.stf ... exclude
+[ 315/1982] gauntlet_exit_combination_2-bmv2/gauntlet_exit_combination_2-bmv2_3.stf ... exclude
+[ 316/1982] gauntlet_exit_combination_2-bmv2/gauntlet_exit_combination_2-bmv2_4.stf ... exclude
+[ 317/1982] gauntlet_exit_combination_20-bmv2/gauntlet_exit_combination_20-bmv2_1.stf ... timeout  300.59s  (23144.4s)
+[ 318/1982] gauntlet_exit_combination_20-bmv2/gauntlet_exit_combination_20-bmv2_2.stf ... exclude
+[ 319/1982] gauntlet_exit_combination_21-bmv2/gauntlet_exit_combination_21-bmv2_1.stf ... exclude
+[ 320/1982] gauntlet_exit_combination_21-bmv2/gauntlet_exit_combination_21-bmv2_2.stf ... exclude
+[ 321/1982] gauntlet_exit_combination_22-bmv2/gauntlet_exit_combination_22-bmv2_1.stf ... timeout  300.56s  (23444.9s)
+[ 322/1982] gauntlet_exit_combination_22-bmv2/gauntlet_exit_combination_22-bmv2_2.stf ... exclude
+[ 323/1982] gauntlet_exit_combination_22-bmv2/gauntlet_exit_combination_22-bmv2_3.stf ... exclude
+[ 324/1982] gauntlet_exit_combination_22-bmv2/gauntlet_exit_combination_22-bmv2_4.stf ... exclude
+[ 325/1982] gauntlet_exit_combination_23-bmv2/gauntlet_exit_combination_23-bmv2_1.stf ... timeout  300.59s  (23745.5s)
+[ 326/1982] gauntlet_exit_combination_23-bmv2/gauntlet_exit_combination_23-bmv2_2.stf ... exclude
+[ 327/1982] gauntlet_exit_combination_23-bmv2/gauntlet_exit_combination_23-bmv2_3.stf ... exclude
+[ 328/1982] gauntlet_exit_combination_3-bmv2/gauntlet_exit_combination_3-bmv2_1.stf ... exclude
+[ 329/1982] gauntlet_exit_combination_3-bmv2/gauntlet_exit_combination_3-bmv2_2.stf ... timeout  300.56s  (24046.1s)
+[ 330/1982] gauntlet_exit_combination_3-bmv2/gauntlet_exit_combination_3-bmv2_3.stf ... exclude
+[ 331/1982] gauntlet_exit_combination_4-bmv2/gauntlet_exit_combination_4-bmv2_1.stf ... exclude
+[ 332/1982] gauntlet_exit_combination_4-bmv2/gauntlet_exit_combination_4-bmv2_2.stf ... exclude
+[ 333/1982] gauntlet_exit_combination_4-bmv2/gauntlet_exit_combination_4-bmv2_3.stf ... timeout  300.59s  (24346.7s)
+[ 334/1982] gauntlet_exit_combination_4-bmv2/gauntlet_exit_combination_4-bmv2_4.stf ... exclude
+[ 335/1982] gauntlet_exit_combination_5-bmv2/gauntlet_exit_combination_5-bmv2_1.stf ... exclude
+[ 336/1982] gauntlet_exit_combination_5-bmv2/gauntlet_exit_combination_5-bmv2_2.stf ... exclude
+[ 337/1982] gauntlet_exit_combination_6-bmv2/gauntlet_exit_combination_6-bmv2_1.stf ... timeout  300.56s  (24647.2s)
+[ 338/1982] gauntlet_exit_combination_6-bmv2/gauntlet_exit_combination_6-bmv2_2.stf ... exclude
+[ 339/1982] gauntlet_exit_combination_7-bmv2/gauntlet_exit_combination_7-bmv2_1.stf ... exclude
+[ 340/1982] gauntlet_exit_combination_7-bmv2/gauntlet_exit_combination_7-bmv2_2.stf ... exclude
+[ 341/1982] gauntlet_exit_combination_8-bmv2/gauntlet_exit_combination_8-bmv2_1.stf ... timeout  300.59s  (24947.8s)
+[ 342/1982] gauntlet_exit_combination_8-bmv2/gauntlet_exit_combination_8-bmv2_2.stf ... exclude
+[ 343/1982] gauntlet_exit_combination_9-bmv2/gauntlet_exit_combination_9-bmv2_1.stf ... exclude
+[ 344/1982] gauntlet_exit_combination_9-bmv2/gauntlet_exit_combination_9-bmv2_2.stf ... exclude
+[ 345/1982] gauntlet_exit_combination_9-bmv2/gauntlet_exit_combination_9-bmv2_3.stf ... timeout  300.60s  (25248.4s)
+[ 346/1982] gauntlet_exit_combination_9-bmv2/gauntlet_exit_combination_9-bmv2_4.stf ... exclude
+[ 347/1982] gauntlet_function_if_hdr_return-bmv2/gauntlet_function_if_hdr_return-bmv2_1.stf ... exclude
+[ 348/1982] gauntlet_function_if_hdr_return-bmv2/gauntlet_function_if_hdr_return-bmv2_2.stf ... exclude
+[ 349/1982] gauntlet_function_return-bmv2/gauntlet_function_return-bmv2_1.stf ... timeout  300.59s  (25549.0s)
+[ 350/1982] gauntlet_function_return_cast-bmv2/gauntlet_function_return_cast-bmv2_1.stf ... exclude
+[ 351/1982] gauntlet_function_return_cast-bmv2/gauntlet_function_return_cast-bmv2_2.stf ... exclude
+[ 352/1982] gauntlet_hdr_assign_1-bmv2/gauntlet_hdr_assign_1-bmv2_1.stf ... exclude
+[ 353/1982] gauntlet_hdr_assign_1-bmv2/gauntlet_hdr_assign_1-bmv2_2.stf ... timeout  300.56s  (25849.6s)
+[ 354/1982] gauntlet_hdr_assign_1-bmv2/gauntlet_hdr_assign_1-bmv2_3.stf ... exclude
+[ 355/1982] gauntlet_hdr_assign_2-bmv2/gauntlet_hdr_assign_2-bmv2_1.stf ... exclude
+[ 356/1982] gauntlet_hdr_assign_2-bmv2/gauntlet_hdr_assign_2-bmv2_2.stf ... exclude
+[ 357/1982] gauntlet_hdr_assign_2-bmv2/gauntlet_hdr_assign_2-bmv2_3.stf ... timeout  300.58s  (26150.2s)
+[ 358/1982] gauntlet_hdr_function_cast-bmv2/gauntlet_hdr_function_cast-bmv2_1.stf ... exclude
+[ 359/1982] gauntlet_hdr_function_cast-bmv2/gauntlet_hdr_function_cast-bmv2_2.stf ... exclude
+[ 360/1982] gauntlet_hdr_function_cast-bmv2/gauntlet_hdr_function_cast-bmv2_3.stf ... exclude
+[ 361/1982] gauntlet_hdr_function_cast-bmv2/gauntlet_hdr_function_cast-bmv2_4.stf ... timeout  300.60s  (26450.8s)
+[ 362/1982] gauntlet_hdr_function_cast-bmv2/gauntlet_hdr_function_cast-bmv2_5.stf ... exclude
+[ 363/1982] gauntlet_hdr_function_cast-bmv2/gauntlet_hdr_function_cast-bmv2_6.stf ... exclude
+[ 364/1982] gauntlet_hdr_in_value-bmv2/gauntlet_hdr_in_value-bmv2_1.stf ... exclude
+[ 365/1982] gauntlet_hdr_in_value-bmv2/gauntlet_hdr_in_value-bmv2_2.stf ... timeout  300.56s  (26751.3s)
+[ 366/1982] gauntlet_hdr_init-bmv2/gauntlet_hdr_init-bmv2_1.stf ... exclude
+[ 367/1982] gauntlet_hdr_init-bmv2/gauntlet_hdr_init-bmv2_2.stf ... exclude
+[ 368/1982] gauntlet_hdr_init-bmv2/gauntlet_hdr_init-bmv2_3.stf ... exclude
+[ 369/1982] gauntlet_hdr_int_initializer-bmv2/gauntlet_hdr_int_initializer-bmv2_1.stf ... timeout  300.55s  (27051.9s)
+[ 370/1982] gauntlet_hdr_int_initializer-bmv2/gauntlet_hdr_int_initializer-bmv2_2.stf ... exclude
+[ 371/1982] gauntlet_hdr_out_in_action-bmv2/gauntlet_hdr_out_in_action-bmv2_1.stf ... exclude
+[ 372/1982] gauntlet_hdr_out_in_action-bmv2/gauntlet_hdr_out_in_action-bmv2_2.stf ... exclude
+[ 373/1982] gauntlet_hdr_out_in_action-bmv2/gauntlet_hdr_out_in_action-bmv2_3.stf ... timeout  300.60s  (27352.5s)
+[ 374/1982] gauntlet_hdr_set_valid-bmv2/gauntlet_hdr_set_valid-bmv2_1.stf ... exclude
+[ 375/1982] gauntlet_hdr_set_valid-bmv2/gauntlet_hdr_set_valid-bmv2_2.stf ... exclude
+[ 376/1982] gauntlet_hdr_set_valid-bmv2/gauntlet_hdr_set_valid-bmv2_3.stf ... exclude
+[ 377/1982] gauntlet_hdr_set_valid-bmv2/gauntlet_hdr_set_valid-bmv2_4.stf ... timeout  300.55s  (27653.0s)
+[ 378/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_1.stf ... exclude
+[ 379/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_10.stf ... exclude
+[ 380/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_2.stf ... exclude
+[ 381/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_3.stf ... timeout  300.60s  (27953.6s)
+[ 382/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_4.stf ... exclude
+[ 383/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_5.stf ... exclude
+[ 384/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_6.stf ... exclude
+[ 385/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_7.stf ... timeout  300.56s  (28254.2s)
+[ 386/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_8.stf ... exclude
+[ 387/1982] gauntlet_index_1-bmv2/gauntlet_index_1-bmv2_9.stf ... exclude
+[ 388/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_1.stf ... exclude
+[ 389/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_10.stf ... timeout  300.59s  (28554.8s)
+[ 390/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_2.stf ... exclude
+[ 391/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_3.stf ... exclude
+[ 392/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_4.stf ... exclude
+[ 393/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_5.stf ... timeout  300.56s  (28855.3s)
+[ 394/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_6.stf ... exclude
+[ 395/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_7.stf ... exclude
+[ 396/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_8.stf ... exclude
+[ 397/1982] gauntlet_index_2-bmv2/gauntlet_index_2-bmv2_9.stf ... timeout  300.56s  (29155.9s)
+[ 398/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_1.stf ... exclude
+[ 399/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_2.stf ... exclude
+[ 400/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_3.stf ... exclude
+[ 401/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_4.stf ... timeout  300.56s  (29456.4s)
+[ 402/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_5.stf ... exclude
+[ 403/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_6.stf ... exclude
+[ 404/1982] gauntlet_index_4-bmv2/gauntlet_index_4-bmv2_7.stf ... exclude
+[ 405/1982] gauntlet_index_5-bmv2/gauntlet_index_5-bmv2_1.stf ... timeout  300.56s  (29757.0s)
+[ 406/1982] gauntlet_index_5-bmv2/gauntlet_index_5-bmv2_2.stf ... exclude
+[ 407/1982] gauntlet_index_5-bmv2/gauntlet_index_5-bmv2_3.stf ... exclude
+[ 408/1982] gauntlet_index_5-bmv2/gauntlet_index_5-bmv2_4.stf ... exclude
+[ 409/1982] gauntlet_index_6-bmv2/gauntlet_index_6-bmv2_1.stf ... timeout  300.58s  (30057.6s)
+[ 410/1982] gauntlet_index_6-bmv2/gauntlet_index_6-bmv2_2.stf ... exclude
+[ 411/1982] gauntlet_index_6-bmv2/gauntlet_index_6-bmv2_3.stf ... exclude
+[ 412/1982] gauntlet_index_6-bmv2/gauntlet_index_6-bmv2_4.stf ... exclude
+[ 413/1982] gauntlet_index_6-bmv2/gauntlet_index_6-bmv2_5.stf ... timeout  300.55s  (30358.1s)
+[ 414/1982] gauntlet_index_7-bmv2/gauntlet_index_7-bmv2_1.stf ... exclude
+[ 415/1982] gauntlet_index_7-bmv2/gauntlet_index_7-bmv2_2.stf ... exclude
+[ 416/1982] gauntlet_index_7-bmv2/gauntlet_index_7-bmv2_3.stf ... exclude
+[ 417/1982] gauntlet_index_7-bmv2/gauntlet_index_7-bmv2_4.stf ... timeout  300.56s  (30658.7s)
+[ 418/1982] gauntlet_index_7-bmv2/gauntlet_index_7-bmv2_5.stf ... exclude
+[ 419/1982] gauntlet_index_7-bmv2/gauntlet_index_7-bmv2_6.stf ... exclude
+[ 420/1982] gauntlet_index_8-bmv2/gauntlet_index_8-bmv2_1.stf ... exclude
+[ 421/1982] gauntlet_index_8-bmv2/gauntlet_index_8-bmv2_2.stf ... timeout  300.59s  (30959.3s)
+[ 422/1982] gauntlet_index_8-bmv2/gauntlet_index_8-bmv2_3.stf ... exclude
+[ 423/1982] gauntlet_index_8-bmv2/gauntlet_index_8-bmv2_4.stf ... exclude
+[ 424/1982] gauntlet_index_8-bmv2/gauntlet_index_8-bmv2_5.stf ... exclude
+[ 425/1982] gauntlet_index_8-bmv2/gauntlet_index_8-bmv2_6.stf ... timeout  300.59s  (31259.9s)
+[ 426/1982] gauntlet_index_9-bmv2/gauntlet_index_9-bmv2_1.stf ... exclude
+[ 427/1982] gauntlet_index_9-bmv2/gauntlet_index_9-bmv2_2.stf ... exclude
+[ 428/1982] gauntlet_index_9-bmv2/gauntlet_index_9-bmv2_3.stf ... exclude
+[ 429/1982] gauntlet_index_9-bmv2/gauntlet_index_9-bmv2_4.stf ... timeout  300.59s  (31560.5s)
+[ 430/1982] gauntlet_indirect_hdr_assign_1-bmv2/gauntlet_indirect_hdr_assign_1-bmv2_1.stf ... exclude
+[ 431/1982] gauntlet_indirect_hdr_assign_1-bmv2/gauntlet_indirect_hdr_assign_1-bmv2_2.stf ... exclude
+[ 432/1982] gauntlet_indirect_hdr_assign_2-bmv2/gauntlet_indirect_hdr_assign_2-bmv2_1.stf ... exclude
+[ 433/1982] gauntlet_indirect_hdr_assign_2-bmv2/gauntlet_indirect_hdr_assign_2-bmv2_2.stf ... timeout  300.55s  (31861.0s)
+[ 434/1982] gauntlet_inout_slice_table_key-bmv2/gauntlet_inout_slice_table_key-bmv2_1.stf ... exclude
+[ 435/1982] gauntlet_inout_slice_table_key-bmv2/gauntlet_inout_slice_table_key-bmv2_2.stf ... exclude
+[ 436/1982] gauntlet_inout_slice_table_key-bmv2/gauntlet_inout_slice_table_key-bmv2_3.stf ... exclude
+[ 437/1982] gauntlet_inout_slice_table_key-bmv2/gauntlet_inout_slice_table_key-bmv2_4.stf ... timeout  300.60s  (32161.6s)
+[ 438/1982] gauntlet_instance_overwrite-bmv2/gauntlet_instance_overwrite-bmv2_1.stf ... exclude
+[ 439/1982] gauntlet_instance_overwrite-bmv2/gauntlet_instance_overwrite-bmv2_2.stf ... exclude
+[ 440/1982] gauntlet_int_casting-bmv2/gauntlet_int_casting-bmv2_1.stf ... exclude
+[ 441/1982] gauntlet_int_casting-bmv2/gauntlet_int_casting-bmv2_2.stf ... timeout  300.59s  (32462.2s)
+[ 442/1982] gauntlet_int_slice-bmv2/gauntlet_int_slice-bmv2_1.stf ... exclude
+[ 443/1982] gauntlet_int_slice-bmv2/gauntlet_int_slice-bmv2_2.stf ... exclude
+[ 444/1982] gauntlet_int_slice-bmv2/gauntlet_int_slice-bmv2_3.stf ... exclude
+[ 445/1982] gauntlet_invalid_hdr_assign-bmv2/gauntlet_invalid_hdr_assign-bmv2_1.stf ... timeout  300.60s  (32762.8s)
+[ 446/1982] gauntlet_invalid_hdr_assign-bmv2/gauntlet_invalid_hdr_assign-bmv2_2.stf ... exclude
+[ 447/1982] gauntlet_invalid_hdr_assign-bmv2/gauntlet_invalid_hdr_assign-bmv2_3.stf ... exclude
+[ 448/1982] gauntlet_invalid_hdr_short_circuit-bmv2/gauntlet_invalid_hdr_short_circuit-bmv2_1.stf ... exclude
+[ 449/1982] gauntlet_invalid_hdr_short_circuit-bmv2/gauntlet_invalid_hdr_short_circuit-bmv2_2.stf ... timeout  300.59s  (33063.4s)
+[ 450/1982] gauntlet_list_as_in_argument-bmv2/gauntlet_list_as_in_argument-bmv2_1.stf ... exclude
+[ 451/1982] gauntlet_list_as_in_argument-bmv2/gauntlet_list_as_in_argument-bmv2_2.stf ... exclude
+[ 452/1982] gauntlet_lookahead_expansion-bmv2/gauntlet_lookahead_expansion-bmv2_1.stf ... exclude
+[ 453/1982] gauntlet_lookahead_expansion-bmv2/gauntlet_lookahead_expansion-bmv2_2.stf ... timeout  300.59s  (33364.0s)
+[ 454/1982] gauntlet_lookahead_expansion-bmv2/gauntlet_lookahead_expansion-bmv2_3.stf ... exclude
+[ 455/1982] gauntlet_mux_eval-bmv2/gauntlet_mux_eval-bmv2_1.stf ... exclude
+[ 456/1982] gauntlet_mux_eval-bmv2/gauntlet_mux_eval-bmv2_2.stf ... exclude
+[ 457/1982] gauntlet_mux_hdr-bmv2/gauntlet_mux_hdr-bmv2_1.stf ... timeout  300.56s  (33664.5s)
+[ 458/1982] gauntlet_mux_hdr-bmv2/gauntlet_mux_hdr-bmv2_2.stf ... exclude
+[ 459/1982] gauntlet_mux_hdr-bmv2/gauntlet_mux_hdr-bmv2_3.stf ... exclude
+[ 460/1982] gauntlet_mux_hdr-bmv2/gauntlet_mux_hdr-bmv2_4.stf ... exclude
+[ 461/1982] gauntlet_mux_hdr-bmv2/gauntlet_mux_hdr-bmv2_5.stf ... timeout  300.58s  (33965.1s)
+[ 462/1982] gauntlet_mux_hdr-bmv2/gauntlet_mux_hdr-bmv2_6.stf ... exclude
+[ 463/1982] gauntlet_mux_typecasting-bmv2/gauntlet_mux_typecasting-bmv2_1.stf ... exclude
+[ 464/1982] gauntlet_mux_typecasting-bmv2/gauntlet_mux_typecasting-bmv2_2.stf ... exclude
+[ 465/1982] gauntlet_mux_typecasting-bmv2/gauntlet_mux_typecasting-bmv2_3.stf ... timeout  300.56s  (34265.7s)
+[ 466/1982] gauntlet_mux_validity-bmv2/gauntlet_mux_validity-bmv2_1.stf ... exclude
+[ 467/1982] gauntlet_mux_validity-bmv2/gauntlet_mux_validity-bmv2_2.stf ... exclude
+[ 468/1982] gauntlet_mux_validity-bmv2/gauntlet_mux_validity-bmv2_3.stf ... exclude
+[ 469/1982] gauntlet_nested_ifs_in_function-bmv2/gauntlet_nested_ifs_in_function-bmv2_1.stf ... timeout  300.60s  (34566.3s)
+[ 470/1982] gauntlet_nested_ifs_in_function-bmv2/gauntlet_nested_ifs_in_function-bmv2_2.stf ... exclude
+[ 471/1982] gauntlet_nested_ifs_in_function-bmv2/gauntlet_nested_ifs_in_function-bmv2_3.stf ... exclude
+[ 472/1982] gauntlet_nested_slice-bmv2/gauntlet_nested_slice-bmv2_1.stf ... exclude
+[ 473/1982] gauntlet_nested_slice-bmv2/gauntlet_nested_slice-bmv2_2.stf ... timeout  300.58s  (34866.9s)
+[ 474/1982] gauntlet_nested_slice-bmv2/gauntlet_nested_slice-bmv2_3.stf ... exclude
+[ 475/1982] gauntlet_nested_switch-bmv2/gauntlet_nested_switch-bmv2_1.stf ... exclude
+[ 476/1982] gauntlet_nested_switch-bmv2/gauntlet_nested_switch-bmv2_2.stf ... exclude
+[ 477/1982] gauntlet_nested_table_calls-bmv2/gauntlet_nested_table_calls-bmv2_1.stf ... timeout  300.56s  (35167.4s)
+[ 478/1982] gauntlet_nested_table_calls-bmv2/gauntlet_nested_table_calls-bmv2_2.stf ... exclude
+[ 479/1982] gauntlet_nested_table_calls-bmv2/gauntlet_nested_table_calls-bmv2_3.stf ... exclude
+[ 480/1982] gauntlet_return_truncate-bmv2/gauntlet_return_truncate-bmv2_1.stf ... exclude
+[ 481/1982] gauntlet_return_truncate-bmv2/gauntlet_return_truncate-bmv2_2.stf ... timeout  300.60s  (35468.0s)
+[ 482/1982] gauntlet_return_truncate-bmv2/gauntlet_return_truncate-bmv2_3.stf ... exclude
+[ 483/1982] gauntlet_set_invalid-bmv2/gauntlet_set_invalid-bmv2_1.stf ... exclude
+[ 484/1982] gauntlet_set_invalid-bmv2/gauntlet_set_invalid-bmv2_2.stf ... exclude
+[ 485/1982] gauntlet_set_invalid-bmv2/gauntlet_set_invalid-bmv2_3.stf ... timeout  300.58s  (35768.6s)
+[ 486/1982] gauntlet_set_valid_in_function-bmv2/gauntlet_set_valid_in_function-bmv2_1.stf ... exclude
+[ 487/1982] gauntlet_set_valid_in_function-bmv2/gauntlet_set_valid_in_function-bmv2_2.stf ... exclude
+[ 488/1982] gauntlet_set_valid_in_function-bmv2/gauntlet_set_valid_in_function-bmv2_3.stf ... exclude
+[ 489/1982] gauntlet_short_circuit-bmv2/gauntlet_short_circuit-bmv2_1.stf ... timeout  300.56s  (36069.2s)
+[ 490/1982] gauntlet_short_circuit-bmv2/gauntlet_short_circuit-bmv2_2.stf ... exclude
+[ 491/1982] gauntlet_short_circuit-bmv2/gauntlet_short_circuit-bmv2_3.stf ... exclude
+[ 492/1982] gauntlet_short_circuit-bmv2/gauntlet_short_circuit-bmv2_4.stf ... exclude
+[ 493/1982] gauntlet_side_effect_order_1-bmv2/gauntlet_side_effect_order_1-bmv2_1.stf ... timeout  300.55s  (36369.7s)
+[ 494/1982] gauntlet_side_effect_order_1-bmv2/gauntlet_side_effect_order_1-bmv2_2.stf ... exclude
+[ 495/1982] gauntlet_side_effect_order_1-bmv2/gauntlet_side_effect_order_1-bmv2_3.stf ... exclude
+[ 496/1982] gauntlet_side_effect_order_2-bmv2/gauntlet_side_effect_order_2-bmv2_1.stf ... exclude
+[ 497/1982] gauntlet_side_effect_order_2-bmv2/gauntlet_side_effect_order_2-bmv2_2.stf ... timeout  300.59s  (36670.3s)
+[ 498/1982] gauntlet_side_effect_order_2-bmv2/gauntlet_side_effect_order_2-bmv2_3.stf ... exclude
+[ 499/1982] gauntlet_side_effect_order_3-bmv2/gauntlet_side_effect_order_3-bmv2_1.stf ... exclude
+[ 500/1982] gauntlet_side_effect_order_3-bmv2/gauntlet_side_effect_order_3-bmv2_2.stf ... exclude
+[ 501/1982] gauntlet_side_effect_order_3-bmv2/gauntlet_side_effect_order_3-bmv2_3.stf ... timeout  300.57s  (36970.9s)
+[ 502/1982] gauntlet_side_effect_order_4-bmv2/gauntlet_side_effect_order_4-bmv2_1.stf ... exclude
+[ 503/1982] gauntlet_side_effect_order_4-bmv2/gauntlet_side_effect_order_4-bmv2_2.stf ... exclude
+[ 504/1982] gauntlet_side_effect_order_4-bmv2/gauntlet_side_effect_order_4-bmv2_3.stf ... exclude
+[ 505/1982] gauntlet_side_effect_order_5-bmv2/gauntlet_side_effect_order_5-bmv2_1.stf ... timeout  300.56s  (37271.4s)
+[ 506/1982] gauntlet_side_effect_order_5-bmv2/gauntlet_side_effect_order_5-bmv2_2.stf ... exclude
+[ 507/1982] gauntlet_side_effect_order_5-bmv2/gauntlet_side_effect_order_5-bmv2_3.stf ... exclude
+[ 508/1982] gauntlet_side_effect_order_5-bmv2/gauntlet_side_effect_order_5-bmv2_4.stf ... exclude
+[ 509/1982] gauntlet_side_effects_in_mux-bmv2/gauntlet_side_effects_in_mux-bmv2_1.stf ... timeout  300.57s  (37572.0s)
+[ 510/1982] gauntlet_side_effects_in_mux-bmv2/gauntlet_side_effects_in_mux-bmv2_2.stf ... exclude
+[ 511/1982] gauntlet_side_effects_in_mux-bmv2/gauntlet_side_effects_in_mux-bmv2_3.stf ... exclude
+[ 512/1982] gauntlet_side_effects_in_mux-bmv2/gauntlet_side_effects_in_mux-bmv2_4.stf ... exclude
+[ 513/1982] gauntlet_side_effects_in_mux-bmv2/gauntlet_side_effects_in_mux-bmv2_5.stf ... timeout  300.56s  (37872.6s)
+[ 514/1982] gauntlet_switch_exclusivity-bmv2/gauntlet_switch_exclusivity-bmv2_1.stf ... exclude
+[ 515/1982] gauntlet_switch_exclusivity-bmv2/gauntlet_switch_exclusivity-bmv2_2.stf ... exclude
+[ 516/1982] gauntlet_switch_exclusivity-bmv2/gauntlet_switch_exclusivity-bmv2_3.stf ... exclude
+[ 517/1982] gauntlet_switch_exclusivity-bmv2/gauntlet_switch_exclusivity-bmv2_4.stf ... timeout  300.59s  (38173.2s)
+[ 518/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_1.stf ... exclude
+[ 519/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_2.stf ... exclude
+[ 520/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_3.stf ... exclude
+[ 521/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_4.stf ... timeout  300.60s  (38473.8s)
+[ 522/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_5.stf ... exclude
+[ 523/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_6.stf ... exclude
+[ 524/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_7.stf ... exclude
+[ 525/1982] gauntlet_switch_nested_table_apply-bmv2/gauntlet_switch_nested_table_apply-bmv2_8.stf ... timeout  300.57s  (38774.3s)
+[ 526/1982] gauntlet_switch_shadowing-bmv2/gauntlet_switch_shadowing-bmv2_1.stf ... exclude
+[ 527/1982] gauntlet_switch_shadowing-bmv2/gauntlet_switch_shadowing-bmv2_2.stf ... exclude
+[ 528/1982] gauntlet_switch_shadowing-bmv2/gauntlet_switch_shadowing-bmv2_3.stf ... exclude
+[ 529/1982] gauntlet_switch_shadowing-bmv2/gauntlet_switch_shadowing-bmv2_4.stf ... timeout  300.58s  (39074.9s)
+[ 530/1982] gauntlet_table_call_in_expression-bmv2/gauntlet_table_call_in_expression-bmv2_1.stf ... exclude
+[ 531/1982] gauntlet_table_call_in_expression-bmv2/gauntlet_table_call_in_expression-bmv2_2.stf ... exclude
+[ 532/1982] gauntlet_table_call_in_expression-bmv2/gauntlet_table_call_in_expression-bmv2_3.stf ... exclude
+[ 533/1982] gauntlet_table_call_in_expression-bmv2/gauntlet_table_call_in_expression-bmv2_4.stf ... timeout  300.60s  (39375.5s)
+[ 534/1982] gauntlet_table_call_in_expression-bmv2/gauntlet_table_call_in_expression-bmv2_5.stf ... exclude
+[ 535/1982] gauntlet_typedef_cast-bmv2/gauntlet_typedef_cast-bmv2_1.stf ... exclude
+[ 536/1982] gauntlet_typedef_cast-bmv2/gauntlet_typedef_cast-bmv2_2.stf ... exclude
+[ 537/1982] gauntlet_typedef_cast-bmv2/gauntlet_typedef_cast-bmv2_3.stf ... timeout  300.60s  (39676.1s)
+[ 538/1982] gauntlet_typedef_cast-bmv2/gauntlet_typedef_cast-bmv2_4.stf ... exclude
+[ 539/1982] gauntlet_uninitialized_bool_struct-bmv2/gauntlet_uninitialized_bool_struct-bmv2_1.stf ... exclude
+[ 540/1982] gauntlet_uninitialized_bool_struct-bmv2/gauntlet_uninitialized_bool_struct-bmv2_2.stf ... exclude
+[ 541/1982] gauntlet_uninitialized_bool_struct-bmv2/gauntlet_uninitialized_bool_struct-bmv2_3.stf ... timeout  300.56s  (39976.7s)
+[ 542/1982] gauntlet_variable_shadowing-bmv2/gauntlet_variable_shadowing-bmv2_1.stf ... exclude
+[ 543/1982] gauntlet_variable_shadowing-bmv2/gauntlet_variable_shadowing-bmv2_2.stf ... exclude
+[ 544/1982] gauntlet_variable_shadowing-bmv2/gauntlet_variable_shadowing-bmv2_3.stf ... exclude
+[ 545/1982] gauntlet_variable_shadowing-bmv2/gauntlet_variable_shadowing-bmv2_4.stf ... timeout  300.59s  (40277.3s)
+[ 546/1982] gauntlet_variable_shadowing-bmv2/gauntlet_variable_shadowing-bmv2_5.stf ... exclude
+[ 547/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_1.stf ... exclude
+[ 548/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_10.stf ... exclude
+[ 549/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_2.stf ... exclude
+[ 550/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_3.stf ... exclude
+[ 551/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_4.stf ... exclude
+[ 552/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_5.stf ... exclude
+[ 553/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_6.stf ... exclude
+[ 554/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_7.stf ... exclude
+[ 555/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_8.stf ... exclude
+[ 556/1982] gauntlet_various_ops-bmv2/gauntlet_various_ops-bmv2_9.stf ... exclude
+[ 557/1982] global_action_after_exit/global_action_after_exit_1.stf ... exclude
+[ 558/1982] global_action_after_exit/global_action_after_exit_2.stf ... exclude
+[ 559/1982] graph-annotationless-key/graph-annotationless-key_1.stf ... timeout  300.60s  (40577.9s)
+[ 560/1982] graph-annotationless-key/graph-annotationless-key_2.stf ... exclude
+[ 561/1982] graph-annotationless-key/graph-annotationless-key_3.stf ... exclude
+[ 562/1982] hash-bmv2/hash-bmv2_1.stf ... exclude
+[ 563/1982] hashing-non-tuple-bmv2/hashing-non-tuple-bmv2_1.stf ... exclude
+[ 564/1982] hdr_stacks2345/hdr_stacks2345_1.stf ... timeout  300.59s  (40878.4s)
+[ 565/1982] hdr_stacks2345/hdr_stacks2345_2.stf ... exclude
+[ 566/1982] hdr_stacks2345/hdr_stacks2345_3.stf ... exclude
+[ 567/1982] hdr_stacks2345/hdr_stacks2345_4.stf ... exclude
+[ 568/1982] hdr_stacks2345/hdr_stacks2345_5.stf ... timeout  300.56s  (41179.0s)
+[ 569/1982] hdr_stacks2345/hdr_stacks2345_6.stf ... exclude
+[ 570/1982] hdr_stacks2345/hdr_stacks2345_7.stf ... exclude
+[ 571/1982] header-bmv2/header-bmv2_1.stf ... exclude
+[ 572/1982] header-bmv2/header-bmv2_2.stf ... timeout  300.59s  (41479.6s)
+[ 573/1982] header-bool-bmv2/header-bool-bmv2_1.stf ... exclude
+[ 574/1982] header-bool-bmv2/header-bool-bmv2_2.stf ... exclude
+[ 575/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_1.stf ... exclude
+[ 576/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_10.stf ... timeout  300.60s  (41780.2s)
+[ 577/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_2.stf ... exclude
+[ 578/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_3.stf ... exclude
+[ 579/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_4.stf ... exclude
+[ 580/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_5.stf ... timeout  300.60s  (42080.8s)
+[ 581/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_6.stf ... exclude
+[ 582/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_7.stf ... exclude
+[ 583/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_8.stf ... exclude
+[ 584/1982] header-stack-ops-bmv2/header-stack-ops-bmv2_9.stf ... timeout  300.59s  (42381.4s)
+[ 585/1982] hit-expr-bmv2/hit-expr-bmv2_1.stf ... exclude
+[ 586/1982] init-entries-bmv2/init-entries-bmv2_1.stf ... exclude
+[ 587/1982] init-entries-bmv2/init-entries-bmv2_10.stf ... exclude
+[ 588/1982] init-entries-bmv2/init-entries-bmv2_2.stf ... timeout  300.60s  (42682.0s)
+[ 589/1982] init-entries-bmv2/init-entries-bmv2_3.stf ... exclude
+[ 590/1982] init-entries-bmv2/init-entries-bmv2_4.stf ... exclude
+[ 591/1982] init-entries-bmv2/init-entries-bmv2_5.stf ... exclude
+[ 592/1982] init-entries-bmv2/init-entries-bmv2_6.stf ... timeout  300.55s  (42982.6s)
+[ 593/1982] init-entries-bmv2/init-entries-bmv2_7.stf ... exclude
+[ 594/1982] init-entries-bmv2/init-entries-bmv2_8.stf ... exclude
+[ 595/1982] init-entries-bmv2/init-entries-bmv2_9.stf ... exclude
+[ 596/1982] inline-bmv2/inline-bmv2_1.stf ... timeout  300.57s  (43283.1s)
+[ 597/1982] inline-bmv2/inline-bmv2_2.stf ... exclude
+[ 598/1982] inline-stack-bmv2/inline-stack-bmv2_1.stf ... exclude
+[ 599/1982] intrinsic-bmv2/intrinsic-bmv2_1.stf ... exclude
+[ 600/1982] invalid-hdr-warnings2/invalid-hdr-warnings2_1.stf ... timeout  300.60s  (43583.7s)
+[ 601/1982] invalid-hdr-warnings4/invalid-hdr-warnings4_1.stf ... exclude
+[ 602/1982] invalid-hdr-warnings4/invalid-hdr-warnings4_2.stf ... exclude
+[ 603/1982] invalid-hdr-warnings4/invalid-hdr-warnings4_3.stf ... exclude
+[ 604/1982] invalid-hdr-warnings4/invalid-hdr-warnings4_4.stf ... timeout  300.60s  (43884.3s)
+[ 605/1982] invalid-hdr-warnings5/invalid-hdr-warnings5_1.stf ... exclude
+[ 606/1982] invalid-hdr-warnings5/invalid-hdr-warnings5_2.stf ... exclude
+[ 607/1982] invalid-hdr-warnings6/invalid-hdr-warnings6_1.stf ... exclude
+[ 608/1982] invalid-hdr-warnings6/invalid-hdr-warnings6_2.stf ... timeout  300.56s  (44184.9s)
+[ 609/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_1.stf ... exclude
+[ 610/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_10.stf ... exclude
+[ 611/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_2.stf ... exclude
+[ 612/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_3.stf ... timeout  300.56s  (44485.4s)
+[ 613/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_4.stf ... exclude
+[ 614/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_5.stf ... exclude
+[ 615/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_6.stf ... exclude
+[ 616/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_7.stf ... timeout  300.56s  (44786.0s)
+[ 617/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_8.stf ... exclude
+[ 618/1982] ipv6-switch-ml-bmv2/ipv6-switch-ml-bmv2_9.stf ... exclude
+[ 619/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_1.stf ... exclude
+[ 620/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_10.stf ... timeout  300.55s  (45086.6s)
+[ 621/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_2.stf ... exclude
+[ 622/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_3.stf ... exclude
+[ 623/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_4.stf ... exclude
+[ 624/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_5.stf ... timeout  300.57s  (45387.1s)
+[ 625/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_6.stf ... exclude
+[ 626/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_7.stf ... exclude
+[ 627/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_8.stf ... exclude
+[ 628/1982] issue-2123-2-bmv2/issue-2123-2-bmv2_9.stf ... timeout  300.57s  (45687.7s)
+[ 629/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_1.stf ... exclude
+[ 630/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_10.stf ... exclude
+[ 631/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_2.stf ... exclude
+[ 632/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_3.stf ... timeout  300.56s  (45988.2s)
+[ 633/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_4.stf ... exclude
+[ 634/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_5.stf ... exclude
+[ 635/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_6.stf ... exclude
+[ 636/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_7.stf ... timeout  300.56s  (46288.8s)
+[ 637/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_8.stf ... exclude
+[ 638/1982] issue-2123-3-bmv2/issue-2123-3-bmv2_9.stf ... exclude
+[ 639/1982] issue-2123/issue-2123_1.stf ... exclude
+[ 640/1982] issue-2123/issue-2123_10.stf ... timeout  300.56s  (46589.4s)
+[ 641/1982] issue-2123/issue-2123_2.stf ... exclude
+[ 642/1982] issue-2123/issue-2123_3.stf ... exclude
+[ 643/1982] issue-2123/issue-2123_4.stf ... exclude
+[ 644/1982] issue-2123/issue-2123_5.stf ... timeout  300.55s  (46889.9s)
+[ 645/1982] issue-2123/issue-2123_6.stf ... exclude
+[ 646/1982] issue-2123/issue-2123_7.stf ... exclude
+[ 647/1982] issue-2123/issue-2123_8.stf ... exclude
+[ 648/1982] issue-2123/issue-2123_9.stf ... timeout  300.55s  (47190.5s)
+[ 649/1982] issue-3312-graph-bmv2/issue-3312-graph-bmv2_1.stf ... exclude
+[ 650/1982] issue-3312-graph-bmv2/issue-3312-graph-bmv2_2.stf ... exclude
+[ 651/1982] issue-4969-bmv2/issue-4969-bmv2_1.stf ... exclude
+[ 652/1982] issue-4969-bmv2/issue-4969-bmv2_2.stf ... timeout  300.56s  (47491.0s)
+[ 653/1982] issue-4969-bmv2/issue-4969-bmv2_3.stf ... exclude
+[ 654/1982] issue-4969-bmv2/issue-4969-bmv2_4.stf ... exclude
+[ 655/1982] issue-4969-bmv2/issue-4969-bmv2_5.stf ... exclude
+[ 656/1982] issue1000-bmv2/issue1000-bmv2_1.stf ... timeout  300.60s  (47791.6s)
+[ 657/1982] issue1000-bmv2/issue1000-bmv2_2.stf ... exclude
+[ 658/1982] issue1000-bmv2/issue1000-bmv2_3.stf ... exclude
+[ 659/1982] issue1000-bmv2/issue1000-bmv2_4.stf ... exclude
+[ 660/1982] issue1000-bmv2/issue1000-bmv2_5.stf ... timeout  300.56s  (48092.2s)
+[ 661/1982] issue1000-bmv2/issue1000-bmv2_6.stf ... exclude
+[ 662/1982] issue1000-bmv2/issue1000-bmv2_7.stf ... exclude
+[ 663/1982] issue1000-bmv2/issue1000-bmv2_8.stf ... exclude
+[ 664/1982] issue1000-bmv2/issue1000-bmv2_9.stf ... timeout  300.56s  (48392.8s)
+[ 665/1982] issue1001-1-bmv2/issue1001-1-bmv2_1.stf ... exclude
+[ 666/1982] issue1001-1-bmv2/issue1001-1-bmv2_2.stf ... exclude
+[ 667/1982] issue1001-bmv2/issue1001-bmv2_1.stf ... exclude
+[ 668/1982] issue1001-bmv2/issue1001-bmv2_2.stf ... timeout  300.57s  (48693.3s)
+[ 669/1982] issue1025-bmv2/issue1025-bmv2_1.stf ... exclude
+[ 670/1982] issue1025-bmv2/issue1025-bmv2_2.stf ... exclude
+[ 671/1982] issue1025-bmv2/issue1025-bmv2_3.stf ... exclude
+[ 672/1982] issue1025-bmv2/issue1025-bmv2_4.stf ... timeout  300.56s  (48993.9s)
+[ 673/1982] issue1025-bmv2/issue1025-bmv2_5.stf ... exclude
+[ 674/1982] issue1025-bmv2/issue1025-bmv2_6.stf ... exclude
+[ 675/1982] issue1025-bmv2/issue1025-bmv2_7.stf ... exclude
+[ 676/1982] issue1043-bmv2/issue1043-bmv2_1.stf ... exclude
+[ 677/1982] issue1043-bmv2/issue1043-bmv2_2.stf ... exclude
+[ 678/1982] issue1049-bmv2/issue1049-bmv2_1.stf ... timeout  300.55s  (49294.4s)
+[ 679/1982] issue1049-bmv2/issue1049-bmv2_10.stf ... exclude
+[ 680/1982] issue1049-bmv2/issue1049-bmv2_3.stf ... exclude
+[ 681/1982] issue1049-bmv2/issue1049-bmv2_5.stf ... exclude
+[ 682/1982] issue1049-bmv2/issue1049-bmv2_7.stf ... timeout  300.56s  (49595.0s)
+[ 683/1982] issue1049-bmv2/issue1049-bmv2_9.stf ... exclude
+[ 684/1982] issue1062-1-bmv2/issue1062-1-bmv2_1.stf ... exclude
+[ 685/1982] issue1062-1-bmv2/issue1062-1-bmv2_2.stf ... exclude
+[ 686/1982] issue1062-1-bmv2/issue1062-1-bmv2_3.stf ... timeout  300.56s  (49895.6s)
+[ 687/1982] issue1062-1-bmv2/issue1062-1-bmv2_4.stf ... exclude
+[ 688/1982] issue1062-bmv2/issue1062-bmv2_1.stf ... exclude
+[ 689/1982] issue1062-bmv2/issue1062-bmv2_2.stf ... exclude
+[ 690/1982] issue1079-bmv2/issue1079-bmv2_1.stf ... timeout  300.56s  (50196.1s)
+[ 691/1982] issue1097-2-bmv2/issue1097-2-bmv2_1.stf ... exclude
+[ 692/1982] issue1097-bmv2/issue1097-bmv2_1.stf ... exclude
+[ 693/1982] issue1107/issue1107_1.stf ... exclude
+[ 694/1982] issue1127-bmv2/issue1127-bmv2_1.stf ... timeout  300.59s  (50496.7s)
+[ 695/1982] issue1127-bmv2/issue1127-bmv2_2.stf ... exclude
+[ 696/1982] issue1127-bmv2/issue1127-bmv2_3.stf ... exclude
+[ 697/1982] issue1127-bmv2/issue1127-bmv2_4.stf ... exclude
+[ 698/1982] issue1127-bmv2/issue1127-bmv2_5.stf ... timeout  300.58s  (50797.3s)
+[ 699/1982] issue1127-bmv2/issue1127-bmv2_6.stf ... exclude
+[ 700/1982] issue1127-bmv2/issue1127-bmv2_7.stf ... exclude
+[ 701/1982] issue1127-bmv2/issue1127-bmv2_8.stf ... exclude
+[ 702/1982] issue1127-bmv2/issue1127-bmv2_9.stf ... timeout  300.55s  (51097.8s)
+[ 703/1982] issue1210/issue1210_1.stf ... exclude
+[ 704/1982] issue1291-bmv2/issue1291-bmv2_1.stf ... exclude
+[ 705/1982] issue1325-bmv2/issue1325-bmv2_1.stf ... exclude
+[ 706/1982] issue134-bmv2/issue134-bmv2_1.stf ... timeout  300.59s  (51398.4s)
+[ 707/1982] issue1352-bmv2/issue1352-bmv2_1.stf ... exclude
+[ 708/1982] issue1352-bmv2/issue1352-bmv2_10.stf ... exclude
+[ 709/1982] issue1352-bmv2/issue1352-bmv2_2.stf ... exclude
+[ 710/1982] issue1352-bmv2/issue1352-bmv2_3.stf ... timeout  300.60s  (51699.0s)
+[ 711/1982] issue1352-bmv2/issue1352-bmv2_4.stf ... exclude
+[ 712/1982] issue1352-bmv2/issue1352-bmv2_5.stf ... exclude
+[ 713/1982] issue1352-bmv2/issue1352-bmv2_6.stf ... exclude
+[ 714/1982] issue1352-bmv2/issue1352-bmv2_7.stf ... timeout  300.55s  (51999.6s)
+[ 715/1982] issue1352-bmv2/issue1352-bmv2_8.stf ... exclude
+[ 716/1982] issue1352-bmv2/issue1352-bmv2_9.stf ... exclude
+[ 717/1982] issue1386/issue1386_1.stf ... exclude
+[ 718/1982] issue1386/issue1386_2.stf ... timeout  300.56s  (52300.1s)
+[ 719/1982] issue1406/issue1406_1.stf ... exclude
+[ 720/1982] issue1409-bmv2/issue1409-bmv2_1.stf ... exclude
+[ 721/1982] issue1412-bmv2/issue1412-bmv2_1.stf ... exclude
+[ 722/1982] issue1412-bmv2/issue1412-bmv2_2.stf ... timeout  300.60s  (52600.7s)
+[ 723/1982] issue1470-bmv2/issue1470-bmv2_1.stf ... exclude
+[ 724/1982] issue1470-bmv2/issue1470-bmv2_2.stf ... exclude
+[ 725/1982] issue1470-bmv2/issue1470-bmv2_3.stf ... exclude
+[ 726/1982] issue1470-bmv2/issue1470-bmv2_4.stf ... timeout  300.58s  (52901.3s)
+[ 727/1982] issue1478-bmv2/issue1478-bmv2_1.stf ... exclude
+[ 728/1982] issue1478-bmv2/issue1478-bmv2_2.stf ... exclude
+[ 729/1982] issue1520-bmv2/issue1520-bmv2_1.stf ... exclude
+[ 730/1982] issue1535/issue1535_1.stf ... timeout  300.59s  (53201.9s)
+[ 731/1982] issue1535/issue1535_2.stf ... exclude
+[ 732/1982] issue1538/issue1538_1.stf ... exclude
+[ 733/1982] issue1538/issue1538_2.stf ... exclude
+[ 734/1982] issue1538/issue1538_3.stf ... timeout  300.60s  (53502.5s)
+[ 735/1982] issue1538/issue1538_4.stf ... exclude
+[ 736/1982] issue1538/issue1538_5.stf ... exclude
+[ 737/1982] issue1541/issue1541_1.stf ... exclude
+[ 738/1982] issue1544-1-bmv2/issue1544-1-bmv2_1.stf ... timeout  300.56s  (53803.1s)
+[ 739/1982] issue1544-1-bmv2/issue1544-1-bmv2_2.stf ... exclude
+[ 740/1982] issue1544-1-bmv2/issue1544-1-bmv2_3.stf ... exclude
+[ 741/1982] issue1544-1-bmv2/issue1544-1-bmv2_4.stf ... exclude
+[ 742/1982] issue1544-1-bmv2/issue1544-1-bmv2_5.stf ... timeout  300.57s  (54103.6s)
+[ 743/1982] issue1544-1-bmv2/issue1544-1-bmv2_6.stf ... exclude
+[ 744/1982] issue1544-1-bmv2/issue1544-1-bmv2_7.stf ... exclude
+[ 745/1982] issue1544-1-bmv2/issue1544-1-bmv2_8.stf ... exclude
+[ 746/1982] issue1544-1-bmv2/issue1544-1-bmv2_9.stf ... timeout  300.59s  (54404.2s)
+[ 747/1982] issue1544-2-bmv2/issue1544-2-bmv2_1.stf ... exclude
+[ 748/1982] issue1544-2-bmv2/issue1544-2-bmv2_2.stf ... exclude
+[ 749/1982] issue1544-2-bmv2/issue1544-2-bmv2_3.stf ... exclude
+[ 750/1982] issue1544-2-bmv2/issue1544-2-bmv2_4.stf ... timeout  300.55s  (54704.8s)
+[ 751/1982] issue1544-2-bmv2/issue1544-2-bmv2_5.stf ... exclude
+[ 752/1982] issue1544-2-bmv2/issue1544-2-bmv2_6.stf ... exclude
+[ 753/1982] issue1544-2-bmv2/issue1544-2-bmv2_7.stf ... exclude
+[ 754/1982] issue1544-2-bmv2/issue1544-2-bmv2_8.stf ... timeout  300.60s  (55005.4s)
+[ 755/1982] issue1544-2-bmv2/issue1544-2-bmv2_9.stf ... exclude
+[ 756/1982] issue1544-bmv2/issue1544-bmv2_1.stf ... exclude
+[ 757/1982] issue1544-bmv2/issue1544-bmv2_2.stf ... exclude
+[ 758/1982] issue1544-bmv2/issue1544-bmv2_3.stf ... timeout  300.56s  (55305.9s)
+[ 759/1982] issue1544-bmv2/issue1544-bmv2_4.stf ... exclude
+[ 760/1982] issue1544-bmv2/issue1544-bmv2_5.stf ... exclude
+[ 761/1982] issue1544-bmv2/issue1544-bmv2_6.stf ... exclude
+[ 762/1982] issue1544-bmv2/issue1544-bmv2_7.stf ... timeout  300.57s  (55606.5s)
+[ 763/1982] issue1544-bmv2/issue1544-bmv2_8.stf ... exclude
+[ 764/1982] issue1544-bmv2/issue1544-bmv2_9.stf ... exclude
+[ 765/1982] issue1560-bmv2/issue1560-bmv2_1.stf ... exclude
+[ 766/1982] issue1560-bmv2/issue1560-bmv2_10.stf ... timeout  300.55s  (55907.0s)
+[ 767/1982] issue1560-bmv2/issue1560-bmv2_2.stf ... exclude
+[ 768/1982] issue1560-bmv2/issue1560-bmv2_3.stf ... exclude
+[ 769/1982] issue1560-bmv2/issue1560-bmv2_4.stf ... exclude
+[ 770/1982] issue1560-bmv2/issue1560-bmv2_5.stf ... timeout  300.59s  (56207.6s)
+[ 771/1982] issue1560-bmv2/issue1560-bmv2_6.stf ... exclude
+[ 772/1982] issue1560-bmv2/issue1560-bmv2_7.stf ... exclude
+[ 773/1982] issue1560-bmv2/issue1560-bmv2_8.stf ... exclude
+[ 774/1982] issue1560-bmv2/issue1560-bmv2_9.stf ... timeout  300.56s  (56508.2s)
+[ 775/1982] issue1566-bmv2/issue1566-bmv2_1.stf ... exclude
+[ 776/1982] issue1566-bmv2/issue1566-bmv2_2.stf ... exclude
+[ 777/1982] issue1595/issue1595_1.stf ... exclude
+[ 778/1982] issue1595/issue1595_2.stf ... timeout  300.56s  (56808.8s)
+[ 779/1982] issue1595/issue1595_3.stf ... exclude
+[ 780/1982] issue1595/issue1595_4.stf ... exclude
+[ 781/1982] issue1595/issue1595_5.stf ... exclude
+[ 782/1982] issue1595/issue1595_6.stf ... timeout  300.60s  (57109.4s)
+[ 783/1982] issue1595/issue1595_7.stf ... exclude
+[ 784/1982] issue1607-bmv2/issue1607-bmv2_1.stf ... exclude
+[ 785/1982] issue1607-bmv2/issue1607-bmv2_2.stf ... exclude
+[ 786/1982] issue1630-bmv2/issue1630-bmv2_1.stf ... timeout  300.56s  (57409.9s)
+[ 787/1982] issue1630-bmv2/issue1630-bmv2_10.stf ... exclude
+[ 788/1982] issue1630-bmv2/issue1630-bmv2_2.stf ... exclude
+[ 789/1982] issue1630-bmv2/issue1630-bmv2_3.stf ... exclude
+[ 790/1982] issue1630-bmv2/issue1630-bmv2_4.stf ... timeout  300.55s  (57710.5s)
+[ 791/1982] issue1630-bmv2/issue1630-bmv2_5.stf ... exclude
+[ 792/1982] issue1630-bmv2/issue1630-bmv2_6.stf ... exclude
+[ 793/1982] issue1630-bmv2/issue1630-bmv2_7.stf ... exclude
+[ 794/1982] issue1630-bmv2/issue1630-bmv2_8.stf ... timeout  300.56s  (58011.0s)
+[ 795/1982] issue1630-bmv2/issue1630-bmv2_9.stf ... exclude
+[ 796/1982] issue1642-bmv2/issue1642-bmv2_1.stf ... exclude
+[ 797/1982] issue1642-bmv2/issue1642-bmv2_2.stf ... exclude
+[ 798/1982] issue1653-bmv2/issue1653-bmv2_1.stf ... timeout  300.56s  (58311.6s)
+[ 799/1982] issue1653-bmv2/issue1653-bmv2_2.stf ... exclude
+[ 800/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_1.stf ... exclude
+[ 801/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_2.stf ... exclude
+[ 802/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_3.stf ... timeout  300.56s  (58612.2s)
+[ 803/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_4.stf ... exclude
+[ 804/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_5.stf ... exclude
+[ 805/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_6.stf ... exclude
+[ 806/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_7.stf ... timeout  300.56s  (58912.7s)
+[ 807/1982] issue1653-complex-bmv2/issue1653-complex-bmv2_8.stf ... exclude
+[ 808/1982] issue1660-bmv2/issue1660-bmv2_1.stf ... exclude
+[ 809/1982] issue1660-bmv2/issue1660-bmv2_2.stf ... exclude
+[ 810/1982] issue1670-bmv2/issue1670-bmv2_1.stf ... timeout  300.55s  (59213.3s)
+[ 811/1982] issue1713-bmv2/issue1713-bmv2_1.stf ... exclude
+[ 812/1982] issue1713-bmv2/issue1713-bmv2_2.stf ... exclude
+[ 813/1982] issue1739-bmv2/issue1739-bmv2_1.stf ... exclude
+[ 814/1982] issue1739-bmv2/issue1739-bmv2_10.stf ... timeout  300.60s  (59513.9s)
+[ 815/1982] issue1739-bmv2/issue1739-bmv2_2.stf ... exclude
+[ 816/1982] issue1739-bmv2/issue1739-bmv2_3.stf ... exclude
+[ 817/1982] issue1739-bmv2/issue1739-bmv2_4.stf ... exclude
+[ 818/1982] issue1739-bmv2/issue1739-bmv2_5.stf ... timeout  300.59s  (59814.4s)
+[ 819/1982] issue1739-bmv2/issue1739-bmv2_6.stf ... exclude
+[ 820/1982] issue1739-bmv2/issue1739-bmv2_7.stf ... exclude
+[ 821/1982] issue1739-bmv2/issue1739-bmv2_8.stf ... exclude
+[ 822/1982] issue1739-bmv2/issue1739-bmv2_9.stf ... timeout  300.56s  (60115.0s)
+[ 823/1982] issue1755-1-bmv2/issue1755-1-bmv2_1.stf ... exclude
+[ 824/1982] issue1755-1-bmv2/issue1755-1-bmv2_2.stf ... exclude
+[ 825/1982] issue1755-bmv2/issue1755-bmv2_1.stf ... exclude
+[ 826/1982] issue1765-1-bmv2/issue1765-1-bmv2_1.stf ... timeout  300.56s  (60415.6s)
+[ 827/1982] issue1765-1-bmv2/issue1765-1-bmv2_10.stf ... exclude
+[ 828/1982] issue1765-1-bmv2/issue1765-1-bmv2_2.stf ... exclude
+[ 829/1982] issue1765-1-bmv2/issue1765-1-bmv2_3.stf ... exclude
+[ 830/1982] issue1765-1-bmv2/issue1765-1-bmv2_4.stf ... timeout  300.60s  (60716.2s)
+[ 831/1982] issue1765-1-bmv2/issue1765-1-bmv2_5.stf ... exclude
+[ 832/1982] issue1765-1-bmv2/issue1765-1-bmv2_6.stf ... exclude
+[ 833/1982] issue1765-1-bmv2/issue1765-1-bmv2_7.stf ... exclude
+[ 834/1982] issue1765-1-bmv2/issue1765-1-bmv2_8.stf ... timeout  300.55s  (61016.7s)
+[ 835/1982] issue1765-1-bmv2/issue1765-1-bmv2_9.stf ... exclude
+[ 836/1982] issue1765-bmv2/issue1765-bmv2_1.stf ... exclude
+[ 837/1982] issue1765-bmv2/issue1765-bmv2_10.stf ... exclude
+[ 838/1982] issue1765-bmv2/issue1765-bmv2_2.stf ... timeout  300.59s  (61317.3s)
+[ 839/1982] issue1765-bmv2/issue1765-bmv2_3.stf ... exclude
+[ 840/1982] issue1765-bmv2/issue1765-bmv2_4.stf ... exclude
+[ 841/1982] issue1765-bmv2/issue1765-bmv2_5.stf ... exclude
+[ 842/1982] issue1765-bmv2/issue1765-bmv2_6.stf ... timeout  300.60s  (61617.9s)
+[ 843/1982] issue1765-bmv2/issue1765-bmv2_7.stf ... exclude
+[ 844/1982] issue1765-bmv2/issue1765-bmv2_8.stf ... exclude
+[ 845/1982] issue1765-bmv2/issue1765-bmv2_9.stf ... exclude
+[ 846/1982] issue1768-bmv2/issue1768-bmv2_1.stf ... timeout  300.60s  (61918.5s)
+[ 847/1982] issue1768-bmv2/issue1768-bmv2_2.stf ... exclude
+[ 848/1982] issue1781-bmv2/issue1781-bmv2_1.stf ... exclude
+[ 849/1982] issue1814-1-bmv2/issue1814-1-bmv2_1.stf ... exclude
+[ 850/1982] issue1814-1-bmv2/issue1814-1-bmv2_2.stf ... timeout  300.60s  (62219.1s)
+[ 851/1982] issue1814-1-bmv2/issue1814-1-bmv2_3.stf ... exclude
+[ 852/1982] issue1814-bmv2/issue1814-bmv2_1.stf ... exclude
+[ 853/1982] issue1814-bmv2/issue1814-bmv2_2.stf ... exclude
+[ 854/1982] issue1824-bmv2/issue1824-bmv2_1.stf ... timeout  300.59s  (62519.7s)
+[ 855/1982] issue1824-bmv2/issue1824-bmv2_2.stf ... exclude
+[ 856/1982] issue1829-4-bmv2/issue1829-4-bmv2_1.stf ... exclude
+[ 857/1982] issue1829-4-bmv2/issue1829-4-bmv2_2.stf ... exclude
+[ 858/1982] issue1829-4-bmv2/issue1829-4-bmv2_3.stf ... timeout  300.60s  (62820.3s)
+[ 859/1982] issue1834-bmv2/issue1834-bmv2_1.stf ... exclude
+[ 860/1982] issue1879-bmv2/issue1879-bmv2_1.stf ... exclude
+[ 861/1982] issue1879-bmv2/issue1879-bmv2_10.stf ... exclude
+[ 862/1982] issue1879-bmv2/issue1879-bmv2_2.stf ... timeout  300.59s  (63120.9s)
+[ 863/1982] issue1879-bmv2/issue1879-bmv2_3.stf ... exclude
+[ 864/1982] issue1879-bmv2/issue1879-bmv2_4.stf ... exclude
+[ 865/1982] issue1879-bmv2/issue1879-bmv2_5.stf ... exclude
+[ 866/1982] issue1879-bmv2/issue1879-bmv2_6.stf ... timeout  300.56s  (63421.4s)
+[ 867/1982] issue1879-bmv2/issue1879-bmv2_7.stf ... exclude
+[ 868/1982] issue1879-bmv2/issue1879-bmv2_8.stf ... exclude
+[ 869/1982] issue1879-bmv2/issue1879-bmv2_9.stf ... exclude
+[ 870/1982] issue1897-bmv2/issue1897-bmv2_1.stf ... timeout  300.56s  (63722.0s)
+[ 871/1982] issue1897-bmv2/issue1897-bmv2_10.stf ... exclude
+[ 872/1982] issue1897-bmv2/issue1897-bmv2_2.stf ... exclude
+[ 873/1982] issue1897-bmv2/issue1897-bmv2_3.stf ... exclude
+[ 874/1982] issue1897-bmv2/issue1897-bmv2_4.stf ... timeout  300.56s  (64022.5s)
+[ 875/1982] issue1897-bmv2/issue1897-bmv2_5.stf ... exclude
+[ 876/1982] issue1897-bmv2/issue1897-bmv2_6.stf ... exclude
+[ 877/1982] issue1897-bmv2/issue1897-bmv2_7.stf ... exclude
+[ 878/1982] issue1897-bmv2/issue1897-bmv2_8.stf ... timeout  300.56s  (64323.1s)
+[ 879/1982] issue1897-bmv2/issue1897-bmv2_9.stf ... exclude
+[ 880/1982] issue1937-1-bmv2/issue1937-1-bmv2_1.stf ... exclude
+[ 881/1982] issue1937-2-bmv2/issue1937-2-bmv2_1.stf ... exclude
+[ 882/1982] issue1937-3-bmv2/issue1937-3-bmv2_1.stf ... timeout  300.56s  (64623.7s)
+[ 883/1982] issue1955/issue1955_1.stf ... exclude
+[ 884/1982] issue1955/issue1955_2.stf ... exclude
+[ 885/1982] issue1955/issue1955_3.stf ... exclude
+[ 886/1982] issue1958/issue1958_1.stf ... timeout  300.60s  (64924.3s)
+[ 887/1982] issue1958/issue1958_2.stf ... exclude
+[ 888/1982] issue1958/issue1958_3.stf ... exclude
+[ 889/1982] issue1958/issue1958_4.stf ... exclude
+[ 890/1982] issue1985/issue1985_1.stf ... timeout  300.60s  (65224.9s)
+[ 891/1982] issue1989-bmv2/issue1989-bmv2_1.stf ... exclude
+[ 892/1982] issue2044-bmv2/issue2044-bmv2_1.stf ... exclude
+[ 893/1982] issue2147-bmv2/issue2147-bmv2_1.stf ... exclude
+[ 894/1982] issue2147-bmv2/issue2147-bmv2_2.stf ... timeout  300.56s  (65525.4s)
+[ 895/1982] issue2147-bmv2/issue2147-bmv2_3.stf ... exclude
+[ 896/1982] issue2148/issue2148_1.stf ... exclude
+[ 897/1982] issue2153-bmv2/issue2153-bmv2_1.stf ... exclude
+[ 898/1982] issue2153-bmv2/issue2153-bmv2_2.stf ... timeout  300.59s  (65826.0s)
+[ 899/1982] issue2153-bmv2/issue2153-bmv2_3.stf ... exclude
+[ 900/1982] issue2153-bmv2/issue2153-bmv2_4.stf ... exclude
+[ 901/1982] issue2153-bmv2/issue2153-bmv2_5.stf ... exclude
+[ 902/1982] issue2170-bmv2/issue2170-bmv2_1.stf ... timeout  300.60s  (66126.6s)
+[ 903/1982] issue2170-bmv2/issue2170-bmv2_2.stf ... exclude
+[ 904/1982] issue2170-bmv2/issue2170-bmv2_3.stf ... exclude
+[ 905/1982] issue2170-bmv2/issue2170-bmv2_4.stf ... exclude
+[ 906/1982] issue2170-bmv2/issue2170-bmv2_5.stf ... timeout  300.59s  (66427.2s)
+[ 907/1982] issue2176-bmv2/issue2176-bmv2_1.stf ... exclude
+[ 908/1982] issue2176-bmv2/issue2176-bmv2_2.stf ... exclude
+[ 909/1982] issue2176-bmv2/issue2176-bmv2_3.stf ... exclude
+[ 910/1982] issue2190/issue2190_1.stf ... timeout  300.56s  (66727.7s)
+[ 911/1982] issue2201-bmv2/issue2201-bmv2_1.stf ... exclude
+[ 912/1982] issue2201-bmv2/issue2201-bmv2_10.stf ... exclude
+[ 913/1982] issue2201-bmv2/issue2201-bmv2_2.stf ... exclude
+[ 914/1982] issue2201-bmv2/issue2201-bmv2_3.stf ... timeout  300.60s  (67028.3s)
+[ 915/1982] issue2201-bmv2/issue2201-bmv2_4.stf ... exclude
+[ 916/1982] issue2201-bmv2/issue2201-bmv2_5.stf ... exclude
+[ 917/1982] issue2201-bmv2/issue2201-bmv2_6.stf ... exclude
+[ 918/1982] issue2201-bmv2/issue2201-bmv2_7.stf ... timeout  300.60s  (67328.9s)
+[ 919/1982] issue2201-bmv2/issue2201-bmv2_8.stf ... exclude
+[ 920/1982] issue2201-bmv2/issue2201-bmv2_9.stf ... exclude
+[ 921/1982] issue2205-1-bmv2/issue2205-1-bmv2_1.stf ... exclude
+[ 922/1982] issue2205-1-bmv2/issue2205-1-bmv2_2.stf ... timeout  300.60s  (67629.5s)
+[ 923/1982] issue2205-1-bmv2/issue2205-1-bmv2_3.stf ... exclude
+[ 924/1982] issue2205-bmv2/issue2205-bmv2_1.stf ... exclude
+[ 925/1982] issue2205-bmv2/issue2205-bmv2_2.stf ... exclude
+[ 926/1982] issue2205-bmv2/issue2205-bmv2_3.stf ... timeout  300.57s  (67930.1s)
+[ 927/1982] issue2208/issue2208_1.stf ... exclude
+[ 928/1982] issue2208/issue2208_2.stf ... exclude
+[ 929/1982] issue2208/issue2208_3.stf ... exclude
+[ 930/1982] issue2213-bmv2/issue2213-bmv2_1.stf ... timeout  300.59s  (68230.7s)
+[ 931/1982] issue2213-bmv2/issue2213-bmv2_2.stf ... exclude
+[ 932/1982] issue2221-bmv2/issue2221-bmv2_1.stf ... exclude
+[ 933/1982] issue2221-bmv2/issue2221-bmv2_2.stf ... exclude
+[ 934/1982] issue2225-bmv2/issue2225-bmv2_1.stf ... timeout  300.57s  (68531.3s)
+[ 935/1982] issue2225-bmv2/issue2225-bmv2_2.stf ... exclude
+[ 936/1982] issue2248/issue2248_1.stf ... exclude
+[ 937/1982] issue2248/issue2248_2.stf ... exclude
+[ 938/1982] issue2248/issue2248_3.stf ... timeout  300.58s  (68831.9s)
+[ 939/1982] issue2248/issue2248_4.stf ... exclude
+[ 940/1982] issue2258-bmv2/issue2258-bmv2_1.stf ... exclude
+[ 941/1982] issue2258-bmv2/issue2258-bmv2_2.stf ... exclude
+[ 942/1982] issue2261/issue2261_1.stf ... timeout  300.60s  (69132.5s)
+[ 943/1982] issue2261/issue2261_2.stf ... exclude
+[ 944/1982] issue2266/issue2266_1.stf ... exclude
+[ 945/1982] issue2266/issue2266_2.stf ... exclude
+[ 946/1982] issue2283_1-bmv2/issue2283_1-bmv2_1.stf ... timeout  300.56s  (69433.0s)
+[ 947/1982] issue2283_1-bmv2/issue2283_1-bmv2_2.stf ... exclude
+[ 948/1982] issue2283_1-bmv2/issue2283_1-bmv2_3.stf ... exclude
+[ 949/1982] issue2287-bmv2/issue2287-bmv2_1.stf ... exclude
+[ 950/1982] issue2287-bmv2/issue2287-bmv2_2.stf ... timeout  300.59s  (69733.6s)
+[ 951/1982] issue2287-bmv2/issue2287-bmv2_3.stf ... exclude
+[ 952/1982] issue2287-bmv2/issue2287-bmv2_4.stf ... exclude
+[ 953/1982] issue2289/issue2289_1.stf ... exclude
+[ 954/1982] issue2289/issue2289_2.stf ... timeout  300.55s  (70034.2s)
+[ 955/1982] issue2291-bmv2/issue2291-bmv2_1.stf ... exclude
+[ 956/1982] issue2291-bmv2/issue2291-bmv2_2.stf ... exclude
+[ 957/1982] issue2303/issue2303_1.stf ... exclude
+[ 958/1982] issue2303/issue2303_2.stf ... timeout  300.59s  (70334.8s)
+[ 959/1982] issue2303/issue2303_3.stf ... exclude
+[ 960/1982] issue2314/issue2314_1.stf ... exclude
+[ 961/1982] issue2314/issue2314_10.stf ... exclude
+[ 962/1982] issue2314/issue2314_2.stf ... timeout  300.59s  (70635.3s)
+[ 963/1982] issue2314/issue2314_3.stf ... exclude
+[ 964/1982] issue2314/issue2314_4.stf ... exclude
+[ 965/1982] issue2314/issue2314_5.stf ... exclude
+[ 966/1982] issue2314/issue2314_6.stf ... timeout  300.56s  (70935.9s)
+[ 967/1982] issue2314/issue2314_7.stf ... exclude
+[ 968/1982] issue2314/issue2314_8.stf ... exclude
+[ 969/1982] issue2314/issue2314_9.stf ... exclude
+[ 970/1982] issue232-bmv2/issue232-bmv2_1.stf ... timeout  300.59s  (71236.5s)
+[ 971/1982] issue2321/issue2321_1.stf ... exclude
+[ 972/1982] issue2321/issue2321_2.stf ... exclude
+[ 973/1982] issue2321/issue2321_3.stf ... exclude
+[ 974/1982] issue2321/issue2321_4.stf ... timeout  300.56s  (71537.1s)
+[ 975/1982] issue2321/issue2321_5.stf ... exclude
+[ 976/1982] issue2321/issue2321_6.stf ... exclude
+[ 977/1982] issue2330-1/issue2330-1_1.stf ... exclude
+[ 978/1982] issue2330-1/issue2330-1_2.stf ... timeout  300.59s  (71837.6s)
+[ 979/1982] issue2330-1/issue2330-1_3.stf ... exclude
+[ 980/1982] issue2330/issue2330_1.stf ... exclude
+[ 981/1982] issue2330/issue2330_2.stf ... exclude
+[ 982/1982] issue2330/issue2330_3.stf ... timeout  300.60s  (72138.2s)
+[ 983/1982] issue2343-bmv2/issue2343-bmv2_1.stf ... exclude
+[ 984/1982] issue2343-bmv2/issue2343-bmv2_2.stf ... exclude
+[ 985/1982] issue2344/issue2344_1.stf ... exclude
+[ 986/1982] issue2345-1/issue2345-1_1.stf ... timeout  300.59s  (72438.8s)
+[ 987/1982] issue2345-2/issue2345-2_1.stf ... exclude
+[ 988/1982] issue2345-multiple_dependencies/issue2345-multiple_dependencies_1.stf ... exclude
+[ 989/1982] issue2345-with_nested_if/issue2345-with_nested_if_1.stf ... exclude
+[ 990/1982] issue2345/issue2345_1.stf ... timeout  300.59s  (72739.4s)
+[ 991/1982] issue2355/issue2355_1.stf ... exclude
+[ 992/1982] issue2355/issue2355_2.stf ... exclude
+[ 993/1982] issue2356/issue2356_1.stf ... exclude
+[ 994/1982] issue2356/issue2356_2.stf ... timeout  300.60s  (73040.0s)
+[ 995/1982] issue2359/issue2359_1.stf ... exclude
+[ 996/1982] issue2359/issue2359_2.stf ... exclude
+[ 997/1982] issue2359/issue2359_3.stf ... exclude
+[ 998/1982] issue2362-bmv2/issue2362-bmv2_1.stf ... timeout  300.60s  (73340.6s)
+[ 999/1982] issue2362-bmv2/issue2362-bmv2_2.stf ... exclude
+[1000/1982] issue2375-1-bmv2/issue2375-1-bmv2_1.stf ... exclude
+[1001/1982] issue2375-1-bmv2/issue2375-1-bmv2_2.stf ... exclude
+[1002/1982] issue2375-bmv2/issue2375-bmv2_1.stf ... timeout  300.60s  (73641.2s)
+[1003/1982] issue2375-bmv2/issue2375-bmv2_2.stf ... exclude
+[1004/1982] issue2383-bmv2/issue2383-bmv2_1.stf ... exclude
+[1005/1982] issue2383-bmv2/issue2383-bmv2_2.stf ... exclude
+[1006/1982] issue2392-bmv2/issue2392-bmv2_1.stf ... timeout  300.60s  (73941.8s)
+[1007/1982] issue2392-bmv2/issue2392-bmv2_2.stf ... exclude
+[1008/1982] issue242/issue242_1.stf ... exclude
+[1009/1982] issue242/issue242_2.stf ... exclude
+[1010/1982] issue242/issue242_3.stf ... timeout  300.60s  (74242.4s)
+[1011/1982] issue242/issue242_4.stf ... exclude
+[1012/1982] issue2465-bmv2/issue2465-bmv2_1.stf ... exclude
+[1013/1982] issue2465-bmv2/issue2465-bmv2_2.stf ... exclude
+[1014/1982] issue2465-bmv2/issue2465-bmv2_3.stf ... timeout  300.56s  (74543.0s)
+[1015/1982] issue2465-bmv2/issue2465-bmv2_4.stf ... exclude
+[1016/1982] issue2488-bmv2/issue2488-bmv2_1.stf ... exclude
+[1017/1982] issue2488-bmv2/issue2488-bmv2_2.stf ... exclude
+[1018/1982] issue249/issue249_1.stf ... timeout  300.56s  (74843.5s)
+[1019/1982] issue2498-bmv2/issue2498-bmv2_1.stf ... exclude
+[1020/1982] issue2498-bmv2/issue2498-bmv2_2.stf ... exclude
+[1021/1982] issue2498-bmv2/issue2498-bmv2_3.stf ... exclude
+[1022/1982] issue2614-bmv2/issue2614-bmv2_1.stf ... timeout  300.59s  (75144.1s)
+[1023/1982] issue2614-bmv2/issue2614-bmv2_2.stf ... exclude
+[1024/1982] issue2614-bmv2/issue2614-bmv2_3.stf ... exclude
+[1025/1982] issue2657-bmv2/issue2657-bmv2_1.stf ... exclude
+[1026/1982] issue2657-bmv2/issue2657-bmv2_2.stf ... exclude
+[1027/1982] issue270-bmv2/issue270-bmv2_1.stf ... exclude
+[1028/1982] issue272-1-bmv2/issue272-1-bmv2_1.stf ... timeout  300.59s  (75444.7s)
+[1029/1982] issue272-2-bmv2/issue272-2-bmv2_1.stf ... exclude
+[1030/1982] issue2726-bmv2/issue2726-bmv2_1.stf ... exclude
+[1031/1982] issue2726-bmv2/issue2726-bmv2_10.stf ... exclude
+[1032/1982] issue2726-bmv2/issue2726-bmv2_2.stf ... exclude
+[1033/1982] issue2726-bmv2/issue2726-bmv2_3.stf ... timeout  300.56s  (75745.3s)
+[1034/1982] issue2726-bmv2/issue2726-bmv2_4.stf ... exclude
+[1035/1982] issue2726-bmv2/issue2726-bmv2_5.stf ... exclude
+[1036/1982] issue2726-bmv2/issue2726-bmv2_6.stf ... exclude
+[1037/1982] issue2726-bmv2/issue2726-bmv2_7.stf ... timeout  300.57s  (76045.8s)
+[1038/1982] issue2726-bmv2/issue2726-bmv2_8.stf ... exclude
+[1039/1982] issue2726-bmv2/issue2726-bmv2_9.stf ... exclude
+[1040/1982] issue2735-bmv2/issue2735-bmv2_1.stf ... exclude
+[1041/1982] issue2735-bmv2/issue2735-bmv2_2.stf ... exclude
+[1042/1982] issue281/issue281_1.stf ... timeout  300.58s  (76346.4s)
+[1043/1982] issue281/issue281_10.stf ... exclude
+[1044/1982] issue281/issue281_2.stf ... exclude
+[1045/1982] issue281/issue281_3.stf ... exclude
+[1046/1982] issue281/issue281_4.stf ... timeout  300.56s  (76647.0s)
+[1047/1982] issue281/issue281_5.stf ... exclude
+[1048/1982] issue281/issue281_6.stf ... exclude
+[1049/1982] issue281/issue281_7.stf ... exclude
+[1050/1982] issue281/issue281_8.stf ... timeout  300.56s  (76947.6s)
+[1051/1982] issue281/issue281_9.stf ... exclude
+[1052/1982] issue2844-enum/issue2844-enum_1.stf ... exclude
+[1053/1982] issue2844-enum/issue2844-enum_2.stf ... exclude
+[1054/1982] issue2904/issue2904_1.stf ... timeout  300.56s  (77248.1s)
+[1055/1982] issue2905-bmv2/issue2905-bmv2_1.stf ... exclude
+[1056/1982] issue2905-bmv2/issue2905-bmv2_2.stf ... exclude
+[1057/1982] issue297-bmv2/issue297-bmv2_1.stf ... exclude
+[1058/1982] issue298-bmv2/issue298-bmv2_1.stf ... timeout  300.55s  (77548.7s)
+[1059/1982] issue298-bmv2/issue298-bmv2_10.stf ... exclude
+[1060/1982] issue298-bmv2/issue298-bmv2_2.stf ... exclude
+[1061/1982] issue298-bmv2/issue298-bmv2_3.stf ... exclude
+[1062/1982] issue298-bmv2/issue298-bmv2_4.stf ... timeout  300.56s  (77849.2s)
+[1063/1982] issue298-bmv2/issue298-bmv2_5.stf ... exclude
+[1064/1982] issue298-bmv2/issue298-bmv2_6.stf ... exclude
+[1065/1982] issue298-bmv2/issue298-bmv2_7.stf ... exclude
+[1066/1982] issue298-bmv2/issue298-bmv2_8.stf ... timeout  300.57s  (78149.8s)
+[1067/1982] issue298-bmv2/issue298-bmv2_9.stf ... exclude
+[1068/1982] issue3001-1/issue3001-1_1.stf ... exclude
+[1069/1982] issue3001-1/issue3001-1_2.stf ... exclude
+[1070/1982] issue3118-bmv2/issue3118-bmv2_1.stf ... exclude
+[1071/1982] issue3225/issue3225_1.stf ... exclude
+[1072/1982] issue3225/issue3225_2.stf ... timeout  300.58s  (78450.4s)
+[1073/1982] issue3225/issue3225_3.stf ... exclude
+[1074/1982] issue323/issue323_1.stf ... exclude
+[1075/1982] issue323/issue323_2.stf ... exclude
+[1076/1982] issue3329-bmv2/issue3329-bmv2_1.stf ... timeout  300.58s  (78750.9s)
+[1077/1982] issue3374/issue3374_1.stf ... exclude
+[1078/1982] issue3374/issue3374_2.stf ... exclude
+[1079/1982] issue3374/issue3374_3.stf ... exclude
+[1080/1982] issue3374/issue3374_4.stf ... timeout  300.56s  (79051.5s)
+[1081/1982] issue3374/issue3374_5.stf ... exclude
+[1082/1982] issue3374/issue3374_6.stf ... exclude
+[1083/1982] issue3374/issue3374_7.stf ... exclude
+[1084/1982] issue3374/issue3374_8.stf ... timeout  300.56s  (79352.1s)
+[1085/1982] issue3374/issue3374_9.stf ... exclude
+[1086/1982] issue3394/issue3394_1.stf ... exclude
+[1087/1982] issue3488-1-bmv2/issue3488-1-bmv2_1.stf ... exclude
+[1088/1982] issue3488-1-bmv2/issue3488-1-bmv2_10.stf ... timeout  300.55s  (79652.6s)
+[1089/1982] issue3488-1-bmv2/issue3488-1-bmv2_2.stf ... exclude
+[1090/1982] issue3488-1-bmv2/issue3488-1-bmv2_3.stf ... exclude
+[1091/1982] issue3488-1-bmv2/issue3488-1-bmv2_4.stf ... exclude
+[1092/1982] issue3488-1-bmv2/issue3488-1-bmv2_5.stf ... timeout  300.55s  (79953.2s)
+[1093/1982] issue3488-1-bmv2/issue3488-1-bmv2_6.stf ... exclude
+[1094/1982] issue3488-1-bmv2/issue3488-1-bmv2_7.stf ... exclude
+[1095/1982] issue3488-1-bmv2/issue3488-1-bmv2_8.stf ... exclude
+[1096/1982] issue3488-1-bmv2/issue3488-1-bmv2_9.stf ... timeout  300.60s  (80253.8s)
+[1097/1982] issue3488-bmv2/issue3488-bmv2_1.stf ... exclude
+[1098/1982] issue3488-bmv2/issue3488-bmv2_10.stf ... exclude
+[1099/1982] issue3488-bmv2/issue3488-bmv2_2.stf ... exclude
+[1100/1982] issue3488-bmv2/issue3488-bmv2_3.stf ... timeout  300.60s  (80554.4s)
+[1101/1982] issue3488-bmv2/issue3488-bmv2_4.stf ... exclude
+[1102/1982] issue3488-bmv2/issue3488-bmv2_5.stf ... exclude
+[1103/1982] issue3488-bmv2/issue3488-bmv2_6.stf ... exclude
+[1104/1982] issue3488-bmv2/issue3488-bmv2_7.stf ... timeout  300.56s  (80854.9s)
+[1105/1982] issue3488-bmv2/issue3488-bmv2_8.stf ... exclude
+[1106/1982] issue3488-bmv2/issue3488-bmv2_9.stf ... exclude
+[1107/1982] issue3531/issue3531_1.stf ... exclude
+[1108/1982] issue355-bmv2/issue355-bmv2_1.stf ... timeout  300.60s  (81155.5s)
+[1109/1982] issue355-bmv2/issue355-bmv2_2.stf ... exclude
+[1110/1982] issue355-bmv2/issue355-bmv2_3.stf ... exclude
+[1111/1982] issue356-bmv2/issue356-bmv2_1.stf ... exclude
+[1112/1982] issue356-bmv2/issue356-bmv2_2.stf ... timeout  300.60s  (81456.1s)
+[1113/1982] issue356-bmv2/issue356-bmv2_3.stf ... exclude
+[1114/1982] issue361-bmv2/issue361-bmv2_1.stf ... exclude
+[1115/1982] issue364-bmv2/issue364-bmv2_1.stf ... exclude
+[1116/1982] issue364-bmv2/issue364-bmv2_2.stf ... timeout  300.57s  (81756.7s)
+[1117/1982] issue3650/issue3650_1.stf ... exclude
+[1118/1982] issue3650/issue3650_2.stf ... exclude
+[1119/1982] issue3650/issue3650_3.stf ... exclude
+[1120/1982] issue3702-bmv2/issue3702-bmv2_1.stf ... timeout  300.58s  (82057.3s)
+[1121/1982] issue3702-bmv2/issue3702-bmv2_2.stf ... exclude
+[1122/1982] issue3702-bmv2/issue3702-bmv2_3.stf ... exclude
+[1123/1982] issue3702-bmv2/issue3702-bmv2_4.stf ... exclude
+[1124/1982] issue3702-bmv2/issue3702-bmv2_5.stf ... timeout  300.59s  (82357.9s)
+[1125/1982] issue383-bmv2/issue383-bmv2_1.stf ... exclude
+[1126/1982] issue383-bmv2/issue383-bmv2_2.stf ... exclude
+[1127/1982] issue383-bmv2/issue383-bmv2_3.stf ... exclude
+[1128/1982] issue383-bmv2/issue383-bmv2_4.stf ... timeout  300.56s  (82658.4s)
+[1129/1982] issue383-bmv2/issue383-bmv2_5.stf ... exclude
+[1130/1982] issue383-bmv2/issue383-bmv2_6.stf ... exclude
+[1131/1982] issue383-bmv2/issue383-bmv2_7.stf ... exclude
+[1132/1982] issue383-bmv2/issue383-bmv2_8.stf ... timeout  300.56s  (82959.0s)
+[1133/1982] issue4057/issue4057_1.stf ... exclude
+[1134/1982] issue414-bmv2/issue414-bmv2_1.stf ... exclude
+[1135/1982] issue414-bmv2/issue414-bmv2_2.stf ... exclude
+[1136/1982] issue414-bmv2/issue414-bmv2_3.stf ... exclude
+[1137/1982] issue420/issue420_1.stf ... timeout  300.55s  (83259.6s)
+[1138/1982] issue420/issue420_2.stf ... exclude
+[1139/1982] issue420/issue420_3.stf ... exclude
+[1140/1982] issue420/issue420_4.stf ... exclude
+[1141/1982] issue420/issue420_5.stf ... timeout  300.59s  (83560.1s)
+[1142/1982] issue420/issue420_6.stf ... exclude
+[1143/1982] issue422/issue422_1.stf ... exclude
+[1144/1982] issue422/issue422_2.stf ... exclude
+[1145/1982] issue422/issue422_3.stf ... timeout  300.58s  (83860.7s)
+[1146/1982] issue422/issue422_4.stf ... exclude
+[1147/1982] issue430-1-bmv2/issue430-1-bmv2_1.stf ... exclude
+[1148/1982] issue430-bmv2/issue430-bmv2_1.stf ... exclude
+[1149/1982] issue447-1-bmv2/issue447-1-bmv2_1.stf ... timeout  300.58s  (84161.3s)
+[1150/1982] issue447-1-bmv2/issue447-1-bmv2_2.stf ... exclude
+[1151/1982] issue447-2-bmv2/issue447-2-bmv2_1.stf ... exclude
+[1152/1982] issue447-2-bmv2/issue447-2-bmv2_2.stf ... exclude
+[1153/1982] issue447-2-bmv2/issue447-2-bmv2_3.stf ... timeout  300.60s  (84461.9s)
+[1154/1982] issue447-3-bmv2/issue447-3-bmv2_1.stf ... exclude
+[1155/1982] issue447-3-bmv2/issue447-3-bmv2_2.stf ... exclude
+[1156/1982] issue447-3-bmv2/issue447-3-bmv2_3.stf ... exclude
+[1157/1982] issue447-3-bmv2/issue447-3-bmv2_4.stf ... timeout  300.59s  (84762.5s)
+[1158/1982] issue447-4-bmv2/issue447-4-bmv2_1.stf ... exclude
+[1159/1982] issue447-4-bmv2/issue447-4-bmv2_2.stf ... exclude
+[1160/1982] issue447-4-bmv2/issue447-4-bmv2_3.stf ... exclude
+[1161/1982] issue447-4-bmv2/issue447-4-bmv2_4.stf ... timeout  300.56s  (85063.1s)
+[1162/1982] issue447-5-bmv2/issue447-5-bmv2_1.stf ... exclude
+[1163/1982] issue447-5-bmv2/issue447-5-bmv2_2.stf ... exclude
+[1164/1982] issue447-5-bmv2/issue447-5-bmv2_3.stf ... exclude
+[1165/1982] issue447-5-bmv2/issue447-5-bmv2_4.stf ... timeout  300.60s  (85363.7s)
+[1166/1982] issue447-bmv2/issue447-bmv2_1.stf ... exclude
+[1167/1982] issue461-bmv2/issue461-bmv2_1.stf ... exclude
+[1168/1982] issue461-bmv2/issue461-bmv2_10.stf ... exclude
+[1169/1982] issue461-bmv2/issue461-bmv2_2.stf ... timeout  300.60s  (85664.3s)
+[1170/1982] issue461-bmv2/issue461-bmv2_3.stf ... exclude
+[1171/1982] issue461-bmv2/issue461-bmv2_4.stf ... exclude
+[1172/1982] issue461-bmv2/issue461-bmv2_5.stf ... exclude
+[1173/1982] issue461-bmv2/issue461-bmv2_6.stf ... timeout  300.57s  (85964.8s)
+[1174/1982] issue461-bmv2/issue461-bmv2_7.stf ... exclude
+[1175/1982] issue461-bmv2/issue461-bmv2_8.stf ... exclude
+[1176/1982] issue461-bmv2/issue461-bmv2_9.stf ... exclude
+[1177/1982] issue4835-generic-struct/issue4835-generic-struct_1.stf ... timeout  300.60s  (86265.4s)
+[1178/1982] issue486-bmv2/issue486-bmv2_1.stf ... exclude
+[1179/1982] issue486-bmv2/issue486-bmv2_2.stf ... exclude
+[1180/1982] issue486-bmv2/issue486-bmv2_3.stf ... exclude
+[1181/1982] issue496/issue496_1.stf ... timeout  300.60s  (86566.0s)
+[1182/1982] issue510-bmv2/issue510-bmv2_1.stf ... exclude
+[1183/1982] issue512/issue512_1.stf ... exclude
+[1184/1982] issue512/issue512_2.stf ... exclude
+[1185/1982] issue512/issue512_3.stf ... timeout  300.56s  (86866.6s)
+[1186/1982] issue561-1-bmv2/issue561-1-bmv2_1.stf ... exclude
+[1187/1982] issue561-1-bmv2/issue561-1-bmv2_2.stf ... exclude
+[1188/1982] issue561-1-bmv2/issue561-1-bmv2_3.stf ... exclude
+[1189/1982] issue561-1-bmv2/issue561-1-bmv2_4.stf ... timeout  300.58s  (87167.2s)
+[1190/1982] issue561-1-bmv2/issue561-1-bmv2_5.stf ... exclude
+[1191/1982] issue561-1-bmv2/issue561-1-bmv2_6.stf ... exclude
+[1192/1982] issue561-2-bmv2/issue561-2-bmv2_1.stf ... exclude
+[1193/1982] issue561-2-bmv2/issue561-2-bmv2_2.stf ... timeout  300.57s  (87467.7s)
+[1194/1982] issue561-2-bmv2/issue561-2-bmv2_3.stf ... exclude
+[1195/1982] issue561-2-bmv2/issue561-2-bmv2_4.stf ... exclude
+[1196/1982] issue561-2-bmv2/issue561-2-bmv2_5.stf ... exclude
+[1197/1982] issue561-2-bmv2/issue561-2-bmv2_6.stf ... timeout  300.58s  (87768.3s)
+[1198/1982] issue561-3-bmv2/issue561-3-bmv2_1.stf ... exclude
+[1199/1982] issue561-3-bmv2/issue561-3-bmv2_2.stf ... exclude
+[1200/1982] issue561-3-bmv2/issue561-3-bmv2_3.stf ... exclude
+[1201/1982] issue561-3-bmv2/issue561-3-bmv2_4.stf ... timeout  300.56s  (88068.9s)
+[1202/1982] issue561-3-bmv2/issue561-3-bmv2_5.stf ... exclude
+[1203/1982] issue561-3-bmv2/issue561-3-bmv2_6.stf ... exclude
+[1204/1982] issue561-4-bmv2/issue561-4-bmv2_1.stf ... exclude
+[1205/1982] issue561-4-bmv2/issue561-4-bmv2_10.stf ... timeout  300.56s  (88369.4s)
+[1206/1982] issue561-4-bmv2/issue561-4-bmv2_2.stf ... exclude
+[1207/1982] issue561-4-bmv2/issue561-4-bmv2_3.stf ... exclude
+[1208/1982] issue561-4-bmv2/issue561-4-bmv2_4.stf ... exclude
+[1209/1982] issue561-4-bmv2/issue561-4-bmv2_5.stf ... timeout  300.55s  (88670.0s)
+[1210/1982] issue561-4-bmv2/issue561-4-bmv2_6.stf ... exclude
+[1211/1982] issue561-4-bmv2/issue561-4-bmv2_7.stf ... exclude
+[1212/1982] issue561-4-bmv2/issue561-4-bmv2_8.stf ... exclude
+[1213/1982] issue561-4-bmv2/issue561-4-bmv2_9.stf ... timeout  300.57s  (88970.5s)
+[1214/1982] issue561-5-bmv2/issue561-5-bmv2_1.stf ... exclude
+[1215/1982] issue561-5-bmv2/issue561-5-bmv2_2.stf ... exclude
+[1216/1982] issue561-5-bmv2/issue561-5-bmv2_3.stf ... exclude
+[1217/1982] issue561-5-bmv2/issue561-5-bmv2_4.stf ... timeout  300.55s  (89271.1s)
+[1218/1982] issue561-5-bmv2/issue561-5-bmv2_5.stf ... exclude
+[1219/1982] issue561-5-bmv2/issue561-5-bmv2_6.stf ... exclude
+[1220/1982] issue561-6-bmv2/issue561-6-bmv2_1.stf ... exclude
+[1221/1982] issue561-6-bmv2/issue561-6-bmv2_10.stf ... timeout  300.56s  (89571.7s)
+[1222/1982] issue561-6-bmv2/issue561-6-bmv2_2.stf ... exclude
+[1223/1982] issue561-6-bmv2/issue561-6-bmv2_3.stf ... exclude
+[1224/1982] issue561-6-bmv2/issue561-6-bmv2_4.stf ... exclude
+[1225/1982] issue561-6-bmv2/issue561-6-bmv2_5.stf ... timeout  300.56s  (89872.2s)
+[1226/1982] issue561-6-bmv2/issue561-6-bmv2_6.stf ... exclude
+[1227/1982] issue561-6-bmv2/issue561-6-bmv2_7.stf ... exclude
+[1228/1982] issue561-6-bmv2/issue561-6-bmv2_8.stf ... exclude
+[1229/1982] issue561-6-bmv2/issue561-6-bmv2_9.stf ... timeout  300.56s  (90172.8s)
+[1230/1982] issue561-7-bmv2/issue561-7-bmv2_1.stf ... exclude
+[1231/1982] issue561-7-bmv2/issue561-7-bmv2_2.stf ... exclude
+[1232/1982] issue561-7-bmv2/issue561-7-bmv2_3.stf ... exclude
+[1233/1982] issue561-7-bmv2/issue561-7-bmv2_4.stf ... timeout  300.56s  (90473.3s)
+[1234/1982] issue561-7-bmv2/issue561-7-bmv2_5.stf ... exclude
+[1235/1982] issue561-7-bmv2/issue561-7-bmv2_6.stf ... exclude
+[1236/1982] issue561-bmv2/issue561-bmv2_1.stf ... exclude
+[1237/1982] issue561-bmv2/issue561-bmv2_10.stf ... timeout  300.56s  (90773.9s)
+[1238/1982] issue561-bmv2/issue561-bmv2_2.stf ... exclude
+[1239/1982] issue561-bmv2/issue561-bmv2_3.stf ... exclude
+[1240/1982] issue561-bmv2/issue561-bmv2_4.stf ... exclude
+[1241/1982] issue561-bmv2/issue561-bmv2_5.stf ... timeout  300.55s  (91074.4s)
+[1242/1982] issue561-bmv2/issue561-bmv2_6.stf ... exclude
+[1243/1982] issue561-bmv2/issue561-bmv2_7.stf ... exclude
+[1244/1982] issue561-bmv2/issue561-bmv2_8.stf ... exclude
+[1245/1982] issue561-bmv2/issue561-bmv2_9.stf ... timeout  300.56s  (91375.0s)
+[1246/1982] issue562-bmv2/issue562-bmv2_1.stf ... exclude
+[1247/1982] issue562-bmv2/issue562-bmv2_2.stf ... exclude
+[1248/1982] issue584-1-bmv2/issue584-1-bmv2_1.stf ... exclude
+[1249/1982] issue584-1-bmv2/issue584-1-bmv2_2.stf ... exclude
+[1250/1982] issue635-bmv2/issue635-bmv2_1.stf ... exclude
+[1251/1982] issue635-bmv2/issue635-bmv2_2.stf ... timeout  300.56s  (91675.6s)
+[1252/1982] issue655-bmv2/issue655-bmv2_1.stf ... exclude
+[1253/1982] issue655-bmv2/issue655-bmv2_2.stf ... exclude
+[1254/1982] issue655-bmv2/issue655-bmv2_3.stf ... exclude
+[1255/1982] issue677-bmv2/issue677-bmv2_1.stf ... timeout  300.60s  (91976.2s)
+[1256/1982] issue692-bmv2/issue692-bmv2_1.stf ... exclude
+[1257/1982] issue696-bmv2/issue696-bmv2_1.stf ... exclude
+[1258/1982] issue696-bmv2/issue696-bmv2_2.stf ... exclude
+[1259/1982] issue696-bmv2/issue696-bmv2_3.stf ... timeout  300.56s  (92276.7s)
+[1260/1982] issue696-bmv2/issue696-bmv2_4.stf ... exclude
+[1261/1982] issue737-bmv2/issue737-bmv2_1.stf ... exclude
+[1262/1982] issue774-4-bmv2/issue774-4-bmv2_1.stf ... exclude
+[1263/1982] issue774-4-bmv2/issue774-4-bmv2_2.stf ... timeout  300.57s  (92577.3s)
+[1264/1982] issue774-4-bmv2/issue774-4-bmv2_3.stf ... exclude
+[1265/1982] issue887/issue887_1.stf ... exclude
+[1266/1982] issue891-bmv2/issue891-bmv2_1.stf ... exclude
+[1267/1982] issue914-bmv2/issue914-bmv2_1.stf ... timeout  300.59s  (92877.9s)
+[1268/1982] issue914-bmv2/issue914-bmv2_2.stf ... exclude
+[1269/1982] issue914-bmv2/issue914-bmv2_3.stf ... exclude
+[1270/1982] issue914-bmv2/issue914-bmv2_4.stf ... exclude
+[1271/1982] issue914-bmv2/issue914-bmv2_5.stf ... timeout  300.60s  (93178.5s)
+[1272/1982] issue914-bmv2/issue914-bmv2_6.stf ... exclude
+[1273/1982] issue914-bmv2/issue914-bmv2_7.stf ... exclude
+[1274/1982] issue949/issue949_1.stf ... exclude
+[1275/1982] issue949/issue949_2.stf ... timeout  300.59s  (93479.1s)
+[1276/1982] issue949/issue949_3.stf ... exclude
+[1277/1982] issue949/issue949_4.stf ... exclude
+[1278/1982] issue949/issue949_5.stf ... exclude
+[1279/1982] issue949/issue949_6.stf ... timeout  300.60s  (93779.7s)
+[1280/1982] issue949/issue949_7.stf ... exclude
+[1281/1982] issue955/issue955_1.stf ... exclude
+[1282/1982] issue983-bmv2/issue983-bmv2_1.stf ... exclude
+[1283/1982] issue983-bmv2/issue983-bmv2_2.stf ... timeout  300.60s  (94080.3s)
+[1284/1982] issue983-bmv2/issue983-bmv2_3.stf ... exclude
+[1285/1982] issue983-bmv2/issue983-bmv2_4.stf ... exclude
+[1286/1982] issue983-bmv2/issue983-bmv2_5.stf ... exclude
+[1287/1982] issue986-1-bmv2/issue986-1-bmv2_1.stf ... timeout  300.57s  (94380.8s)
+[1288/1982] issue986-bmv2/issue986-bmv2_1.stf ... exclude
+[1289/1982] issue995-bmv2/issue995-bmv2_1.stf ... exclude
+[1290/1982] issue995-bmv2/issue995-bmv2_2.stf ... exclude
+[1291/1982] issue995-bmv2/issue995-bmv2_3.stf ... timeout  300.59s  (94681.4s)
+[1292/1982] issue995-bmv2/issue995-bmv2_4.stf ... exclude
+[1293/1982] issue995-bmv2/issue995-bmv2_5.stf ... exclude
+[1294/1982] issue995-bmv2/issue995-bmv2_6.stf ... exclude
+[1295/1982] junk-prop-bmv2/junk-prop-bmv2_1.stf ... timeout  300.69s  (94982.1s)
+[1296/1982] key-bmv2/key-bmv2_1.stf ... exclude
+[1297/1982] key-bmv2/key-bmv2_2.stf ... exclude
+[1298/1982] key-bmv2/key-bmv2_3.stf ... exclude
+[1299/1982] key-bmv2/key-bmv2_4.stf ... timeout  300.56s  (95282.7s)
+[1300/1982] key1-bmv2/key1-bmv2_1.stf ... exclude
+[1301/1982] key1-bmv2/key1-bmv2_2.stf ... exclude
+[1302/1982] key1-bmv2/key1-bmv2_3.stf ... exclude
+[1303/1982] key1-bmv2/key1-bmv2_4.stf ... timeout  300.59s  (95583.3s)
+[1304/1982] logging-bmv2/logging-bmv2_1.stf ... exclude
+[1305/1982] logging-bmv2/logging-bmv2_2.stf ... exclude
+[1306/1982] match-on-exprs-bmv2/match-on-exprs-bmv2_1.stf ... exclude
+[1307/1982] match-on-exprs-bmv2/match-on-exprs-bmv2_2.stf ... timeout  300.56s  (95883.8s)
+[1308/1982] match-on-exprs-bmv2/match-on-exprs-bmv2_3.stf ... exclude
+[1309/1982] match-on-exprs-bmv2/match-on-exprs-bmv2_4.stf ... exclude
+[1310/1982] match-on-exprs-bmv2/match-on-exprs-bmv2_5.stf ... exclude
+[1311/1982] match-on-exprs-bmv2/match-on-exprs-bmv2_6.stf ... timeout  300.59s  (96184.4s)
+[1312/1982] patches/v1model/match-on-exprs2-bmv2/match-on-exprs2-bmv2_1.stf ... exclude
+[1313/1982] match-on-exprs2-bmv2/match-on-exprs2-bmv2_2.stf ... exclude
+[1314/1982] match-on-exprs2-bmv2/match-on-exprs2-bmv2_3.stf ... exclude
+[1315/1982] patches/v1model/match-on-exprs2-bmv2/match-on-exprs2-bmv2_4.stf ... timeout  300.60s  (96485.0s)
+[1316/1982] match-on-exprs2-bmv2/match-on-exprs2-bmv2_5.stf ... exclude
+[1317/1982] match-on-exprs2-bmv2/match-on-exprs2-bmv2_6.stf ... exclude
+[1318/1982] metrics_test_2/metrics_test_2_1.stf ... exclude
+[1319/1982] metrics_test_2/metrics_test_2_10.stf ... exclude
+[1320/1982] metrics_test_2/metrics_test_2_2.stf ... exclude
+[1321/1982] metrics_test_2/metrics_test_2_3.stf ... exclude
+[1322/1982] metrics_test_2/metrics_test_2_4.stf ... exclude
+[1323/1982] metrics_test_2/metrics_test_2_5.stf ... exclude
+[1324/1982] metrics_test_2/metrics_test_2_6.stf ... exclude
+[1325/1982] metrics_test_2/metrics_test_2_7.stf ... exclude
+[1326/1982] metrics_test_2/metrics_test_2_8.stf ... exclude
+[1327/1982] metrics_test_2/metrics_test_2_9.stf ... exclude
+[1328/1982] metrics_test_3/metrics_test_3_1.stf ... exclude
+[1329/1982] metrics_test_3/metrics_test_3_10.stf ... timeout  300.56s  (96785.6s)
+[1330/1982] metrics_test_3/metrics_test_3_2.stf ... exclude
+[1331/1982] metrics_test_3/metrics_test_3_3.stf ... exclude
+[1332/1982] metrics_test_3/metrics_test_3_4.stf ... exclude
+[1333/1982] metrics_test_3/metrics_test_3_5.stf ... timeout  300.58s  (97086.2s)
+[1334/1982] metrics_test_3/metrics_test_3_6.stf ... exclude
+[1335/1982] metrics_test_3/metrics_test_3_7.stf ... exclude
+[1336/1982] metrics_test_3/metrics_test_3_8.stf ... exclude
+[1337/1982] metrics_test_3/metrics_test_3_9.stf ... timeout  300.57s  (97386.7s)
+[1338/1982] metrics_test_5/metrics_test_5_1.stf ... exclude
+[1339/1982] metrics_test_5/metrics_test_5_2.stf ... exclude
+[1340/1982] metrics_test_5/metrics_test_5_3.stf ... exclude
+[1341/1982] metrics_test_5/metrics_test_5_4.stf ... timeout  300.56s  (97687.3s)
+[1342/1982] metrics_test_5/metrics_test_5_5.stf ... exclude
+[1343/1982] metrics_test_5/metrics_test_5_6.stf ... exclude
+[1344/1982] metrics_test_8/metrics_test_8_1.stf ... exclude
+[1345/1982] metrics_test_8/metrics_test_8_10.stf ... timeout  300.56s  (97987.9s)
+[1346/1982] metrics_test_8/metrics_test_8_2.stf ... exclude
+[1347/1982] metrics_test_8/metrics_test_8_3.stf ... exclude
+[1348/1982] metrics_test_8/metrics_test_8_4.stf ... exclude
+[1349/1982] metrics_test_8/metrics_test_8_5.stf ... timeout  300.56s  (98288.4s)
+[1350/1982] metrics_test_8/metrics_test_8_6.stf ... exclude
+[1351/1982] metrics_test_8/metrics_test_8_7.stf ... exclude
+[1352/1982] metrics_test_8/metrics_test_8_8.stf ... exclude
+[1353/1982] metrics_test_8/metrics_test_8_9.stf ... timeout  300.56s  (98589.0s)
+[1354/1982] multicast-bmv2/multicast-bmv2_1.stf ... exclude
+[1355/1982] multicast-bmv2/multicast-bmv2_10.stf ... exclude
+[1356/1982] multicast-bmv2/multicast-bmv2_2.stf ... exclude
+[1357/1982] multicast-bmv2/multicast-bmv2_3.stf ... timeout  300.56s  (98889.5s)
+[1358/1982] multicast-bmv2/multicast-bmv2_4.stf ... exclude
+[1359/1982] multicast-bmv2/multicast-bmv2_5.stf ... exclude
+[1360/1982] multicast-bmv2/multicast-bmv2_6.stf ... exclude
+[1361/1982] multicast-bmv2/multicast-bmv2_7.stf ... timeout  300.60s  (99190.1s)
+[1362/1982] multicast-bmv2/multicast-bmv2_8.stf ... exclude
+[1363/1982] multicast-bmv2/multicast-bmv2_9.stf ... exclude
+[1364/1982] mux-bmv2/mux-bmv2_1.stf ... exclude
+[1365/1982] name_annotations_to_p4info-bmv2/name_annotations_to_p4info-bmv2_1.stf ... timeout  300.59s  (99490.7s)
+[1366/1982] name_annotations_to_p4info-bmv2/name_annotations_to_p4info-bmv2_2.stf ... exclude
+[1367/1982] name_annotations_to_p4info-bmv2/name_annotations_to_p4info-bmv2_3.stf ... exclude
+[1368/1982] name_annotations_to_p4info-bmv2/name_annotations_to_p4info-bmv2_4.stf ... exclude
+[1369/1982] named_meter_1-bmv2/named_meter_1-bmv2_1.stf ... timeout  300.56s  (99791.3s)
+[1370/1982] named_meter_1-bmv2/named_meter_1-bmv2_10.stf ... exclude
+[1371/1982] named_meter_1-bmv2/named_meter_1-bmv2_2.stf ... exclude
+[1372/1982] named_meter_1-bmv2/named_meter_1-bmv2_3.stf ... exclude
+[1373/1982] named_meter_1-bmv2/named_meter_1-bmv2_4.stf ... timeout  300.58s  (100091.9s)
+[1374/1982] named_meter_1-bmv2/named_meter_1-bmv2_5.stf ... exclude
+[1375/1982] named_meter_1-bmv2/named_meter_1-bmv2_6.stf ... exclude
+[1376/1982] named_meter_1-bmv2/named_meter_1-bmv2_7.stf ... exclude
+[1377/1982] named_meter_1-bmv2/named_meter_1-bmv2_8.stf ... timeout  300.56s  (100392.4s)
+[1378/1982] named_meter_1-bmv2/named_meter_1-bmv2_9.stf ... exclude
+[1379/1982] named_meter_bmv2/named_meter_bmv2_1.stf ... exclude
+[1380/1982] named_meter_bmv2/named_meter_bmv2_10.stf ... exclude
+[1381/1982] named_meter_bmv2/named_meter_bmv2_2.stf ... timeout  300.56s  (100693.0s)
+[1382/1982] named_meter_bmv2/named_meter_bmv2_3.stf ... exclude
+[1383/1982] named_meter_bmv2/named_meter_bmv2_4.stf ... exclude
+[1384/1982] named_meter_bmv2/named_meter_bmv2_5.stf ... exclude
+[1385/1982] named_meter_bmv2/named_meter_bmv2_6.stf ... timeout  300.56s  (100993.5s)
+[1386/1982] named_meter_bmv2/named_meter_bmv2_7.stf ... exclude
+[1387/1982] named_meter_bmv2/named_meter_bmv2_8.stf ... exclude
+[1388/1982] named_meter_bmv2/named_meter_bmv2_9.stf ... exclude
+[1389/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_1.stf ... timeout  300.55s  (101294.1s)
+[1390/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_10.stf ... exclude
+[1391/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_2.stf ... exclude
+[1392/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_3.stf ... exclude
+[1393/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_4.stf ... timeout  300.59s  (101594.7s)
+[1394/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_5.stf ... exclude
+[1395/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_6.stf ... exclude
+[1396/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_7.stf ... exclude
+[1397/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_8.stf ... timeout  300.59s  (101895.3s)
+[1398/1982] nested-actions-with-return-exit1/nested-actions-with-return-exit1_9.stf ... exclude
+[1399/1982] nested_if_else/nested_if_else_1.stf ... exclude
+[1400/1982] nested_if_else/nested_if_else_10.stf ... exclude
+[1401/1982] nested_if_else/nested_if_else_2.stf ... timeout  300.56s  (102195.8s)
+[1402/1982] nested_if_else/nested_if_else_3.stf ... exclude
+[1403/1982] nested_if_else/nested_if_else_4.stf ... exclude
+[1404/1982] nested_if_else/nested_if_else_5.stf ... exclude
+[1405/1982] nested_if_else/nested_if_else_6.stf ... timeout  300.57s  (102496.4s)
+[1406/1982] nested_if_else/nested_if_else_7.stf ... exclude
+[1407/1982] nested_if_else/nested_if_else_8.stf ... exclude
+[1408/1982] nested_if_else/nested_if_else_9.stf ... exclude
+[1409/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_1.stf ... timeout  300.56s  (102797.0s)
+[1410/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_10.stf ... exclude
+[1411/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_2.stf ... exclude
+[1412/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_3.stf ... exclude
+[1413/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_4.stf ... timeout  300.56s  (103097.5s)
+[1414/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_5.stf ... exclude
+[1415/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_6.stf ... exclude
+[1416/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_7.stf ... exclude
+[1417/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_8.stf ... timeout  300.60s  (103398.1s)
+[1418/1982] nested_if_lvalue_dependencies/nested_if_lvalue_dependencies_9.stf ... exclude
+[1419/1982] nested_if_statement/nested_if_statement_1.stf ... exclude
+[1420/1982] nested_if_statement/nested_if_statement_10.stf ... exclude
+[1421/1982] nested_if_statement/nested_if_statement_2.stf ... timeout  300.56s  (103698.7s)
+[1422/1982] nested_if_statement/nested_if_statement_3.stf ... exclude
+[1423/1982] nested_if_statement/nested_if_statement_4.stf ... exclude
+[1424/1982] nested_if_statement/nested_if_statement_5.stf ... exclude
+[1425/1982] nested_if_statement/nested_if_statement_6.stf ... timeout  300.56s  (103999.2s)
+[1426/1982] nested_if_statement/nested_if_statement_7.stf ... exclude
+[1427/1982] nested_if_statement/nested_if_statement_8.stf ... exclude
+[1428/1982] nested_if_statement/nested_if_statement_9.stf ... exclude
+[1429/1982] next-def-use/next-def-use_1.stf ... timeout  300.56s  (104299.8s)
+[1430/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_1.stf ... exclude
+[1431/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_10.stf ... exclude
+[1432/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_2.stf ... exclude
+[1433/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_3.stf ... timeout  300.56s  (104600.3s)
+[1434/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_4.stf ... exclude
+[1435/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_5.stf ... exclude
+[1436/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_6.stf ... exclude
+[1437/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_7.stf ... timeout  300.59s  (104900.9s)
+[1438/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_8.stf ... exclude
+[1439/1982] nonstandard_table_names-bmv2/nonstandard_table_names-bmv2_9.stf ... exclude
+[1440/1982] up4/up4_1.stf ... exclude
+[1441/1982] up4/up4_10.stf ... timeout  300.56s  (105201.5s)
+[1442/1982] up4/up4_2.stf ... exclude
+[1443/1982] up4/up4_3.stf ... exclude
+[1444/1982] up4/up4_4.stf ... exclude
+[1445/1982] up4/up4_5.stf ... timeout  300.59s  (105502.1s)
+[1446/1982] up4/up4_6.stf ... exclude
+[1447/1982] up4/up4_7.stf ... exclude
+[1448/1982] up4/up4_8.stf ... exclude
+[1449/1982] up4/up4_9.stf ... timeout  300.58s  (105802.7s)
+[1450/1982] opassign1-bmv2/opassign1-bmv2_1.stf ... exclude
+[1451/1982] opassign1-bmv2/opassign1-bmv2_2.stf ... exclude
+[1452/1982] opassign2-bmv2/opassign2-bmv2_1.stf ... exclude
+[1453/1982] opassign2-bmv2/opassign2-bmv2_10.stf ... timeout  300.58s  (106103.3s)
+[1454/1982] opassign2-bmv2/opassign2-bmv2_2.stf ... exclude
+[1455/1982] opassign2-bmv2/opassign2-bmv2_3.stf ... exclude
+[1456/1982] opassign2-bmv2/opassign2-bmv2_4.stf ... exclude
+[1457/1982] opassign2-bmv2/opassign2-bmv2_5.stf ... timeout  300.56s  (106403.8s)
+[1458/1982] opassign2-bmv2/opassign2-bmv2_6.stf ... exclude
+[1459/1982] opassign2-bmv2/opassign2-bmv2_7.stf ... exclude
+[1460/1982] opassign2-bmv2/opassign2-bmv2_8.stf ... exclude
+[1461/1982] opassign2-bmv2/opassign2-bmv2_9.stf ... timeout  300.56s  (106704.4s)
+[1462/1982] p416-type-use3/p416-type-use3_1.stf ... exclude
+[1463/1982] p416-type-use3/p416-type-use3_10.stf ... exclude
+[1464/1982] p416-type-use3/p416-type-use3_2.stf ... exclude
+[1465/1982] p416-type-use3/p416-type-use3_3.stf ... timeout  300.56s  (107004.9s)
+[1466/1982] p416-type-use3/p416-type-use3_4.stf ... exclude
+[1467/1982] p416-type-use3/p416-type-use3_5.stf ... exclude
+[1468/1982] p416-type-use3/p416-type-use3_6.stf ... exclude
+[1469/1982] p416-type-use3/p416-type-use3_7.stf ... timeout  300.56s  (107305.5s)
+[1470/1982] p416-type-use3/p416-type-use3_8.stf ... exclude
+[1471/1982] p416-type-use3/p416-type-use3_9.stf ... exclude
+[1472/1982] parser-if/parser-if_1.stf ... exclude
+[1473/1982] parser-if/parser-if_2.stf ... timeout  300.56s  (107606.1s)
+[1474/1982] parser-inline-test1/parser-inline-test1_1.stf ... exclude
+[1475/1982] parser-inline-test1/parser-inline-test1_10.stf ... exclude
+[1476/1982] parser-inline-test1/parser-inline-test1_2.stf ... exclude
+[1477/1982] parser-inline-test1/parser-inline-test1_3.stf ... timeout  300.56s  (107906.6s)
+[1478/1982] parser-inline-test1/parser-inline-test1_4.stf ... exclude
+[1479/1982] parser-inline-test1/parser-inline-test1_5.stf ... exclude
+[1480/1982] parser-inline-test1/parser-inline-test1_6.stf ... exclude
+[1481/1982] parser-inline-test1/parser-inline-test1_7.stf ... timeout  300.56s  (108207.2s)
+[1482/1982] parser-inline-test1/parser-inline-test1_8.stf ... exclude
+[1483/1982] parser-inline-test1/parser-inline-test1_9.stf ... exclude
+[1484/1982] parser-inline-test10/parser-inline-test10_1.stf ... exclude
+[1485/1982] parser-inline-test10/parser-inline-test10_2.stf ... timeout  300.56s  (108507.7s)
+[1486/1982] parser-inline-test10/parser-inline-test10_3.stf ... exclude
+[1487/1982] parser-inline-test10/parser-inline-test10_4.stf ... exclude
+[1488/1982] parser-inline-test10/parser-inline-test10_5.stf ... exclude
+[1489/1982] parser-inline-test10/parser-inline-test10_6.stf ... timeout  300.57s  (108808.3s)
+[1490/1982] parser-inline-test11/parser-inline-test11_1.stf ... exclude
+[1491/1982] parser-inline-test11/parser-inline-test11_10.stf ... exclude
+[1492/1982] parser-inline-test11/parser-inline-test11_2.stf ... exclude
+[1493/1982] parser-inline-test11/parser-inline-test11_3.stf ... timeout  300.60s  (109108.9s)
+[1494/1982] parser-inline-test11/parser-inline-test11_4.stf ... exclude
+[1495/1982] parser-inline-test11/parser-inline-test11_5.stf ... exclude
+[1496/1982] parser-inline-test11/parser-inline-test11_6.stf ... exclude
+[1497/1982] parser-inline-test11/parser-inline-test11_7.stf ... timeout  300.58s  (109409.5s)
+[1498/1982] parser-inline-test11/parser-inline-test11_8.stf ... exclude
+[1499/1982] parser-inline-test11/parser-inline-test11_9.stf ... exclude
+[1500/1982] parser-inline-test12/parser-inline-test12_1.stf ... exclude
+[1501/1982] parser-inline-test12/parser-inline-test12_10.stf ... timeout  300.56s  (109710.0s)
+[1502/1982] parser-inline-test12/parser-inline-test12_2.stf ... exclude
+[1503/1982] parser-inline-test12/parser-inline-test12_3.stf ... exclude
+[1504/1982] parser-inline-test12/parser-inline-test12_4.stf ... exclude
+[1505/1982] parser-inline-test12/parser-inline-test12_5.stf ... timeout  300.61s  (110010.7s)
+[1506/1982] parser-inline-test12/parser-inline-test12_6.stf ... exclude
+[1507/1982] parser-inline-test12/parser-inline-test12_7.stf ... exclude
+[1508/1982] parser-inline-test12/parser-inline-test12_8.stf ... exclude
+[1509/1982] parser-inline-test12/parser-inline-test12_9.stf ... timeout  300.56s  (110311.2s)
+[1510/1982] parser-inline-test13/parser-inline-test13_1.stf ... exclude
+[1511/1982] parser-inline-test13/parser-inline-test13_10.stf ... exclude
+[1512/1982] parser-inline-test13/parser-inline-test13_2.stf ... exclude
+[1513/1982] parser-inline-test13/parser-inline-test13_3.stf ... exclude
+[1514/1982] parser-inline-test13/parser-inline-test13_4.stf ... exclude
+[1515/1982] parser-inline-test13/parser-inline-test13_5.stf ... timeout  300.58s  (110611.8s)
+[1516/1982] parser-inline-test13/parser-inline-test13_6.stf ... exclude
+[1517/1982] parser-inline-test13/parser-inline-test13_7.stf ... exclude
+[1518/1982] parser-inline-test13/parser-inline-test13_8.stf ... exclude
+[1519/1982] parser-inline-test13/parser-inline-test13_9.stf ... exclude
+[1520/1982] parser-inline-test2/parser-inline-test2_1.stf ... timeout  300.56s  (110912.3s)
+[1521/1982] parser-inline-test2/parser-inline-test2_10.stf ... exclude
+[1522/1982] parser-inline-test2/parser-inline-test2_2.stf ... exclude
+[1523/1982] parser-inline-test2/parser-inline-test2_3.stf ... exclude
+[1524/1982] parser-inline-test2/parser-inline-test2_4.stf ... timeout  300.58s  (111212.9s)
+[1525/1982] parser-inline-test2/parser-inline-test2_5.stf ... exclude
+[1526/1982] parser-inline-test2/parser-inline-test2_6.stf ... exclude
+[1527/1982] parser-inline-test2/parser-inline-test2_7.stf ... exclude
+[1528/1982] parser-inline-test2/parser-inline-test2_8.stf ... timeout  300.59s  (111513.5s)
+[1529/1982] parser-inline-test2/parser-inline-test2_9.stf ... exclude
+[1530/1982] parser-inline-test3/parser-inline-test3_1.stf ... exclude
+[1531/1982] parser-inline-test3/parser-inline-test3_10.stf ... exclude
+[1532/1982] parser-inline-test3/parser-inline-test3_2.stf ... timeout  300.58s  (111814.1s)
+[1533/1982] parser-inline-test3/parser-inline-test3_3.stf ... exclude
+[1534/1982] parser-inline-test3/parser-inline-test3_4.stf ... exclude
+[1535/1982] parser-inline-test3/parser-inline-test3_5.stf ... exclude
+[1536/1982] parser-inline-test3/parser-inline-test3_6.stf ... timeout  300.57s  (112114.7s)
+[1537/1982] parser-inline-test3/parser-inline-test3_7.stf ... exclude
+[1538/1982] parser-inline-test3/parser-inline-test3_8.stf ... exclude
+[1539/1982] parser-inline-test3/parser-inline-test3_9.stf ... exclude
+[1540/1982] parser-inline-test4/parser-inline-test4_1.stf ... timeout  300.58s  (112415.2s)
+[1541/1982] parser-inline-test4/parser-inline-test4_10.stf ... exclude
+[1542/1982] parser-inline-test4/parser-inline-test4_2.stf ... exclude
+[1543/1982] parser-inline-test4/parser-inline-test4_3.stf ... exclude
+[1544/1982] parser-inline-test4/parser-inline-test4_4.stf ... timeout  300.56s  (112715.8s)
+[1545/1982] parser-inline-test4/parser-inline-test4_5.stf ... exclude
+[1546/1982] parser-inline-test4/parser-inline-test4_6.stf ... exclude
+[1547/1982] parser-inline-test4/parser-inline-test4_7.stf ... exclude
+[1548/1982] parser-inline-test4/parser-inline-test4_8.stf ... timeout  300.57s  (113016.4s)
+[1549/1982] parser-inline-test4/parser-inline-test4_9.stf ... exclude
+[1550/1982] parser-inline-test5/parser-inline-test5_1.stf ... exclude
+[1551/1982] parser-inline-test5/parser-inline-test5_10.stf ... exclude
+[1552/1982] parser-inline-test5/parser-inline-test5_2.stf ... timeout  300.56s  (113316.9s)
+[1553/1982] parser-inline-test5/parser-inline-test5_3.stf ... exclude
+[1554/1982] parser-inline-test5/parser-inline-test5_4.stf ... exclude
+[1555/1982] parser-inline-test5/parser-inline-test5_5.stf ... exclude
+[1556/1982] parser-inline-test5/parser-inline-test5_6.stf ... timeout  300.56s  (113617.5s)
+[1557/1982] parser-inline-test5/parser-inline-test5_7.stf ... exclude
+[1558/1982] parser-inline-test5/parser-inline-test5_8.stf ... exclude
+[1559/1982] parser-inline-test5/parser-inline-test5_9.stf ... exclude
+[1560/1982] parser-inline-test6/parser-inline-test6_1.stf ... timeout  300.56s  (113918.1s)
+[1561/1982] parser-inline-test6/parser-inline-test6_10.stf ... exclude
+[1562/1982] parser-inline-test6/parser-inline-test6_2.stf ... exclude
+[1563/1982] parser-inline-test6/parser-inline-test6_3.stf ... exclude
+[1564/1982] parser-inline-test6/parser-inline-test6_4.stf ... timeout  300.56s  (114218.6s)
+[1565/1982] parser-inline-test6/parser-inline-test6_5.stf ... exclude
+[1566/1982] parser-inline-test6/parser-inline-test6_6.stf ... exclude
+[1567/1982] parser-inline-test6/parser-inline-test6_7.stf ... exclude
+[1568/1982] parser-inline-test6/parser-inline-test6_8.stf ... timeout  300.60s  (114519.2s)
+[1569/1982] parser-inline-test6/parser-inline-test6_9.stf ... exclude
+[1570/1982] parser-inline-test7/parser-inline-test7_1.stf ... exclude
+[1571/1982] parser-inline-test7/parser-inline-test7_2.stf ... exclude
+[1572/1982] parser-inline-test7/parser-inline-test7_3.stf ... timeout  300.59s  (114819.8s)
+[1573/1982] parser-inline-test8/parser-inline-test8_1.stf ... exclude
+[1574/1982] parser-inline-test8/parser-inline-test8_2.stf ... exclude
+[1575/1982] parser-inline-test8/parser-inline-test8_3.stf ... exclude
+[1576/1982] parser-inline-test8/parser-inline-test8_4.stf ... timeout  300.60s  (115120.4s)
+[1577/1982] parser-inline-test9/parser-inline-test9_1.stf ... exclude
+[1578/1982] parser-inline-test9/parser-inline-test9_2.stf ... exclude
+[1579/1982] parser-inline-test9/parser-inline-test9_3.stf ... exclude
+[1580/1982] parser-inline-test9/parser-inline-test9_4.stf ... timeout  300.60s  (115421.0s)
+[1581/1982] parser-inline-test9/parser-inline-test9_5.stf ... exclude
+[1582/1982] parser-inline-test9/parser-inline-test9_6.stf ... exclude
+[1583/1982] parser-locals2/parser-locals2_1.stf ... exclude
+[1584/1982] parser-locals2/parser-locals2_10.stf ... timeout  300.56s  (115721.6s)
+[1585/1982] parser-locals2/parser-locals2_2.stf ... exclude
+[1586/1982] parser-locals2/parser-locals2_3.stf ... exclude
+[1587/1982] parser-locals2/parser-locals2_4.stf ... exclude
+[1588/1982] parser-locals2/parser-locals2_5.stf ... timeout  300.59s  (116022.2s)
+[1589/1982] parser-locals2/parser-locals2_6.stf ... exclude
+[1590/1982] parser-locals2/parser-locals2_7.stf ... exclude
+[1591/1982] parser-locals2/parser-locals2_8.stf ... exclude
+[1592/1982] parser-locals2/parser-locals2_9.stf ... timeout  300.56s  (116322.7s)
+[1593/1982] parser-pragma/parser-pragma_1.stf ... exclude
+[1594/1982] parser-pragma/parser-pragma_2.stf ... exclude
+[1595/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_1.stf ... exclude
+[1596/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_10.stf ... timeout  300.56s  (116623.3s)
+[1597/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_2.stf ... exclude
+[1598/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_3.stf ... exclude
+[1599/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_4.stf ... exclude
+[1600/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_5.stf ... timeout  300.56s  (116923.8s)
+[1601/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_6.stf ... exclude
+[1602/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_7.stf ... exclude
+[1603/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_8.stf ... exclude
+[1604/1982] parser-unroll-issue3537-1/parser-unroll-issue3537-1_9.stf ... timeout  300.56s  (117224.4s)
+[1605/1982] parser-unroll-issue3537/parser-unroll-issue3537_1.stf ... exclude
+[1606/1982] parser-unroll-issue3537/parser-unroll-issue3537_10.stf ... exclude
+[1607/1982] parser-unroll-issue3537/parser-unroll-issue3537_2.stf ... exclude
+[1608/1982] parser-unroll-issue3537/parser-unroll-issue3537_3.stf ... timeout  300.56s  (117525.0s)
+[1609/1982] parser-unroll-issue3537/parser-unroll-issue3537_4.stf ... exclude
+[1610/1982] parser-unroll-issue3537/parser-unroll-issue3537_5.stf ... exclude
+[1611/1982] parser-unroll-issue3537/parser-unroll-issue3537_6.stf ... exclude
+[1612/1982] parser-unroll-issue3537/parser-unroll-issue3537_7.stf ... timeout  300.56s  (117825.5s)
+[1613/1982] parser-unroll-issue3537/parser-unroll-issue3537_8.stf ... exclude
+[1614/1982] parser-unroll-issue3537/parser-unroll-issue3537_9.stf ... exclude
+[1615/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_1.stf ... exclude
+[1616/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_10.stf ... timeout  300.60s  (118126.1s)
+[1617/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_2.stf ... exclude
+[1618/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_3.stf ... exclude
+[1619/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_4.stf ... exclude
+[1620/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_5.stf ... timeout  300.58s  (118426.7s)
+[1621/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_6.stf ... exclude
+[1622/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_7.stf ... exclude
+[1623/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_8.stf ... exclude
+[1624/1982] parser-unroll-t1-cond/parser-unroll-t1-cond_9.stf ... timeout  300.56s  (118727.3s)
+[1625/1982] parser-unroll-test1/parser-unroll-test1_1.stf ... exclude
+[1626/1982] parser-unroll-test1/parser-unroll-test1_10.stf ... exclude
+[1627/1982] parser-unroll-test1/parser-unroll-test1_2.stf ... exclude
+[1628/1982] parser-unroll-test1/parser-unroll-test1_3.stf ... timeout  300.56s  (119027.8s)
+[1629/1982] parser-unroll-test1/parser-unroll-test1_4.stf ... exclude
+[1630/1982] parser-unroll-test1/parser-unroll-test1_5.stf ... exclude
+[1631/1982] parser-unroll-test1/parser-unroll-test1_6.stf ... exclude
+[1632/1982] parser-unroll-test1/parser-unroll-test1_7.stf ... exclude
+[1633/1982] parser-unroll-test1/parser-unroll-test1_8.stf ... timeout  300.60s  (119328.4s)
+[1634/1982] parser-unroll-test1/parser-unroll-test1_9.stf ... exclude
+[1635/1982] parser-unroll-test2/parser-unroll-test2_1.stf ... exclude
+[1636/1982] parser-unroll-test2/parser-unroll-test2_10.stf ... exclude
+[1637/1982] parser-unroll-test2/parser-unroll-test2_2.stf ... timeout  300.60s  (119629.0s)
+[1638/1982] parser-unroll-test2/parser-unroll-test2_3.stf ... exclude
+[1639/1982] parser-unroll-test2/parser-unroll-test2_4.stf ... exclude
+[1640/1982] parser-unroll-test2/parser-unroll-test2_5.stf ... exclude
+[1641/1982] parser-unroll-test2/parser-unroll-test2_6.stf ... timeout  300.56s  (119929.6s)
+[1642/1982] parser-unroll-test2/parser-unroll-test2_7.stf ... exclude
+[1643/1982] parser-unroll-test2/parser-unroll-test2_8.stf ... exclude
+[1644/1982] parser-unroll-test2/parser-unroll-test2_9.stf ... exclude
+[1645/1982] parser-unroll-test3/parser-unroll-test3_1.stf ... timeout  300.60s  (120230.2s)
+[1646/1982] parser-unroll-test3/parser-unroll-test3_10.stf ... exclude
+[1647/1982] parser-unroll-test3/parser-unroll-test3_2.stf ... exclude
+[1648/1982] parser-unroll-test3/parser-unroll-test3_3.stf ... exclude
+[1649/1982] parser-unroll-test3/parser-unroll-test3_4.stf ... timeout  300.55s  (120530.7s)
+[1650/1982] parser-unroll-test3/parser-unroll-test3_5.stf ... exclude
+[1651/1982] parser-unroll-test3/parser-unroll-test3_6.stf ... exclude
+[1652/1982] parser-unroll-test3/parser-unroll-test3_7.stf ... exclude
+[1653/1982] parser-unroll-test3/parser-unroll-test3_8.stf ... timeout  300.60s  (120831.3s)
+[1654/1982] parser-unroll-test3/parser-unroll-test3_9.stf ... exclude
+[1655/1982] parser-unroll-test4/parser-unroll-test4_1.stf ... exclude
+[1656/1982] parser-unroll-test4/parser-unroll-test4_10.stf ... exclude
+[1657/1982] parser-unroll-test4/parser-unroll-test4_2.stf ... timeout  300.57s  (121131.9s)
+[1658/1982] parser-unroll-test4/parser-unroll-test4_3.stf ... exclude
+[1659/1982] parser-unroll-test4/parser-unroll-test4_4.stf ... exclude
+[1660/1982] parser-unroll-test4/parser-unroll-test4_5.stf ... exclude
+[1661/1982] parser-unroll-test4/parser-unroll-test4_6.stf ... timeout  300.57s  (121432.5s)
+[1662/1982] parser-unroll-test4/parser-unroll-test4_7.stf ... exclude
+[1663/1982] parser-unroll-test4/parser-unroll-test4_8.stf ... exclude
+[1664/1982] parser-unroll-test4/parser-unroll-test4_9.stf ... exclude
+[1665/1982] parser-unroll-test5/parser-unroll-test5_1.stf ... timeout  300.58s  (121733.0s)
+[1666/1982] parser-unroll-test5/parser-unroll-test5_10.stf ... exclude
+[1667/1982] parser-unroll-test5/parser-unroll-test5_2.stf ... exclude
+[1668/1982] parser-unroll-test5/parser-unroll-test5_3.stf ... exclude
+[1669/1982] parser-unroll-test5/parser-unroll-test5_4.stf ... timeout  300.56s  (122033.6s)
+[1670/1982] parser-unroll-test5/parser-unroll-test5_5.stf ... exclude
+[1671/1982] parser-unroll-test5/parser-unroll-test5_6.stf ... exclude
+[1672/1982] parser-unroll-test5/parser-unroll-test5_7.stf ... exclude
+[1673/1982] parser-unroll-test5/parser-unroll-test5_8.stf ... timeout  300.58s  (122334.2s)
+[1674/1982] parser-unroll-test5/parser-unroll-test5_9.stf ... exclude
+[1675/1982] parser-unroll-test6/parser-unroll-test6_1.stf ... exclude
+[1676/1982] parser-unroll-test7/parser-unroll-test7_1.stf ... exclude
+[1677/1982] parser-unroll-test8/parser-unroll-test8_1.stf ... timeout  300.56s  (122634.7s)
+[1678/1982] parser-unroll-test9/parser-unroll-test9_1.stf ... exclude
+[1679/1982] parser-unroll-test9/parser-unroll-test9_10.stf ... exclude
+[1680/1982] parser-unroll-test9/parser-unroll-test9_2.stf ... exclude
+[1681/1982] parser-unroll-test9/parser-unroll-test9_3.stf ... timeout  300.55s  (122935.3s)
+[1682/1982] parser-unroll-test9/parser-unroll-test9_4.stf ... exclude
+[1683/1982] parser-unroll-test9/parser-unroll-test9_5.stf ... exclude
+[1684/1982] parser-unroll-test9/parser-unroll-test9_6.stf ... exclude
+[1685/1982] parser-unroll-test9/parser-unroll-test9_7.stf ... timeout  300.56s  (123235.8s)
+[1686/1982] parser-unroll-test9/parser-unroll-test9_8.stf ... exclude
+[1687/1982] parser-unroll-test9/parser-unroll-test9_9.stf ... exclude
+[1688/1982] parser_error-bmv2/parser_error-bmv2_1.stf ... exclude
+[1689/1982] parser_error-bmv2/parser_error-bmv2_2.stf ... timeout  300.56s  (123536.4s)
+[1690/1982] pins_fabric/pins_fabric_1.stf ... exclude
+[1691/1982] pins_fabric/pins_fabric_10.stf ... exclude
+[1692/1982] pins_fabric/pins_fabric_2.stf ... exclude
+[1693/1982] pins_fabric/pins_fabric_3.stf ... exclude
+[1694/1982] pins_fabric/pins_fabric_4.stf ... exclude
+[1695/1982] pins_fabric/pins_fabric_5.stf ... exclude
+[1696/1982] pins_fabric/pins_fabric_6.stf ... exclude
+[1697/1982] pins_fabric/pins_fabric_7.stf ... exclude
+[1698/1982] pins_fabric/pins_fabric_8.stf ... exclude
+[1699/1982] pins_fabric/pins_fabric_9.stf ... exclude
+[1700/1982] pins_middleblock/pins_middleblock_1.stf ... exclude
+[1701/1982] pins_middleblock/pins_middleblock_10.stf ... exclude
+[1702/1982] pins_middleblock/pins_middleblock_2.stf ... exclude
+[1703/1982] pins_middleblock/pins_middleblock_3.stf ... exclude
+[1704/1982] pins_middleblock/pins_middleblock_4.stf ... exclude
+[1705/1982] pins_middleblock/pins_middleblock_5.stf ... exclude
+[1706/1982] pins_middleblock/pins_middleblock_6.stf ... exclude
+[1707/1982] pins_middleblock/pins_middleblock_7.stf ... exclude
+[1708/1982] pins_middleblock/pins_middleblock_8.stf ... exclude
+[1709/1982] pins_middleblock/pins_middleblock_9.stf ... exclude
+[1710/1982] pins_wbb/pins_wbb_1.stf ... exclude
+[1711/1982] pins_wbb/pins_wbb_2.stf ... exclude
+[1712/1982] pins_wbb/pins_wbb_3.stf ... exclude
+[1713/1982] pins_wbb/pins_wbb_4.stf ... exclude
+[1714/1982] pkginfo_annotation/pkginfo_annotation_1.stf ... exclude
+[1715/1982] predication_issue/predication_issue_1.stf ... exclude
+[1716/1982] predication_issue/predication_issue_2.stf ... exclude
+[1717/1982] predication_issue_1/predication_issue_1_1.stf ... timeout  300.59s  (123837.0s)
+[1718/1982] predication_issue_1/predication_issue_1_2.stf ... exclude
+[1719/1982] predication_issue_1/predication_issue_1_3.stf ... exclude
+[1720/1982] predication_issue_2/predication_issue_2_1.stf ... exclude
+[1721/1982] predication_issue_2/predication_issue_2_2.stf ... timeout  300.56s  (124137.6s)
+[1722/1982] predication_issue_2/predication_issue_2_3.stf ... exclude
+[1723/1982] predication_issue_2/predication_issue_2_4.stf ... exclude
+[1724/1982] predication_issue_2/predication_issue_2_5.stf ... exclude
+[1725/1982] predication_issue_2/predication_issue_2_6.stf ... timeout  300.56s  (124438.1s)
+[1726/1982] predication_issue_2/predication_issue_2_7.stf ... exclude
+[1727/1982] predication_issue_2/predication_issue_2_8.stf ... exclude
+[1728/1982] predication_issue_3/predication_issue_3_1.stf ... exclude
+[1729/1982] predication_issue_3/predication_issue_3_2.stf ... timeout  300.59s  (124738.7s)
+[1730/1982] predication_issue_3/predication_issue_3_3.stf ... exclude
+[1731/1982] predication_issue_3/predication_issue_3_4.stf ... exclude
+[1732/1982] predication_issue_4/predication_issue_4_1.stf ... exclude
+[1733/1982] predication_issue_4/predication_issue_4_2.stf ... timeout  300.59s  (125039.3s)
+[1734/1982] predication_issue_4/predication_issue_4_3.stf ... exclude
+[1735/1982] predication_issue_4/predication_issue_4_4.stf ... exclude
+[1736/1982] predication_issue_4/predication_issue_4_5.stf ... exclude
+[1737/1982] predication_issue_4/predication_issue_4_6.stf ... timeout  300.59s  (125339.9s)
+[1738/1982] predication_issue_4/predication_issue_4_7.stf ... exclude
+[1739/1982] predication_issue_4/predication_issue_4_8.stf ... exclude
+[1740/1982] predication_issue_4/predication_issue_4_9.stf ... exclude
+[1741/1982] proliferation1/proliferation1_1.stf ... timeout  300.60s  (125640.5s)
+[1742/1982] proliferation1/proliferation1_2.stf ... exclude
+[1743/1982] pvs-bitstring-bmv2/pvs-bitstring-bmv2_1.stf ... exclude
+[1744/1982] pvs-bitstring-bmv2/pvs-bitstring-bmv2_2.stf ... exclude
+[1745/1982] pvs-bitstring-bmv2/pvs-bitstring-bmv2_3.stf ... timeout  300.56s  (125941.0s)
+[1746/1982] pvs-struct-1-bmv2/pvs-struct-1-bmv2_1.stf ... exclude
+[1747/1982] pvs-struct-1-bmv2/pvs-struct-1-bmv2_2.stf ... exclude
+[1748/1982] pvs-struct-1-bmv2/pvs-struct-1-bmv2_3.stf ... exclude
+[1749/1982] pvs-struct-2-bmv2/pvs-struct-2-bmv2_1.stf ... exclude
+[1750/1982] pvs-struct-2-bmv2/pvs-struct-2-bmv2_2.stf ... exclude
+[1751/1982] pvs-struct-2-bmv2/pvs-struct-2-bmv2_3.stf ... exclude
+[1752/1982] pvs-struct-3-bmv2/pvs-struct-3-bmv2_1.stf ... exclude
+[1753/1982] pvs-struct-3-bmv2/pvs-struct-3-bmv2_2.stf ... exclude
+[1754/1982] pvs-struct-3-bmv2/pvs-struct-3-bmv2_3.stf ... exclude
+[1755/1982] pvs-struct-3-bmv2/pvs-struct-3-bmv2_4.stf ... exclude
+[1756/1982] pvs-struct-3-bmv2/pvs-struct-3-bmv2_5.stf ... exclude
+[1757/1982] pvs-struct-3-bmv2/pvs-struct-3-bmv2_6.stf ... exclude
+[1758/1982] register-serenum-bmv2/register-serenum-bmv2_1.stf ... exclude
+[1759/1982] register-serenum-bmv2/register-serenum-bmv2_2.stf ... exclude
+[1760/1982] register-serenum-bmv2/register-serenum-bmv2_3.stf ... exclude
+[1761/1982] register-serenum-bmv2/register-serenum-bmv2_4.stf ... timeout  300.58s  (126241.6s)
+[1762/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_1.stf ... exclude
+[1763/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_10.stf ... exclude
+[1764/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_2.stf ... exclude
+[1765/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_3.stf ... timeout  300.59s  (126542.2s)
+[1766/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_4.stf ... exclude
+[1767/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_5.stf ... exclude
+[1768/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_6.stf ... exclude
+[1769/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_7.stf ... timeout  300.58s  (126842.8s)
+[1770/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_8.stf ... exclude
+[1771/1982] runtime-index-2-bmv2/runtime-index-2-bmv2_9.stf ... exclude
+[1772/1982] runtime-index-bmv2/runtime-index-bmv2_1.stf ... exclude
+[1773/1982] runtime-index-bmv2/runtime-index-bmv2_10.stf ... timeout  300.55s  (127143.4s)
+[1774/1982] runtime-index-bmv2/runtime-index-bmv2_2.stf ... exclude
+[1775/1982] runtime-index-bmv2/runtime-index-bmv2_3.stf ... exclude
+[1776/1982] runtime-index-bmv2/runtime-index-bmv2_4.stf ... exclude
+[1777/1982] runtime-index-bmv2/runtime-index-bmv2_5.stf ... timeout  300.56s  (127443.9s)
+[1778/1982] runtime-index-bmv2/runtime-index-bmv2_6.stf ... exclude
+[1779/1982] runtime-index-bmv2/runtime-index-bmv2_7.stf ... exclude
+[1780/1982] runtime-index-bmv2/runtime-index-bmv2_8.stf ... exclude
+[1781/1982] runtime-index-bmv2/runtime-index-bmv2_9.stf ... timeout  300.56s  (127744.5s)
+[1782/1982] same_name_for_table_and_action/same_name_for_table_and_action_1.stf ... exclude
+[1783/1982] same_name_for_table_and_action/same_name_for_table_and_action_2.stf ... exclude
+[1784/1982] same_name_for_table_and_action/same_name_for_table_and_action_3.stf ... exclude
+[1785/1982] saturated-bmv2/saturated-bmv2_1.stf ... timeout  300.55s  (128045.0s)
+[1786/1982] saturated-bmv2/saturated-bmv2_10.stf ... exclude
+[1787/1982] saturated-bmv2/saturated-bmv2_2.stf ... exclude
+[1788/1982] saturated-bmv2/saturated-bmv2_3.stf ... exclude
+[1789/1982] saturated-bmv2/saturated-bmv2_4.stf ... timeout  300.57s  (128345.6s)
+[1790/1982] saturated-bmv2/saturated-bmv2_5.stf ... exclude
+[1791/1982] saturated-bmv2/saturated-bmv2_6.stf ... exclude
+[1792/1982] saturated-bmv2/saturated-bmv2_7.stf ... exclude
+[1793/1982] saturated-bmv2/saturated-bmv2_8.stf ... timeout  300.59s  (128646.2s)
+[1794/1982] saturated-bmv2/saturated-bmv2_9.stf ... exclude
+[1795/1982] scalarmeta-bmv2/scalarmeta-bmv2_1.stf ... exclude
+[1796/1982] simplify_slice/simplify_slice_1.stf ... exclude
+[1797/1982] slice-def-use/slice-def-use_1.stf ... timeout  300.56s  (128946.8s)
+[1798/1982] slice-def-use1/slice-def-use1_1.stf ... exclude
+[1799/1982] stack-bmv2/stack-bmv2_1.stf ... exclude
+[1800/1982] stack-bmv2/stack-bmv2_2.stf ... exclude
+[1801/1982] stack-bvec-bmv2/stack-bvec-bmv2_1.stf ... timeout  300.59s  (129247.3s)
+[1802/1982] stack-bvec-bmv2/stack-bvec-bmv2_2.stf ... exclude
+[1803/1982] stack_complex-bmv2/stack_complex-bmv2_1.stf ... exclude
+[1804/1982] stack_complex-bmv2/stack_complex-bmv2_2.stf ... exclude
+[1805/1982] stack_complex-bmv2/stack_complex-bmv2_3.stf ... timeout  300.57s  (129547.9s)
+[1806/1982] stack_complex-bmv2/stack_complex-bmv2_4.stf ... exclude
+[1807/1982] stack_complex-bmv2/stack_complex-bmv2_5.stf ... exclude
+[1808/1982] stack_complex-bmv2/stack_complex-bmv2_6.stf ... exclude
+[1809/1982] stack_complex-bmv2/stack_complex-bmv2_7.stf ... timeout  300.59s  (129848.5s)
+[1810/1982] std_meta_inlining/std_meta_inlining_1.stf ... exclude
+[1811/1982] std_meta_inlining/std_meta_inlining_2.stf ... exclude
+[1812/1982] strength3/strength3_1.stf ... exclude
+[1813/1982] strength3/strength3_2.stf ... timeout  300.60s  (130149.1s)
+[1814/1982] strength4-bmv2/strength4-bmv2_1.stf ... exclude
+[1815/1982] strength6/strength6_1.stf ... exclude
+[1816/1982] strength6/strength6_2.stf ... exclude
+[1817/1982] struct_assignment_optimization/struct_assignment_optimization_1.stf ... timeout  300.58s  (130449.7s)
+[1818/1982] struct_assignment_optimization/struct_assignment_optimization_2.stf ... exclude
+[1819/1982] structure-valued-expr-ok-1-bmv2/structure-valued-expr-ok-1-bmv2_1.stf ... exclude
+[1820/1982] structure-valued-expr-ok-1-bmv2/structure-valued-expr-ok-1-bmv2_2.stf ... exclude
+[1821/1982] structure-valued-expr-ok-1-bmv2/structure-valued-expr-ok-1-bmv2_3.stf ... timeout  300.58s  (130750.3s)
+[1822/1982] structured_annotations/structured_annotations_1.stf ... exclude
+[1823/1982] structured_annotations/structured_annotations_2.stf ... exclude
+[1824/1982] structured_annotations/structured_annotations_3.stf ... exclude
+[1825/1982] structured_annotations/structured_annotations_4.stf ... timeout  300.57s  (131050.8s)
+[1826/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_1.stf ... exclude
+[1827/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_10.stf ... exclude
+[1828/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_2.stf ... exclude
+[1829/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_3.stf ... timeout  300.60s  (131351.4s)
+[1830/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_4.stf ... exclude
+[1831/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_5.stf ... exclude
+[1832/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_6.stf ... exclude
+[1833/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_7.stf ... timeout  300.56s  (131652.0s)
+[1834/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_8.stf ... exclude
+[1835/1982] subparser-with-header-stack-bmv2/subparser-with-header-stack-bmv2_9.stf ... exclude
+[1836/1982] table-entries-exact-bmv2/table-entries-exact-bmv2_1.stf ... exclude
+[1837/1982] table-entries-exact-bmv2/table-entries-exact-bmv2_2.stf ... timeout  300.55s  (131952.5s)
+[1838/1982] table-entries-exact-bmv2/table-entries-exact-bmv2_3.stf ... exclude
+[1839/1982] table-entries-exact-ternary-bmv2/table-entries-exact-ternary-bmv2_1.stf ... exclude
+[1840/1982] table-entries-exact-ternary-bmv2/table-entries-exact-ternary-bmv2_2.stf ... exclude
+[1841/1982] table-entries-exact-ternary-bmv2/table-entries-exact-ternary-bmv2_3.stf ... timeout  300.56s  (132253.1s)
+[1842/1982] table-entries-exact-ternary-bmv2/table-entries-exact-ternary-bmv2_4.stf ... exclude
+[1843/1982] table-entries-exact-ternary-bmv2/table-entries-exact-ternary-bmv2_5.stf ... exclude
+[1844/1982] table-entries-lpm-bmv2/table-entries-lpm-bmv2_1.stf ... exclude
+[1845/1982] table-entries-optional-bmv2/table-entries-optional-bmv2_1.stf ... timeout  300.59s  (132553.7s)
+[1846/1982] table-entries-optional-bmv2/table-entries-optional-bmv2_2.stf ... exclude
+[1847/1982] table-entries-optional-bmv2/table-entries-optional-bmv2_3.stf ... exclude
+[1848/1982] table-entries-optional-bmv2/table-entries-optional-bmv2_4.stf ... exclude
+[1849/1982] table-entries-priority-bmv2/table-entries-priority-bmv2_1.stf ... exclude
+[1850/1982] table-entries-priority-bmv2/table-entries-priority-bmv2_2.stf ... exclude
+[1851/1982] table-entries-range-bmv2/table-entries-range-bmv2_1.stf ... timeout  300.59s  (132854.3s)
+[1852/1982] table-entries-range-bmv2/table-entries-range-bmv2_2.stf ... exclude
+[1853/1982] table-entries-range-bmv2/table-entries-range-bmv2_3.stf ... exclude
+[1854/1982] table-entries-range-bmv2/table-entries-range-bmv2_4.stf ... exclude
+[1855/1982] table-entries-ser-enum-bmv2/table-entries-ser-enum-bmv2_1.stf ... exclude
+[1856/1982] table-entries-ser-enum-bmv2/table-entries-ser-enum-bmv2_2.stf ... exclude
+[1857/1982] table-entries-ser-enum-bmv2/table-entries-ser-enum-bmv2_3.stf ... exclude
+[1858/1982] table-entries-ser-enum-bmv2/table-entries-ser-enum-bmv2_4.stf ... exclude
+[1859/1982] table-entries-ternary-bmv2/table-entries-ternary-bmv2_1.stf ... timeout  300.57s  (133154.8s)
+[1860/1982] table-entries-ternary-bmv2/table-entries-ternary-bmv2_2.stf ... exclude
+[1861/1982] table-entries-ternary-bmv2/table-entries-ternary-bmv2_3.stf ... exclude
+[1862/1982] table-entries-ternary-bmv2/table-entries-ternary-bmv2_4.stf ... exclude
+[1863/1982] table-entries-valid-bmv2/table-entries-valid-bmv2_1.stf ... timeout  300.58s  (133455.4s)
+[1864/1982] table-entries-valid-bmv2/table-entries-valid-bmv2_2.stf ... exclude
+[1865/1982] table-key-serenum-bmv2/table-key-serenum-bmv2_1.stf ... exclude
+[1866/1982] table-key-serenum-bmv2/table-key-serenum-bmv2_2.stf ... exclude
+[1867/1982] table-key-serenum-bmv2/table-key-serenum-bmv2_3.stf ... timeout  300.60s  (133756.0s)
+[1868/1982] table-key-serenum-bmv2/table-key-serenum-bmv2_4.stf ... exclude
+[1869/1982] ternary2-bmv2/ternary2-bmv2_1.stf ... exclude
+[1870/1982] ternary2-bmv2/ternary2-bmv2_10.stf ... exclude
+[1871/1982] ternary2-bmv2/ternary2-bmv2_2.stf ... timeout  300.55s  (134056.6s)
+[1872/1982] ternary2-bmv2/ternary2-bmv2_3.stf ... exclude
+[1873/1982] ternary2-bmv2/ternary2-bmv2_4.stf ... exclude
+[1874/1982] ternary2-bmv2/ternary2-bmv2_5.stf ... exclude
+[1875/1982] ternary2-bmv2/ternary2-bmv2_6.stf ... timeout  300.56s  (134357.1s)
+[1876/1982] ternary2-bmv2/ternary2-bmv2_7.stf ... exclude
+[1877/1982] ternary2-bmv2/ternary2-bmv2_8.stf ... exclude
+[1878/1982] ternary2-bmv2/ternary2-bmv2_9.stf ... exclude
+[1879/1982] test-parserinvalidargument-error-bmv2/test-parserinvalidargument-error-bmv2_1.stf ... timeout  300.56s  (134657.7s)
+[1880/1982] test-parserinvalidargument-error-bmv2/test-parserinvalidargument-error-bmv2_2.stf ... exclude
+[1881/1982] test-parserinvalidargument-error-bmv2/test-parserinvalidargument-error-bmv2_3.stf ... exclude
+[1882/1982] union-bmv2/union-bmv2_1.stf ... exclude
+[1883/1982] union-bmv2/union-bmv2_2.stf ... timeout  300.56s  (134958.3s)
+[1884/1982] union-valid-bmv2/union-valid-bmv2_1.stf ... exclude
+[1885/1982] union-valid-bmv2/union-valid-bmv2_10.stf ... exclude
+[1886/1982] union-valid-bmv2/union-valid-bmv2_2.stf ... exclude
+[1887/1982] union-valid-bmv2/union-valid-bmv2_3.stf ... timeout  300.60s  (135258.9s)
+[1888/1982] union-valid-bmv2/union-valid-bmv2_4.stf ... exclude
+[1889/1982] union-valid-bmv2/union-valid-bmv2_5.stf ... exclude
+[1890/1982] union-valid-bmv2/union-valid-bmv2_6.stf ... exclude
+[1891/1982] union-valid-bmv2/union-valid-bmv2_7.stf ... timeout  300.59s  (135559.5s)
+[1892/1982] union-valid-bmv2/union-valid-bmv2_8.stf ... exclude
+[1893/1982] union-valid-bmv2/union-valid-bmv2_9.stf ... exclude
+[1894/1982] union1-bmv2/union1-bmv2_1.stf ... exclude
+[1895/1982] union1-bmv2/union1-bmv2_2.stf ... timeout  300.56s  (135860.0s)
+[1896/1982] union2-bmv2/union2-bmv2_1.stf ... exclude
+[1897/1982] union2-bmv2/union2-bmv2_2.stf ... exclude
+[1898/1982] union3-bmv2/union3-bmv2_1.stf ... exclude
+[1899/1982] union3-bmv2/union3-bmv2_2.stf ... timeout  300.56s  (136160.6s)
+[1900/1982] union4-bmv2/union4-bmv2_1.stf ... exclude
+[1901/1982] union4-bmv2/union4-bmv2_2.stf ... exclude
+[1902/1982] unused-counter-bmv2/unused-counter-bmv2_1.stf ... exclude
+[1903/1982] unused-counter-bmv2/unused-counter-bmv2_2.stf ... timeout  300.55s  (136461.1s)
+[1904/1982] use-priority-as-name/use-priority-as-name_1.stf ... exclude
+[1905/1982] use-priority-as-name/use-priority-as-name_10.stf ... exclude
+[1906/1982] use-priority-as-name/use-priority-as-name_2.stf ... exclude
+[1907/1982] use-priority-as-name/use-priority-as-name_3.stf ... timeout  300.55s  (136761.7s)
+[1908/1982] use-priority-as-name/use-priority-as-name_4.stf ... exclude
+[1909/1982] use-priority-as-name/use-priority-as-name_5.stf ... exclude
+[1910/1982] use-priority-as-name/use-priority-as-name_6.stf ... exclude
+[1911/1982] use-priority-as-name/use-priority-as-name_7.stf ... timeout  300.56s  (137062.2s)
+[1912/1982] use-priority-as-name/use-priority-as-name_8.stf ... exclude
+[1913/1982] use-priority-as-name/use-priority-as-name_9.stf ... exclude
+[1914/1982] v1model-const-entries-bmv2/v1model-const-entries-bmv2_1.stf ... exclude
+[1915/1982] v1model-const-entries-bmv2/v1model-const-entries-bmv2_2.stf ... timeout  300.56s  (137362.8s)
+[1916/1982] v1model-const-entries-bmv2/v1model-const-entries-bmv2_3.stf ... exclude
+[1917/1982] v1model-const-entries-bmv2/v1model-const-entries-bmv2_4.stf ... exclude
+[1918/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_1.stf ... exclude
+[1919/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_10.stf ... timeout  300.56s  (137663.3s)
+[1920/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_2.stf ... exclude
+[1921/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_3.stf ... exclude
+[1922/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_4.stf ... exclude
+[1923/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_5.stf ... timeout  300.55s  (137963.9s)
+[1924/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_6.stf ... exclude
+[1925/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_7.stf ... exclude
+[1926/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_8.stf ... exclude
+[1927/1982] v1model-digest-containing-ser-enum/v1model-digest-containing-ser-enum_9.stf ... timeout  300.59s  (138264.5s)
+[1928/1982] v1model-digest-custom-type/v1model-digest-custom-type_1.stf ... exclude
+[1929/1982] v1model-digest-custom-type/v1model-digest-custom-type_10.stf ... exclude
+[1930/1982] v1model-digest-custom-type/v1model-digest-custom-type_2.stf ... exclude
+[1931/1982] v1model-digest-custom-type/v1model-digest-custom-type_3.stf ... timeout  300.55s  (138565.1s)
+[1932/1982] v1model-digest-custom-type/v1model-digest-custom-type_4.stf ... exclude
+[1933/1982] v1model-digest-custom-type/v1model-digest-custom-type_5.stf ... exclude
+[1934/1982] v1model-digest-custom-type/v1model-digest-custom-type_6.stf ... exclude
+[1935/1982] v1model-digest-custom-type/v1model-digest-custom-type_7.stf ... timeout  300.60s  (138865.6s)
+[1936/1982] v1model-digest-custom-type/v1model-digest-custom-type_8.stf ... exclude
+[1937/1982] v1model-digest-custom-type/v1model-digest-custom-type_9.stf ... exclude
+[1938/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_1.stf ... exclude
+[1939/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_10.stf ... exclude
+[1940/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_2.stf ... exclude
+[1941/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_3.stf ... exclude
+[1942/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_4.stf ... exclude
+[1943/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_5.stf ... exclude
+[1944/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_6.stf ... exclude
+[1945/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_7.stf ... exclude
+[1946/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_8.stf ... exclude
+[1947/1982] v1model-p4runtime-enumint-types1/v1model-p4runtime-enumint-types1_9.stf ... exclude
+[1948/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_1.stf ... exclude
+[1949/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_10.stf ... exclude
+[1950/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_2.stf ... exclude
+[1951/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_3.stf ... exclude
+[1952/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_4.stf ... exclude
+[1953/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_5.stf ... exclude
+[1954/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_6.stf ... exclude
+[1955/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_7.stf ... exclude
+[1956/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_8.stf ... exclude
+[1957/1982] v1model-p4runtime-most-types1/v1model-p4runtime-most-types1_9.stf ... exclude
+[1958/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_1.stf ... exclude
+[1959/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_10.stf ... exclude
+[1960/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_2.stf ... timeout  300.59s  (139166.2s)
+[1961/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_3.stf ... exclude
+[1962/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_4.stf ... exclude
+[1963/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_5.stf ... exclude
+[1964/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_6.stf ... timeout  300.60s  (139466.8s)
+[1965/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_7.stf ... exclude
+[1966/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_8.stf ... exclude
+[1967/1982] v1model-special-ops-bmv2/v1model-special-ops-bmv2_9.stf ... exclude
+[1968/1982] verify-bmv2/verify-bmv2_1.stf ... exclude
+[1969/1982] verify_disjunction/verify_disjunction_1.stf ... timeout  300.59s  (139767.4s)
+[1970/1982] verify_disjunction/verify_disjunction_2.stf ... exclude
+[1971/1982] wrong-warning/wrong-warning_1.stf ... exclude
+[1972/1982] wrong-warning/wrong-warning_2.stf ... exclude
+[1973/1982] x-bmv2/x-bmv2_1.stf ... timeout  300.59s  (140068.0s)
+[1974/1982] xor_test/xor_test_1.stf ... exclude
+[1975/1982] xor_test/xor_test_2.stf ... exclude
+[1976/1982] xor_test/xor_test_3.stf ... exclude
+[1977/1982] xor_test/xor_test_4.stf ... timeout  300.60s  (140368.6s)
+[1978/1982] xor_test/xor_test_5.stf ... exclude
+[1979/1982] xor_test/xor_test_6.stf ... exclude
+[1980/1982] xor_test/xor_test_7.stf ... exclude
+[1981/1982] xor_test/xor_test_8.stf ... timeout  300.57s  (140669.2s)
+[1982/1982] xor_test/xor_test_9.stf ... exclude
+
+metacirc sim-group redex cache=true det=true v1model-p4testgen group 1: collected=1982 excluded=1514 executed=468 patched=2 pass=0 fail=0 timeout=468 elapsed=140669.327s; all expected records matched
+
+slowest 10:
+  300.69s  testdata/p4testgen/junk-prop-bmv2/junk-prop-bmv2_1.stf
+  300.61s  testdata/p4testgen/parser-inline-test12/parser-inline-test12_5.stf
+  300.60s  testdata/p4testgen/checksum2-bmv2/checksum2-bmv2_9.stf
+  300.60s  testdata/p4testgen/invalid-hdr-warnings4/invalid-hdr-warnings4_4.stf
+  300.60s  testdata/p4testgen/issue949/issue949_6.stf
+  300.60s  testdata/p4testgen/issue1595/issue1595_6.stf
+  300.60s  testdata/p4testgen/array-copy-bmv2/array-copy-bmv2_1.stf
+  300.60s  testdata/p4testgen/equality-bmv2/equality-bmv2_1.stf
+  300.60s  testdata/p4testgen/union-valid-bmv2/union-valid-bmv2_3.stf
+  300.60s  testdata/p4testgen/parser-inline-test8/parser-inline-test8_4.stf

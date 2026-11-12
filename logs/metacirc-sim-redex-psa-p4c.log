@@ -1,0 +1,44 @@
+p4spectec-test metacirc-sim-redex-psa-p4c
+metacirc sim redex cache=true det=true: collected=26 excluded=1; preparing specification
+
+== psa-p4c (p4c/testdata/p4_16_samples)
+[ 1/26] hash-extern-bmv2.stf ... timeout  300.58s  (300.6s)
+[ 2/26] internet_checksum1-bmv2.stf ... timeout  300.56s  (601.1s)
+[ 3/26] psa-basic-counter-bmv2.stf ... timeout  300.56s  (901.7s)
+[ 4/26] psa-bool-ternary-const-entry-bmv2.stf ... timeout  300.57s  (1202.3s)
+[ 5/26] psa-drop-all-bmv2.stf ... timeout  300.55s  (1502.8s)
+[ 6/26] psa-drop-all-corrected-bmv2.stf ... timeout  300.57s  (1803.4s)
+[ 7/26] psa-e2e-cloning-basic-bmv2.stf ... timeout  300.57s  (2104.0s)
+[ 8/26] psa-end-of-ingress-test-bmv2.stf ... timeout  300.57s  (2404.5s)
+[ 9/26] psa-example-dpdk-varbit-bmv2.stf ... timeout  300.56s  (2705.1s)
+[10/26] psa-example-register2-bmv2.stf ... timeout  300.56s  (3005.7s)
+[11/26] psa-fwd-bmv2.stf ... timeout  300.56s  (3306.2s)
+[12/26] psa-i2e-cloning-basic-bmv2.stf ... timeout  300.56s  (3606.8s)
+[13/26] psa-metadata-bmv2.stf ... timeout  300.58s  (3907.4s)
+[14/26] psa-meter7-bmv2.stf ... exclude
+[15/26] psa-multicast-basic-2-bmv2.stf ... timeout  300.56s  (4207.9s)
+[16/26] psa-multicast-basic-bmv2.stf ... timeout  300.56s  (4508.5s)
+[17/26] psa-multicast-basic-corrected-bmv2.stf ... timeout  300.59s  (4809.1s)
+[18/26] psa-parser-error-test-bmv2.stf ... timeout  300.58s  (5109.6s)
+[19/26] psa-recirculate-no-meta-bmv2.stf ... timeout  300.56s  (5410.2s)
+[20/26] psa-register-complex-bmv2.stf ... timeout  300.57s  (5710.8s)
+[21/26] psa-register-read-write-2-bmv2.stf ... timeout  300.55s  (6011.3s)
+[22/26] psa-register-read-write-bmv2.stf ... timeout  300.56s  (6311.9s)
+[23/26] psa-resubmit-bmv2.stf ... timeout  300.57s  (6612.5s)
+[24/26] psa-top-level-assignments-bmv2.stf ... timeout  300.55s  (6913.0s)
+[25/26] psa-unicast-or-drop-bmv2.stf ... timeout  300.56s  (7213.6s)
+[26/26] psa-unicast-or-drop-corrected-bmv2.stf ... timeout  300.57s  (7514.1s)
+
+metacirc sim redex cache=true det=true: collected=26 excluded=1 executed=25 patched=0 pass=0 fail=0 timeout=25 elapsed=7514.154s; all expected records matched
+
+slowest 10:
+  300.59s  p4c/testdata/p4_16_samples/psa-multicast-basic-corrected-bmv2.stf
+  300.58s  p4c/testdata/p4_16_samples/hash-extern-bmv2.stf
+  300.58s  p4c/testdata/p4_16_samples/psa-metadata-bmv2.stf
+  300.58s  p4c/testdata/p4_16_samples/psa-parser-error-test-bmv2.stf
+  300.57s  p4c/testdata/p4_16_samples/psa-e2e-cloning-basic-bmv2.stf
+  300.57s  p4c/testdata/p4_16_samples/psa-resubmit-bmv2.stf
+  300.57s  p4c/testdata/p4_16_samples/psa-register-complex-bmv2.stf
+  300.57s  p4c/testdata/p4_16_samples/psa-unicast-or-drop-corrected-bmv2.stf
+  300.57s  p4c/testdata/p4_16_samples/psa-drop-all-corrected-bmv2.stf
+  300.57s  p4c/testdata/p4_16_samples/psa-end-of-ingress-test-bmv2.stf

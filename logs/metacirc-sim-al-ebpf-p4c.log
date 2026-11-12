@@ -1,0 +1,35 @@
+p4spectec-test metacirc-sim-al-ebpf-p4c
+metacirc sim al cache=true det=true: collected=17 excluded=2; preparing specification
+
+== ebpf-p4c (p4c/testdata/p4_16_samples)
+[ 1/17] action_call_ebpf.stf ... pass  1.30s  (1.3s)
+[ 2/17] action_call_table_ebpf.stf ... pass  1.22s  (2.5s)
+[ 3/17] advance_ebpf.stf ... pass  1.04s  (3.6s)
+[ 4/17] count_ebpf.stf ... pass  1.30s  (4.9s)
+[ 5/17] ebpf_checksum_extern.stf ... exclude
+[ 6/17] ebpf_conntrack_extern.stf ... exclude
+[ 7/17] hit_ebpf.stf ... pass  1.53s  (6.4s)
+[ 8/17] issue870_ebpf.stf ... pass  1.57s  (8.0s)
+[ 9/17] key-issue-1020_ebpf.stf ... pass  1.70s  (9.7s)
+[10/17] key_ebpf.stf ... pass  1.49s  (11.1s)
+[11/17] length_ebpf.stf ... pass  0.98s  (12.1s)
+[12/17] lpm_ebpf.stf ... pass  1.37s  (13.5s)
+[13/17] switch_ebpf.stf ... pass  3.87s  (17.4s)
+[14/17] test_ebpf.stf ... pass  1.76s  (19.1s)
+[15/17] two_ebpf.stf ... pass  2.05s  (21.2s)
+[16/17] valid_ebpf.stf ... pass  1.48s  (22.7s)
+[17/17] verify_ebpf.stf ... pass  0.95s  (23.6s)
+
+metacirc sim al cache=true det=true: collected=17 excluded=2 executed=15 patched=0 pass=15 fail=0 timeout=0 elapsed=23.637s; all expected records matched
+
+slowest 10:
+    3.87s  p4c/testdata/p4_16_samples/switch_ebpf.stf
+    2.05s  p4c/testdata/p4_16_samples/two_ebpf.stf
+    1.76s  p4c/testdata/p4_16_samples/test_ebpf.stf
+    1.70s  p4c/testdata/p4_16_samples/key-issue-1020_ebpf.stf
+    1.57s  p4c/testdata/p4_16_samples/issue870_ebpf.stf
+    1.53s  p4c/testdata/p4_16_samples/hit_ebpf.stf
+    1.49s  p4c/testdata/p4_16_samples/key_ebpf.stf
+    1.48s  p4c/testdata/p4_16_samples/valid_ebpf.stf
+    1.37s  p4c/testdata/p4_16_samples/lpm_ebpf.stf
+    1.30s  p4c/testdata/p4_16_samples/count_ebpf.stf
