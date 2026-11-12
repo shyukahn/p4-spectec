@@ -1,0 +1,5364 @@
+;; Instruction coverage: 1292/1998 (64.66%)
+;; tower: towers/al-p4.json
+;; arch: ebpf
+;; config: cache=true det=true guard=false
+;; tests 148 (pass 148, fail 0, crash 0), excluded 13
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:17.1-18.43
+def $ite<X>(b, X_t, X_f)
+
++ 1. Case analysis on b (total)  [hits: 148]
+
+    1. Case (% = true)
+
++     1. Return X_t  [hits: 148]
+
+    2. Case (% = false)
+
++     1. Return X_f  [hits: 148]
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:26.1-27.54
+def $deopt_<X>(X'?{X' <- X'?}, X_d)
+
++ 1. Case analysis on X'?{X' <- X'?} (total)  [hits: 148]
+
+    1. Case (% matches pattern ())
+
++     1. Return X_d  [hits: 148]
+
+    2. Case (% matches pattern (_))
+
++     1. (Let ?(X) be X'?{X' <- X'?})  [hits: 148]
+
++       1. Return X  [hits: 148]
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:35.1-37.43
+def $exists_(b*{b <- b*})
+
++ 1. Case analysis on b*{b <- b*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Return false  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let b_h :: b_t*{b_t <- b_t*} be b*{b <- b*})  [hits: 148]
+
++       1. Return (b_h \/ $exists_(b_t*{b_t <- b_t*}))  [hits: 148]
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:41.1-43.44
+def $forall_(b*{b <- b*})
+
++ 1. Case analysis on b*{b <- b*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Return true  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let b_h :: b_t*{b_t <- b_t*} be b*{b <- b*})  [hits: 148]
+
++       1. Return (b_h /\ $forall_(b_t*{b_t <- b_t*}))  [hits: 148]
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:47.1-48.47
+def $repeat_<X>(X, n)
+
++ 1. Case analysis on n (total)  [hits: 148]
+
+    1. Case (% = 0)
+
++     1. Return []  [hits: 148]
+
+    2. Case (% =/= 0)
+
++     1. (Let i be (n - 1))  [hits: 148]
+
++       1. If (i <: nat), then  [hits: 148]
+
++         1. (Let n' be i as nat)  [hits: 148]
+
++           1. Return [X] ++ $repeat_<X>(X, n')  [hits: 148]
+
+        1. Else Dangling
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:60.1-61.33
+def $transpose_<X>(X'*{X' <- X'*}*{X'* <- X'**})
+
++ 1. Case analysis on X'*{X' <- X'*}*{X'* <- X'**} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
+-     1. Return []
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let X*{X <- X*} :: X_t*{X_t <- X_t*}*{X_t* <- X_t**} be X'*{X' <- X'*}*{X'* <- X'**})  [hits: 148]
+
++       1. If (X*{X <- X*} matches []), then  [hits: 148]
+
++         1. If ($forall_((X_t*{X_t <- X_t*} = [])*{X_t* <- X_t**})), then  [hits: 148]
+
++           1. Return []  [hits: 148]
+
+          1. Else Dangling
+
+        1. Else Dangling
+
++ 2. If (X'*{X' <- X'*} matches _ :: _)*{X'* <- X'**}, then  [hits: 148]
+
++   1. (Let X_h :: X_t*{X_t <- X_t*} be X'*{X' <- X'*})*{X'* <- X'**, X_h -> X_h*, X_t* -> X_t**}  [hits: 148]
+
++     1. If (X_h*{X_h <- X_h*} matches _ :: _), then  [hits: 148]
+
++       1. (Let X_trans*{X_trans <- X_trans*}*{X_trans* <- X_trans**} be $transpose_<X>(X_t*{X_t <- X_t*}*{X_t* <- X_t**}))  [hits: 148]
+
++         1. Return X_h*{X_h <- X_h*} :: X_trans*{X_trans <- X_trans*}*{X_trans* <- X_trans**}  [hits: 148]
+
+      1. Else Dangling
+
+  2. Else Dangling
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:83.1-84.32
+def $empty_map<K, V>
+
++ 1. Return `{ [] `}  [hits: 148]
+
+;; towers/../spec-meta/0-aux/0.0-stdlib.watsup:93.1-94.70
+def $adds_map<K, V>(`{ K ':' V*{K <- K*, V <- V*} `}, K'*{K' <- K'*}, V'*{V' <- V'*})
+
++ 1. Case analysis on K'*{K' <- K'*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. If (V'*{V' <- V'*} matches []), then  [hits: 148]
+
++       1. Return `{ K ':' V*{K <- K*, V <- V*} `}  [hits: 148]
+
+      1. Else Dangling
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let K_h :: K_t*{K_t <- K_t*} be K'*{K' <- K'*})  [hits: 148]
+
++       1. If (V'*{V' <- V'*} matches _ :: _), then  [hits: 148]
+
++         1. (Let V_h :: V_t*{V_t <- V_t*} be V'*{V' <- V'*})  [hits: 148]
+
++           1. Return $adds_map<K, V>($add_map<K, V>(`{ K ':' V*{K <- K*, V <- V*} `}, K_h, V_h), K_t*{K_t <- K_t*}, V_t*{V_t <- V_t*})  [hits: 148]
+
+        1. Else Dangling
+
+;; towers/../spec-meta/2-runtime/2.1-variable.watsup:9.1-10.58
+def $fresh(id_used*{id_used <- id_used*}, id)
+
+- 1. Case analysis on id <- id_used*{id_used <- id_used*} (total)
+
+    1. Case false
+
+-     1. Return id
+
+    2. Case true
+
+-     1. Return $fresh(id_used*{id_used <- id_used*}, id ++ "'")
+
+;; towers/../spec-meta/2-runtime/2.1-variable.watsup:24.1-25.37
+def $iterate_vari(id typ iter*{iter <- iter*}, iter_add*{iter_add <- iter_add*})
+
++ 1. Return id typ iter*{iter <- iter*} ++ iter_add*{iter_add <- iter_add*}  [hits: 148]
+
+;; towers/../spec-meta/2-runtime/2.4-typ-subst.watsup:7.1-8.59
+def $theta_of_tdenv(set<pair<id, typDef>>)
+
++ 1. If ((set<pair<id, typDef>> = `{ [] `})), then  [hits: 148]
+
++   1. Return $empty_map<id, typ>  [hits: 148]
+
+  1. Else Dangling
+
++ 2. (Let `{ pair<id, typDef>*{pair<id, typDef> <- pair<id, typDef>*} `} be set<pair<id, typDef>>)  [hits: 148]
+
++   1. If (pair<id, typDef>*{pair<id, typDef> <- pair<id, typDef>*} matches _ :: _), then  [hits: 148]
+
++     1. (Let id_h ':' typDef_h :: id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} be pair<id, typDef>*{pair<id, typDef> <- pair<id, typDef>*})  [hits: 148]
+
++       1. Case analysis on typDef_h (total)  [hits: 148]
+
+          1. Case (% has type definedTypDefn)
+
++           1. (Let TYP _id tparam*{tparam <- tparam*} '=' deftyp be typDef_h as definedTypDefn)  [hits: 148]
+
++             1. If (tparam*{tparam <- tparam*} matches []), then  [hits: 148]
+
++               1. If (deftyp matches ALIAS %), then  [hits: 148]
+
++                 1. (Let ALIAS typ_h be deftyp)  [hits: 148]
+
++                   1. (Let theta_t be $theta_of_tdenv(`{ id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} `}))  [hits: 148]
+
++                     1. Return $add_map<id, typ>(theta_t, id_h, typ_h)  [hits: 148]
+
+                1. Else Dangling
+
+              1. Else Dangling
+
++             2. Case analysis on deftyp (total)  [hits: 148]
+
+                1. Case (% matches pattern ALIAS %)
+
++                 1. If (tparam*{tparam <- tparam*} matches _ :: _), then  [hits: 148]
+
+-                   1. Return $theta_of_tdenv(`{ id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} `})
+
+                  1. Else Dangling
+
+                2. Case (% matches pattern STRUCT %)
+
+-                 1. Return $theta_of_tdenv(`{ id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} `})
+
+                3. Case (% matches pattern VARIANT %)
+
+-                 1. Return $theta_of_tdenv(`{ id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} `})
+
+          2. Case (% matches pattern PARAM)
+
+-           1. Return $theta_of_tdenv(`{ id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} `})
+
+          3. Case (% has type externTypDefn)
+
+-           1. Return $theta_of_tdenv(`{ id_t ':' typDef_t*{id_t <- id_t*, typDef_t <- typDef_t*} `})
+
+    1. Else Dangling
+
+;; towers/../spec-meta/2-runtime/2.4-typ-subst.watsup:29.1-30.52
+def $ids_typ(typ')
+
+- 1. Case analysis on typ'
+
+    1. Case (% matches pattern VAR % %)
+
+-     1. (Let VAR id typ*{typ <- typ*} be typ')
+
+-       1. Return [id] ++ $ids_typs(typ*{typ <- typ*})
+
+    2. Case (% matches pattern TUP %)
+
+-     1. (Let TUP typ*{typ <- typ*} be typ')
+
+-       1. Return $ids_typs(typ*{typ <- typ*})
+
+    3. Case (% matches pattern ITER % %)
+
+-     1. (Let ITER typ iter be typ')
+
+-       1. Return $ids_typ(typ)
+
+    4. Case (% matches pattern FUNC % % %)
+
+-     1. (Let FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret be typ')
+
+-       1. Return tparam*{tparam <- tparam*} ++ $ids_typs(typ*{typ <- typ*}) ++ $ids_typ(typ_ret)
+
+  2. Otherwise,
+
+-   1. Return []
+
+;; towers/../spec-meta/2-runtime/2.4-typ-subst.watsup:31.1-32.52
+def $ids_typs(typ*{typ <- typ*})
+
+- 1. Case analysis on typ*{typ <- typ*} (total)
+
+    1. Case (% matches pattern [])
+
+-     1. Return []
+
+    2. Case (% matches pattern _ :: _)
+
+-     1. (Let typ_h :: typ_t*{typ_t <- typ_t*} be typ*{typ <- typ*})
+
+-       1. Return $ids_typ(typ_h) ++ $ids_typs(typ_t*{typ_t <- typ_t*})
+
+;; towers/../spec-meta/2-runtime/2.4-typ-subst.watsup:45.1-46.66
+def $fresh_ids(id_used*{id_used <- id_used*}, id*{id <- id*})
+
+- 1. Case analysis on id*{id <- id*} (total)
+
+    1. Case (% matches pattern [])
+
+-     1. Return []
+
+    2. Case (% matches pattern _ :: _)
+
+-     1. (Let id_h :: id_t*{id_t <- id_t*} be id*{id <- id*})
+
+-       1. (Let id_fresh be $fresh(id_used*{id_used <- id_used*}, id_h))
+
+-         1. Return [id_fresh] ++ $fresh_ids([id_fresh] ++ id_used*{id_used <- id_used*}, id_t*{id_t <- id_t*})
+
+;; towers/../spec-meta/2-runtime/2.4-typ-subst.watsup:57.1-58.64
+def $subst_typ(theta, typ')
+
++ 1. Case analysis on typ'  [hits: 148]
+
+    1. Case (% has type numtyp)
+
++     1. (Let numtyp be typ' as numtyp)  [hits: 148]
+
++       1. Case analysis on numtyp (total)  [hits: 148]
+
+          1. Case (% matches pattern NAT)
+
++           1. Return OK NAT as typ as typRes  [hits: 148]
+
+          2. Case (% matches pattern INT)
+
++           1. Return OK INT as typ as typRes  [hits: 148]
+
+    2. Case (% matches pattern VAR % %)
+
++     1. (Let VAR id targ*{targ <- targ*} be typ')  [hits: 148]
+
++       1. If (targ*{targ <- targ*} matches []), then  [hits: 148]
+
++         1. (Let typ''?{typ'' <- typ''?} be $find_map<id, typ>(theta, id))  [hits: 148]
+
++           1. If (typ''?{typ'' <- typ''?} matches (_)), then  [hits: 148]
+
++             1. (Let ?(typ) be typ''?{typ'' <- typ''?})  [hits: 148]
+
++               1. Return OK typ as typRes  [hits: 148]
+
++       2. If ($find_map<id, typ>(theta, id) matches ()), then  [hits: 148]
+
++         1. (Let typsRes be $subst_typs(theta, targ*{targ <- targ*}))  [hits: 148]
+
++           1. If (typsRes <: ok<typ*>), then  [hits: 148]
+
++             1. (Let OK targ_subst*{targ_subst <- targ_subst*} be typsRes as ok<typ*>)  [hits: 148]
+
++               1. Return OK VAR id targ_subst*{targ_subst <- targ_subst*} as typRes  [hits: 148]
+
+    3. Case (% matches pattern TUP %)
+
++     1. (Let TUP typ*{typ <- typ*} be typ')  [hits: 45]
+
++       1. (Let typsRes be $subst_typs(theta, typ*{typ <- typ*}))  [hits: 45]
+
++         1. If (typsRes <: ok<typ*>), then  [hits: 45]
+
++           1. (Let OK typ_subst*{typ_subst <- typ_subst*} be typsRes as ok<typ*>)  [hits: 45]
+
++             1. Return OK TUP typ_subst*{typ_subst <- typ_subst*} as typRes  [hits: 45]
+
+    4. Case (% matches pattern ITER % %)
+
++     1. (Let ITER typ iter be typ')  [hits: 148]
+
++       1. (Let typRes be $subst_typ(theta, typ))  [hits: 148]
+
++         1. If (typRes <: ok<typ>), then  [hits: 148]
+
++           1. (Let OK typ_subst be typRes as ok<typ>)  [hits: 148]
+
++             1. Return OK ITER typ_subst iter as typRes  [hits: 148]
+
+    5. Case (% matches pattern FUNC % % %)
+
+-     1. (Let FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret be typ')
+
+-       1. (Let `{ id ':' typ_arg*{id <- id*, typ_arg <- typ_arg*} `} be theta)
+
+-         1. (Let id_used*{id_used <- id_used*} be id*{id <- id*} ++ $ids_typs(typ_arg*{typ_arg <- typ_arg*}) ++ $ids_typ(FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret))
+
+-           1. (Let tparam_fresh*{tparam_fresh <- tparam_fresh*} be $fresh_ids(id_used*{id_used <- id_used*}, tparam*{tparam <- tparam*}))
+
+-             1. If ((|tparam*{tparam <- tparam*}| = |tparam_fresh*{tparam_fresh <- tparam_fresh*}|)), then
+
+-               1. (Let theta_fresh be `{ tparam ':' VAR tparam_fresh []*{tparam <- tparam*, tparam_fresh <- tparam_fresh*} `})
+
+-                 1. (Let typsRes be $subst_typs(theta_fresh, typ*{typ <- typ*}))
+
+-                   1. If (typsRes <: ok<typ*>), then
+
+-                     1. (Let OK typ_fresh*{typ_fresh <- typ_fresh*} be typsRes as ok<typ*>)
+
+-                       1. (Let typsRes' be $subst_typs(theta, typ_fresh*{typ_fresh <- typ_fresh*}))
+
+-                         1. If (typsRes' <: ok<typ*>), then
+
+-                           1. (Let OK typ_subst*{typ_subst <- typ_subst*} be typsRes' as ok<typ*>)
+
+-                             1. (Let typRes be $subst_typ(theta_fresh, typ_ret))
+
+-                               1. If (typRes <: ok<typ>), then
+
+-                                 1. (Let OK typ_ret_fresh be typRes as ok<typ>)
+
+-                                   1. (Let typRes' be $subst_typ(theta, typ_ret_fresh))
+
+-                                     1. If (typRes' <: ok<typ>), then
+
+-                                       1. (Let OK typ_ret_subst be typRes' as ok<typ>)
+
+-                                         1. Return OK FUNC tparam_fresh*{tparam_fresh <- tparam_fresh*} typ_subst*{typ_subst <- typ_subst*} typ_ret_subst as typRes
+
++ 2. If (typ' <: optyp), then  [hits: 148]
+
++   1. (Let optyp be typ' as optyp)  [hits: 148]
+
++     1. Case analysis on optyp  [hits: 148]
+
+        1. Case (% matches pattern TEXT)
+
++         1. Return OK TEXT as typ as typRes  [hits: 148]
+
+        2. Case (% matches pattern BOOL)
+
++         1. Return OK BOOL as typ as typRes  [hits: 148]
+
+  3. Otherwise,
+
+-   1. Return ERROR as typRes
+
+;; towers/../spec-meta/2-runtime/2.4-typ-subst.watsup:59.1-60.65
+def $subst_typs(theta, typ*{typ <- typ*})
+
++ 1. Case analysis on typ*{typ <- typ*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Return OK [] as typsRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let typ_h :: typ_t*{typ_t <- typ_t*} be typ*{typ <- typ*})  [hits: 148]
+
++       1. (Let typRes be $subst_typ(theta, typ_h))  [hits: 148]
+
++         1. If (typRes <: ok<typ>), then  [hits: 148]
+
++           1. (Let OK typ_subst be typRes as ok<typ>)  [hits: 148]
+
++             1. (Let typsRes be $subst_typs(theta, typ_t*{typ_t <- typ_t*}))  [hits: 148]
+
++               1. If (typsRes <: ok<typ*>), then  [hits: 148]
+
++                 1. (Let OK typ_t_subst*{typ_t_subst <- typ_t_subst*} be typsRes as ok<typ*>)  [hits: 148]
+
++                   1. Return OK typ_subst :: typ_t_subst*{typ_t_subst <- typ_t_subst*} as typsRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ERROR as typsRes
+
+;; towers/../spec-meta/2-runtime/2.5-typ-equiv.watsup:5.1-7.45
+def $expand_typ(tdenv, typ')
+
+- 1. Case analysis on typ' (total)
+
+    1. Case (% matches pattern VAR % %)
+
+-     1. (Let VAR id targ*{targ <- targ*} be typ')
+
+-       1. (Let typDef'?{typDef' <- typDef'?} be $find_map<id, typDef>(tdenv, id))
+
+-         1. If (typDef'?{typDef' <- typDef'?} matches (_)), then
+
+-           1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})
+
+-             1. Case analysis on typDef
+
+                1. Case (% has type definedTypDefn)
+
+-                 1. (Let TYP _id tparam*{tparam <- tparam*} '=' deftyp be typDef as definedTypDefn)
+
+-                   1. If (deftyp matches ALIAS %), then
+
+-                     1. (Let ALIAS typ be deftyp)
+
+-                       1. If ((|targ*{targ <- targ*}| = |tparam*{tparam <- tparam*}|)), then
+
+-                         1. (Let theta be `{ tparam ':' targ*{targ <- targ*, tparam <- tparam*} `})
+
+-                           1. (Let typRes be $subst_typ(theta, typ))
+
+-                             1. If (typRes <: ok<typ>), then
+
+-                               1. (Let OK typ_subst be typRes as ok<typ>)
+
+-                                 1. Return $expand_typ(tdenv, typ_subst)
+
+                2. Case (% matches pattern PARAM)
+
+-                 1. If (targ*{targ <- targ*} matches []), then
+
+-                   1. Return OK VAR id targ*{targ <- targ*} as typRes
+
+-       2. If (targ*{targ <- targ*} matches []), then
+
+-         1. (Let typDef'?{typDef' <- typDef'?} be $find_map<id, typDef>(tdenv, id))
+
+-           1. If (typDef'?{typDef' <- typDef'?} matches (_)), then
+
+-             1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})
+
+-               1. If (typDef <: externTypDefn), then
+
+-                 1. Return OK VAR id [] as typRes
+
+-       3. (Let typDef'?{typDef' <- typDef'?} be $find_map<id, typDef>(tdenv, id))
+
+-         1. If (typDef'?{typDef' <- typDef'?} matches (_)), then
+
+-           1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})
+
+-             1. If (typDef <: definedTypDefn), then
+
+-               1. (Let TYP _id tparam*{tparam <- tparam*} '=' deftyp be typDef as definedTypDefn)
+
+-                 1. Case analysis on deftyp
+
+                    1. Case (% matches pattern STRUCT %)
+
+-                     1. If ((|tparam*{tparam <- tparam*}| = |targ*{targ <- targ*}|)), then
+
+-                       1. Return OK VAR id targ*{targ <- targ*} as typRes
+
+                    2. Case (% matches pattern VARIANT %)
+
+-                     1. If ((|tparam*{tparam <- tparam*}| = |targ*{targ <- targ*}|)), then
+
+-                       1. Return OK VAR id targ*{targ <- targ*} as typRes
+
+    2. Case (% has type optyp)
+
+-     1. (Let optyp be typ' as optyp)
+
+-       1. Case analysis on optyp
+
+          1. Case (% matches pattern BOOL)
+
+-           1. Return OK BOOL as typ as typRes
+
+          2. Case (% matches pattern TEXT)
+
+-           1. Return OK TEXT as typ as typRes
+
+    3. Case (% matches pattern TUP %)
+
+-     1. (Let TUP typ*{typ <- typ*} be typ')
+
+-       1. Return OK TUP typ*{typ <- typ*} as typRes
+
+    4. Case (% matches pattern ITER % %)
+
+-     1. (Let ITER typ iter be typ')
+
+-       1. Return OK ITER typ iter as typRes
+
+    5. Case (% matches pattern FUNC % % %)
+
+-     1. (Let FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret be typ')
+
+-       1. Return OK FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret as typRes
+
+- 2. If (typ' <: numtyp), then
+
+-   1. (Let numtyp be typ' as numtyp)
+
+-     1. Case analysis on numtyp (total)
+
+        1. Case (% matches pattern NAT)
+
+-         1. Return OK NAT as typ as typRes
+
+        2. Case (% matches pattern INT)
+
+-         1. Return OK INT as typ as typRes
+
+  3. Otherwise,
+
+-   1. Return ERROR as typRes
+
+;; towers/../spec-meta/2-runtime/2.5-typ-equiv.watsup:38.1-40.45
+def $equiv_typ(tdenv, typ_l, typ_r)
+
+- 1. (Let typRes be $expand_typ(tdenv, typ_l))
+
+-   1. If (typRes <: ok<typ>), then
+
+-     1. (Let OK typ_l_expand be typRes as ok<typ>)
+
+-       1. (Let typRes' be $expand_typ(tdenv, typ_r))
+
+-         1. If (typRes' <: ok<typ>), then
+
+-           1. (Let OK typ_r_expand be typRes' as ok<typ>)
+
+-             1. Return $equiv_typ'(tdenv, typ_l_expand, typ_r_expand)
+
+  2. Otherwise,
+
+-   1. Return ERROR as equivRes
+
+;; towers/../spec-meta/2-runtime/2.5-typ-equiv.watsup:41.1-43.45
+def $equiv_typs(tdenv, typ*{typ <- typ*}, typ'*{typ' <- typ'*})
+
+- 1. Case analysis on typ*{typ <- typ*} (total)
+
+    1. Case (% matches pattern [])
+
+-     1. Case analysis on typ'*{typ' <- typ'*} (total)
+
+        1. Case (% matches pattern [])
+
+-         1. Return OK true as equivRes
+
+        2. Case (% matches pattern _ :: _)
+
+-         1. Return OK false as equivRes
+
+    2. Case (% matches pattern _ :: _)
+
+-     1. (Let typ_l :: typ_l_t*{typ_l_t <- typ_l_t*} be typ*{typ <- typ*})
+
+-       1. Case analysis on typ'*{typ' <- typ'*} (total)
+
+          1. Case (% matches pattern _ :: _)
+
+-           1. (Let typ_r :: typ_r_t*{typ_r_t <- typ_r_t*} be typ'*{typ' <- typ'*})
+
+-             1. If ((OK true as equivRes = $equiv_typ(tdenv, typ_l, typ_r))), then
+
+-               1. Return $equiv_typs(tdenv, typ_l_t*{typ_l_t <- typ_l_t*}, typ_r_t*{typ_r_t <- typ_r_t*})
+
+              1. Else Dangling
+
+-             2. (Let equivRes be $equiv_typ(tdenv, typ_l, typ_r))
+
+-               1. If ((equivRes =/= OK true as equivRes)), then
+
+-                 1. Return equivRes
+
+                1. Else Dangling
+
+          2. Case (% matches pattern [])
+
+-           1. Return OK false as equivRes
+
+;; towers/../spec-meta/2-runtime/2.5-typ-equiv.watsup:44.1-46.45
+def $equiv_typ'(tdenv, typ, typ')
+
+- 1. Case analysis on typ
+
+    1. Case (% has type optyp)
+
+-     1. (Let optyp be typ as optyp)
+
+-       1. Case analysis on optyp
+
+          1. Case (% matches pattern BOOL)
+
+-           1. If (typ' <: optyp), then
+
+-             1. (Let optyp' be typ' as optyp)
+
+-               1. If (optyp' matches BOOL), then
+
+-                 1. Return OK true as equivRes
+
+          2. Case (% matches pattern TEXT)
+
+-           1. If (typ' <: optyp), then
+
+-             1. (Let optyp' be typ' as optyp)
+
+-               1. If (optyp' matches TEXT), then
+
+-                 1. Return OK true as equivRes
+
+    2. Case (% matches pattern VAR % %)
+
+-     1. (Let VAR id_l targ_l*{targ_l <- targ_l*} be typ)
+
+-       1. If (typ' matches VAR % %), then
+
+-         1. (Let VAR id_r targ_r*{targ_r <- targ_r*} be typ')
+
+-           1. If ((id_l = id_r)), then
+
+-             1. Return $equiv_typs(tdenv, targ_l*{targ_l <- targ_l*}, targ_r*{targ_r <- targ_r*})
+
+    3. Case (% matches pattern TUP %)
+
+-     1. (Let TUP typ_l*{typ_l <- typ_l*} be typ)
+
+-       1. If (typ' matches TUP %), then
+
+-         1. (Let TUP typ_r*{typ_r <- typ_r*} be typ')
+
+-           1. Return $equiv_typs(tdenv, typ_l*{typ_l <- typ_l*}, typ_r*{typ_r <- typ_r*})
+
+    4. Case (% matches pattern ITER % %)
+
+-     1. (Let ITER typ_l iter_l be typ)
+
+-       1. If (typ' matches ITER % %), then
+
+-         1. (Let ITER typ_r iter_r be typ')
+
+-           1. If ((iter_l = iter_r)), then
+
+-             1. Return $equiv_typ(tdenv, typ_l, typ_r)
+
+- 2. If (typ <: numtyp), then
+
+-   1. (Let numtyp be typ as numtyp)
+
+-     1. Case analysis on numtyp (total)
+
+        1. Case (% matches pattern NAT)
+
+-         1. If (typ' <: numtyp), then
+
+-           1. (Let numtyp' be typ' as numtyp)
+
+-             1. If (numtyp' matches NAT), then
+
+-               1. Return OK true as equivRes
+
+        2. Case (% matches pattern INT)
+
+-         1. If (typ' <: numtyp), then
+
+-           1. (Let numtyp' be typ' as numtyp)
+
+-             1. If (numtyp' matches INT), then
+
+-               1. Return OK true as equivRes
+
+  3. Otherwise,
+
+-   1. Return OK false as equivRes
+
+;; towers/../spec-meta/2-runtime/2.5-typ-equiv.watsup:82.1-84.54
+def $equiv_func_typ(tdenv, typ, typ')
+
+- 1. If (typ matches FUNC % % %), then
+
+-   1. (Let FUNC tparam_l*{tparam_l <- tparam_l*} typ_l*{typ_l <- typ_l*} typ_ret_l be typ)
+
+-     1. If (typ' matches FUNC % % %), then
+
+-       1. (Let FUNC tparam_r*{tparam_r <- tparam_r*} typ_r*{typ_r <- typ_r*} typ_ret_r be typ')
+
+-         1. If ((|tparam_l*{tparam_l <- tparam_l*}| = |tparam_r*{tparam_r <- tparam_r*}|)), then
+
+-           1. If ((|typ_l*{typ_l <- typ_l*}| = |typ_r*{typ_r <- typ_r*}|)), then
+
+-             1. (Let `{ id ':' typDef*{id <- id*, typDef <- typDef*} `} be tdenv)
+
+-               1. (Let id_used*{id_used <- id_used*} be id*{id <- id*} ++ $ids_typ(FUNC tparam_l*{tparam_l <- tparam_l*} typ_l*{typ_l <- typ_l*} typ_ret_l) ++ $ids_typ(FUNC tparam_r*{tparam_r <- tparam_r*} typ_r*{typ_r <- typ_r*} typ_ret_r))
+
+-                 1. (Let tparam_fresh*{tparam_fresh <- tparam_fresh*} be $fresh_ids(id_used*{id_used <- id_used*}, tparam_l*{tparam_l <- tparam_l*}))
+
+-                   1. If ((|tparam_fresh*{tparam_fresh <- tparam_fresh*}| = |tparam_l*{tparam_l <- tparam_l*}|)), then
+
+-                     1. (Let theta_l be `{ tparam_l ':' VAR tparam_fresh []*{tparam_fresh <- tparam_fresh*, tparam_l <- tparam_l*} `})
+
+-                       1. (Let theta_r be `{ tparam_r ':' VAR tparam_fresh []*{tparam_fresh <- tparam_fresh*, tparam_r <- tparam_r*} `})
+
+-                         1. (Let typsRes be $subst_typs(theta_l, typ_l*{typ_l <- typ_l*}))
+
+-                           1. If (typsRes <: ok<typ*>), then
+
+-                             1. (Let OK typ_l_subst*{typ_l_subst <- typ_l_subst*} be typsRes as ok<typ*>)
+
+-                               1. (Let typsRes' be $subst_typs(theta_r, typ_r*{typ_r <- typ_r*}))
+
+-                                 1. If (typsRes' <: ok<typ*>), then
+
+-                                   1. (Let OK typ_r_subst*{typ_r_subst <- typ_r_subst*} be typsRes' as ok<typ*>)
+
+-                                     1. (Let typRes be $subst_typ(theta_l, typ_ret_l))
+
+-                                       1. If (typRes <: ok<typ>), then
+
+-                                         1. (Let OK typ_ret_l_subst be typRes as ok<typ>)
+
+-                                           1. (Let typRes' be $subst_typ(theta_r, typ_ret_r))
+
+-                                             1. If (typRes' <: ok<typ>), then
+
+-                                               1. (Let OK typ_ret_r_subst be typRes' as ok<typ>)
+
+-                                                 1. (Let tdenv_fresh be $adds_map<id, typDef>(tdenv, tparam_fresh*{tparam_fresh <- tparam_fresh*}, $repeat_<typDef>(PARAM, |tparam_fresh*{tparam_fresh <- tparam_fresh*}|)))
+
+-                                                   1. Return $equiv_typs(tdenv_fresh, typ_l_subst*{typ_l_subst <- typ_l_subst*} ++ [typ_ret_l_subst], typ_r_subst*{typ_r_subst <- typ_r_subst*} ++ [typ_ret_r_subst])
+
+-         2. If (((|tparam_l*{tparam_l <- tparam_l*}| =/= |tparam_r*{tparam_r <- tparam_r*}|) \/ (|typ_l*{typ_l <- typ_l*}| =/= |typ_r*{typ_r <- typ_r*}|))), then
+
+-           1. Return OK false as equivRes
+
+  2. Otherwise,
+
+-   1. Return ERROR as equivRes
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:15.1-16.38
+def $empty_globalLayer
+
++ 1. Return {TYP $empty_map<id, typDef>, REL $empty_map<id, relDefn>, FUNC $empty_map<id, funcDefn>}  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:22.1-23.37
+def $empty_localLayer
+
++ 1. Return {TYP $empty_map<id, typDef>, FUNC $empty_map<id, id>, VAL $empty_map<varr, val>}  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:31.1-32.33
+def $empty_ctx
+
++ 1. Return {GLOBAL $empty_globalLayer, LOCAL $empty_localLayer}  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:41.1-42.44
+def $load_ctx(C, defn'*{defn' <- defn'*})
+
++ 1. Case analysis on defn'*{defn' <- defn'*} (total)  [hits: 148]
+
+    1. Case (% matches pattern _ :: _)
+
++     1. (Let defn :: defn_t*{defn_t <- defn_t*} be defn'*{defn' <- defn'*})  [hits: 148]
+
++       1. Case analysis on defn (total)  [hits: 148]
+
+          1. Case (% has type externTypDefn)
+
++           1. (Let externTypDefn be defn as externTypDefn)  [hits: 148]
+
++             1. (Let EXTTYP id be externTypDefn)  [hits: 148]
+
++               1. (Let tdenv_update be $add_map<id, typDef>(C.GLOBAL.TYP, id, externTypDefn as typDef))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.TYP = tdenv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          2. Case (% has type definedTypDefn)
+
++           1. (Let definedTypDefn be defn as definedTypDefn)  [hits: 148]
+
++             1. (Let TYP id _tparam*{_tparam <- _tparam*} '=' _deftyp be definedTypDefn)  [hits: 148]
+
++               1. (Let tdenv_update be $add_map<id, typDef>(C.GLOBAL.TYP, id, definedTypDefn as typDef))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.TYP = tdenv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          3. Case (% has type externRelDefn)
+
++           1. (Let externRelDefn be defn as externRelDefn)  [hits: 148]
+
++             1. (Let EXTREL id ':' _typ*{_typ <- _typ*} '->' _typ'*{_typ' <- _typ'*} be externRelDefn)  [hits: 148]
+
++               1. (Let renv_update be $add_map<id, relDefn>(C.GLOBAL.REL, id, externRelDefn as relDefn))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.REL = renv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          4. Case (% has type definedRelDefn)
+
++           1. (Let definedRelDefn be defn as definedRelDefn)  [hits: 148]
+
++             1. (Let REL id ':' _typ*{_typ <- _typ*} '->' _typ'*{_typ' <- _typ'*} '=' _rulGroup*{_rulGroup <- _rulGroup*} _elsGroup?{_elsGroup <- _elsGroup?} be definedRelDefn)  [hits: 148]
+
++               1. (Let renv_update be $add_map<id, relDefn>(C.GLOBAL.REL, id, definedRelDefn as relDefn))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.REL = renv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          5. Case (% has type externFuncDefn)
+
++           1. (Let externFuncDefn be defn as externFuncDefn)  [hits: 148]
+
++             1. (Let EXTFUNC id _tparam*{_tparam <- _tparam*} _param*{_param <- _param*} ':' _typ be externFuncDefn)  [hits: 148]
+
++               1. (Let fenv_update be $add_map<id, funcDefn>(C.GLOBAL.FUNC, id, externFuncDefn as funcDefn))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.FUNC = fenv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          6. Case (% has type builtinFuncDefn)
+
++           1. (Let builtinFuncDefn be defn as builtinFuncDefn)  [hits: 148]
+
++             1. (Let BUILTINFUNC id _tparam*{_tparam <- _tparam*} _param*{_param <- _param*} ':' _typ be builtinFuncDefn)  [hits: 148]
+
++               1. (Let fenv_update be $add_map<id, funcDefn>(C.GLOBAL.FUNC, id, builtinFuncDefn as funcDefn))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.FUNC = fenv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          7. Case (% has type tableFuncDefn)
+
++           1. (Let tableFuncDefn be defn as tableFuncDefn)  [hits: 148]
+
++             1. (Let TABLEFUNC id _param*{_param <- _param*} ':' _typ '=' _tblRow*{_tblRow <- _tblRow*} be tableFuncDefn)  [hits: 148]
+
++               1. (Let fenv_update be $add_map<id, funcDefn>(C.GLOBAL.FUNC, id, tableFuncDefn as funcDefn))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.FUNC = fenv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+          8. Case (% has type definedFuncDefn)
+
++           1. (Let definedFuncDefn be defn as definedFuncDefn)  [hits: 148]
+
++             1. (Let FUNC id _tparam*{_tparam <- _tparam*} _param*{_param <- _param*} ':' _typ '=' _clause*{_clause <- _clause*} _elsClause?{_elsClause <- _elsClause?} be definedFuncDefn)  [hits: 148]
+
++               1. (Let fenv_update be $add_map<id, funcDefn>(C.GLOBAL.FUNC, id, definedFuncDefn as funcDefn))  [hits: 148]
+
++                 1. (Let C_load be C[GLOBAL.FUNC = fenv_update])  [hits: 148]
+
++                   1. Return $load_ctx(C_load, defn_t*{defn_t <- defn_t*})  [hits: 148]
+
+    2. Case (% matches pattern [])
+
++     1. Return C  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:100.1-101.75
+def $add_varr(C, varr, val)
+
++ 1. (Let venv_update be $add_map<varr, val>(C.LOCAL.VAL, varr, val))  [hits: 148]
+
++   1. Return C[LOCAL.VAL = venv_update]  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:106.1-107.83
+def $add_varis(C, vari*{vari <- vari*}, val*{val <- val*})
+
++ 1. (Let id _typ iter*{iter <- iter*} be vari)*{vari <- vari*, _typ -> _typ*, id -> id*, iter* -> iter**}  [hits: 148]
+
++   1. (Let venv_update be $adds_map<varr, val>(C.LOCAL.VAL, id iter*{iter <- iter*}*{id <- id*, iter* <- iter**}, val*{val <- val*}))  [hits: 148]
+
++     1. Return C[LOCAL.VAL = venv_update]  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:115.1-117.60
+def $add_func(C, id, id_global)
+
++ 1. (Let fnenv_update be $add_map<id, id>(C.LOCAL.FUNC, id, id_global))  [hits: 148]
+
++   1. Return C[LOCAL.FUNC = fnenv_update]  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:129.1-130.79
+def $find_vari(C, vari)
+
++ 1. (Let id _typ iter*{iter <- iter*} be vari)  [hits: 148]
+
++   1. (Let val'?{val' <- val'?} be $find_map<varr, val>(C.LOCAL.VAL, id iter*{iter <- iter*}))  [hits: 148]
+
++     1. If (val'?{val' <- val'?} matches (_)), then  [hits: 148]
+
++       1. (Let ?(val) be val'?{val' <- val'?})  [hits: 148]
+
++         1. Return ?(val)  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ?()
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:138.1-139.87
+def $find_varr(C, varr)
+
++ 1. Return $find_map<varr, val>(C.LOCAL.VAL, varr)  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:142.1-144.38
+def $find_varis(C, vari*{vari <- vari*})
+
++ 1. (Let val'?{val' <- val'?} be $find_vari(C, vari))*{vari <- vari*, val'? -> val'?*}  [hits: 148]
+
++   1. If (val'?{val' <- val'?} matches (_))*{val'? <- val'?*}, then  [hits: 148]
+
++     1. (Let ?(val) be val'?{val' <- val'?})*{val'? <- val'?*, val -> val*}  [hits: 148]
+
++       1. Return ?(val*{val <- val*})  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ?()
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:150.1-152.38
+def $finds_vari(C*{C <- C*}, vari)
+
++ 1. (Let id _typ iter*{iter <- iter*} be vari)  [hits: 148]
+
++   1. (Let val'?{val' <- val'?} be $find_map<varr, val>(C.LOCAL.VAL, id iter*{iter <- iter*}))*{C <- C*, val'? -> val'?*}  [hits: 148]
+
++     1. If (val'?{val' <- val'?} matches (_))*{val'? <- val'?*}, then  [hits: 148]
+
++       1. (Let ?(val) be val'?{val' <- val'?})*{val'? <- val'?*, val -> val*}  [hits: 148]
+
++         1. Return ?(val*{val <- val*})  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ?()
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:163.1-164.67
+def $is_iter_on_var(typedExp')
+
++ 1. (Let exp '#' _typ be typedExp')  [hits: 148]
+
++   1. Case analysis on exp  [hits: 148]
+
+      1. Case (% has type varExp)
+
++       1. (Let VAR id be exp as varExp)  [hits: 148]
+
++         1. Return ?(id [])  [hits: 148]
+
+      2. Case (% has type iterExp)
+
++       1. (Let ITER typedExp expIter be exp as iterExp)  [hits: 148]
+
++         1. (Let varr?{varr <- varr?} be $is_iter_on_var(typedExp))  [hits: 148]
+
++           1. If (varr?{varr <- varr?} matches (_)), then  [hits: 148]
+
++             1. (Let ?(id iter*{iter <- iter*}) be varr?{varr <- varr?})  [hits: 148]
+
++               1. (Let iter_outer vari*{vari <- vari*} be expIter)  [hits: 148]
+
++                 1. If (vari*{vari <- vari*} matches [ _/1 ]), then  [hits: 148]
+
++                   1. (Let [id' _typ' iter'*{iter' <- iter'*}] be vari*{vari <- vari*})  [hits: 148]
+
++                     1. If ((id' = id)), then  [hits: 148]
+
++                       1. If ((iter'*{iter' <- iter'*} = iter*{iter <- iter*})), then  [hits: 148]
+
++                         1. Return ?(id iter*{iter <- iter*} ++ [iter_outer])  [hits: 148]
+
+  2. Otherwise,
+
++   1. Return ?()  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:175.1-176.80
+def $find_typ(C, id)
+
++ 1. (Let typDef'?{typDef' <- typDef'?} be $find_map<id, typDef>(C.LOCAL.TYP, id))  [hits: 148]
+
++   1. If (typDef'?{typDef' <- typDef'?} matches (_)), then  [hits: 148]
+
+-     1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})
+
+-       1. Return ?(typDef)
+
+    1. Else Dangling
+
++ 2. If ($find_map<id, typDef>(C.LOCAL.TYP, id) matches ()), then  [hits: 148]
+
++   1. Return $find_map<id, typDef>(C.GLOBAL.TYP, id)  [hits: 148]
+
+  2. Else Dangling
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:185.1-187.30
+def $find_func_param(C, id)
+
++ 1. Return $find_map<id, id>(C.LOCAL.FUNC, id)  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:191.1-192.59
+def $resolve_func_param(C, id)
+
++ 1. Return $deopt_<id>($find_func_param(C, id), id)  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:196.1-197.85
+def $find_func(C, id)
+
++ 1. Return $find_map<id, funcDefn>(C.GLOBAL.FUNC, id)  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:202.1-203.78
+def $find_rel(C, id)
+
++ 1. Return $find_map<id, relDefn>(C.GLOBAL.REL, id)  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:213.1-215.36
+def $sub_opt(C, vari*{vari <- vari*})
+
+- 1. Case analysis on vari*{vari <- vari*} (total)
+
+    1. Case (% matches pattern [])
+
+-     1. Return ERROR as subOptRes
+
+    2. Case (% matches pattern _ :: _)
+
+-     1. (Let vari_iter be $iterate_vari(vari, [QUEST]))*{vari <- vari*, vari_iter -> vari_iter*}
+
+-       1. (Let val'''?{val''' <- val'''?} be $find_vari(C, vari_iter))*{vari_iter <- vari_iter*, val'''? -> val'''?*}
+
+-         1. If (val'''?{val''' <- val'''?} matches (_))*{val'''? <- val'''?*}, then
+
+-           1. (Let ?(val'') be val'''?{val''' <- val'''?})*{val'''? <- val'''?*, val'' -> val''*}
+
+-             1. If (val'' matches OPT %)*{val'' <- val''*}, then
+
+-               1. (Let OPT val'?{val' <- val'?} be val'')*{val'' <- val''*, val'? -> val'?*}
+
+-                 1. If (val'?{val' <- val'?} matches (_))*{val'? <- val'?*}, then
+
+-                   1. (Let ?(val) be val'?{val' <- val'?})*{val'? <- val'?*, val -> val*}
+
+-                     1. (Let C_sub be $add_varis(C, vari*{vari <- vari*}, val*{val <- val*}))
+
+-                       1. Return OK ?(C_sub) as subOptRes
+
+-       2. If ((?(OPT ?()) = $find_vari(C, vari_iter)))*{vari_iter <- vari_iter*}, then
+
+-         1. Return OK ?() as subOptRes
+
+  2. Otherwise,
+
+-   1. Return ERROR as subOptRes
+
+;; towers/../spec-meta/3-execution/3.01-context.watsup:232.1-233.88
+def $sub_list(C, vari*{vari <- vari*})
+
++ 1. (Let vari_iter be $iterate_vari(vari, [STAR]))*{vari <- vari*, vari_iter -> vari_iter*}  [hits: 148]
+
++   1. (Let val''?{val'' <- val''?} be $find_vari(C, vari_iter))*{vari_iter <- vari_iter*, val''? -> val''?*}  [hits: 148]
+
++     1. If (val''?{val'' <- val''?} matches (_))*{val''? <- val''?*}, then  [hits: 148]
+
++       1. (Let ?(val') be val''?{val'' <- val''?})*{val''? <- val''?*, val' -> val'*}  [hits: 148]
+
++         1. If (val' matches LIST %)*{val' <- val'*}, then  [hits: 148]
+
++           1. (Let LIST val*{val <- val*} be val')*{val' <- val'*, val* -> val**}  [hits: 148]
+
++             1. If ((0 < |val*{val <- val*}*{val* <- val**}|))*{val* <- val**}, then  [hits: 148]
+
++               1. If ($forall_((|val*{val <- val*}| = |val*{val <- val*}*{val* <- val**}[0]|)*{val* <- val**})), then  [hits: 148]
+
++                 1. (Let val_trans*{val_trans <- val_trans*}*{val_trans* <- val_trans**} be $transpose_<val>(val*{val <- val*}*{val* <- val**}))  [hits: 148]
+
++                   1. (Let C_sub be $add_varis(C, vari*{vari <- vari*}, val_trans*{val_trans <- val_trans*}))*{val_trans* <- val_trans**, C_sub -> C_sub*}  [hits: 148]
+
++                     1. Return OK C_sub*{C_sub <- C_sub*} as subListRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ERROR as subListRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:41.1-45.21
+relation Eval_exp: C |- typedExp' : %
+
++ 1. (Let exp '#' typ' be typedExp')  [hits: 148]
+
++   1. Case analysis on exp (total)  [hits: 148]
+
+      1. Case (% has type literalExp)
+
++       1. (Let literalExp be exp as literalExp)  [hits: 148]
+
++         1. Case analysis on literalExp  [hits: 148]
+
+            1. Case (% matches pattern BOOL %)
+
++             1. (Let BOOL b be literalExp)  [hits: 148]
+
++               1. Result in: % |- % : OK BOOL b as expRes  [hits: 148]
+
+            2. Case (% matches pattern TEXT %)
+
++             1. (Let TEXT t be literalExp)  [hits: 148]
+
++               1. Result in: % |- % : OK TEXT t as expRes  [hits: 148]
+
+      2. Case (% has type varExp)
+
++       1. (Let VAR id be exp as varExp)  [hits: 148]
+
++         1. (Let val'?{val' <- val'?} be $find_varr(C, id []))  [hits: 148]
+
++           1. If (val'?{val' <- val'?} matches (_)), then  [hits: 148]
+
++             1. (Let ?(val) be val'?{val' <- val'?})  [hits: 148]
+
++               1. Result in: % |- % : OK val as expRes  [hits: 148]
+
+      3. Case (% has type unOpExp)
+
++       1. (Let UN unOp typedExp be exp as unOpExp)  [hits: 148]
+
++         1. If ((unOp = NOT as unOp)), then  [hits: 148]
+
++           1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++             1. Case analysis on expRes (total)  [hits: 148]
+
+                1. Case (% has type failure)
+
+-                 1. (Let failure be expRes as failure)
+
+-                   1. Result in: % |- % : failure as expRes
+
+                2. Case (% has type ok<val>)
+
++                 1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                   1. If (val matches BOOL %), then  [hits: 148]
+
++                     1. (Let BOOL b be val)  [hits: 148]
+
++                       1. (Let b_res be ~b)  [hits: 148]
+
++                         1. Result in: % |- % : OK BOOL b_res as expRes  [hits: 148]
+
++         2. If (unOp <: numUnOp), then  [hits: 148]
+
+-           1. (Let numUnOp be unOp as numUnOp)
+
+-             1. (Eval_exp: C |- typedExp : expRes)
+
+-               1. Case analysis on expRes (total)
+
+                  1. Case (% has type failure)
+
+-                   1. (Let failure be expRes as failure)
+
+-                     1. Result in: % |- % : failure as expRes
+
+                  2. Case (% has type ok<val>)
+
+-                   1. (Let OK val be expRes as ok<val>)
+
+-                     1. If (val <: num), then
+
+-                       1. (Let num be val as num)
+
+-                         1. (Let val_res be $numUnOp(numUnOp, num))
+
+-                           1. Result in: % |- % : OK val_res as expRes
+
+      4. Case (% has type binOpExp)
+
++       1. (Let BIN binOp typedExp_l typedExp_r be exp as binOpExp)  [hits: 148]
+
++         1. Case analysis on binOp (total)  [hits: 148]
+
+            1. Case (% has type boolBinOp)
+
++             1. (Let boolBinOp be binOp as boolBinOp)  [hits: 148]
+
++               1. (Eval_exp: C |- typedExp_l : expRes)  [hits: 148]
+
++                 1. Case analysis on expRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expRes as failure)
+
+-                       1. Result in: % |- % : failure as expRes
+
+                    2. Case (% has type ok<val>)
+
++                     1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                       1. If (val matches BOOL %), then  [hits: 148]
+
++                         1. (Let BOOL b_l be val)  [hits: 148]
+
++                           1. (Eval_exp: C |- typedExp_r : expRes')  [hits: 148]
+
++                             1. Case analysis on expRes' (total)  [hits: 148]
+
+                                1. Case (% has type failure)
+
+-                                 1. (Let failure be expRes' as failure)
+
+-                                   1. Result in: % |- % : failure as expRes
+
+                                2. Case (% has type ok<val>)
+
++                                 1. (Let OK val' be expRes' as ok<val>)  [hits: 148]
+
++                                   1. If (val' matches BOOL %), then  [hits: 148]
+
++                                     1. (Let BOOL b_r be val')  [hits: 148]
+
++                                       1. (Let b_res be $boolBinOp(boolBinOp, b_l, b_r))  [hits: 148]
+
++                                         1. Result in: % |- % : OK BOOL b_res as expRes  [hits: 148]
+
+            2. Case (% has type numBinOp)
+
++             1. (Let numBinOp be binOp as numBinOp)  [hits: 148]
+
++               1. (Eval_exp: C |- typedExp_l : expRes)  [hits: 148]
+
++                 1. Case analysis on expRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expRes as failure)
+
+-                       1. Result in: % |- % : failure as expRes
+
+                    2. Case (% has type ok<val>)
+
++                     1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                       1. If (val <: num), then  [hits: 148]
+
++                         1. (Let num_l be val as num)  [hits: 148]
+
++                           1. (Eval_exp: C |- typedExp_r : expRes')  [hits: 148]
+
++                             1. Case analysis on expRes' (total)  [hits: 148]
+
+                                1. Case (% has type failure)
+
+-                                 1. (Let failure be expRes' as failure)
+
+-                                   1. Result in: % |- % : failure as expRes
+
+                                2. Case (% has type ok<val>)
+
++                                 1. (Let OK val' be expRes' as ok<val>)  [hits: 148]
+
++                                   1. If (val' <: num), then  [hits: 148]
+
++                                     1. (Let num_r be val' as num)  [hits: 148]
+
++                                       1. (Let numBinOpRes be $numBinOp(numBinOp, num_l, num_r))  [hits: 148]
+
++                                         1. Result in: % |- % : numBinOpRes as expRes  [hits: 148]
+
+      5. Case (% has type cmpOpExp)
+
++       1. (Let CMP cmpOp typedExp_l typedExp_r be exp as cmpOpExp)  [hits: 148]
+
++         1. Case analysis on cmpOp (total)  [hits: 148]
+
+            1. Case (% has type polyCmpOp)
+
++             1. (Let polyCmpOp be cmpOp as polyCmpOp)  [hits: 148]
+
++               1. (Eval_exp: C |- typedExp_l : expRes)  [hits: 148]
+
++                 1. Case analysis on expRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expRes as failure)
+
+-                       1. Result in: % |- % : failure as expRes
+
+                    2. Case (% has type ok<val>)
+
++                     1. (Let OK val_l be expRes as ok<val>)  [hits: 148]
+
++                       1. (Eval_exp: C |- typedExp_r : expRes')  [hits: 148]
+
++                         1. Case analysis on expRes' (total)  [hits: 148]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes' as failure)
+
+-                               1. Result in: % |- % : failure as expRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val_r be expRes' as ok<val>)  [hits: 148]
+
++                               1. (Let b_res be $polyCmpOp(polyCmpOp, val_l, val_r))  [hits: 148]
+
++                                 1. Result in: % |- % : OK BOOL b_res as expRes  [hits: 148]
+
+            2. Case (% has type numCmpOp)
+
++             1. (Let numCmpOp be cmpOp as numCmpOp)  [hits: 148]
+
++               1. (Eval_exp: C |- typedExp_l : expRes)  [hits: 148]
+
++                 1. Case analysis on expRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expRes as failure)
+
+-                       1. Result in: % |- % : failure as expRes
+
+                    2. Case (% has type ok<val>)
+
++                     1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                       1. If (val <: num), then  [hits: 148]
+
++                         1. (Let num_l be val as num)  [hits: 148]
+
++                           1. (Eval_exp: C |- typedExp_r : expRes')  [hits: 148]
+
++                             1. Case analysis on expRes' (total)  [hits: 148]
+
+                                1. Case (% has type failure)
+
+-                                 1. (Let failure be expRes' as failure)
+
+-                                   1. Result in: % |- % : failure as expRes
+
+                                2. Case (% has type ok<val>)
+
++                                 1. (Let OK val' be expRes' as ok<val>)  [hits: 148]
+
++                                   1. If (val' <: num), then  [hits: 148]
+
++                                     1. (Let num_r be val' as num)  [hits: 148]
+
++                                       1. (Let numCmpRes be $numCmpOp(numCmpOp, num_l, num_r))  [hits: 148]
+
++                                         1. If (numCmpRes <: ok<bool>), then  [hits: 148]
+
++                                           1. (Let OK b_res be numCmpRes as ok<bool>)  [hits: 148]
+
++                                             1. Result in: % |- % : OK BOOL b_res as expRes  [hits: 148]
+
+      6. Case (% has type upCastExp)
+
++       1. (Let UPCAST typ typedExp be exp as upCastExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                 1. (Let castRes be $upcast(C, typ, val))  [hits: 148]
+
++                   1. Result in: % |- % : castRes as expRes  [hits: 148]
+
+      7. Case (% has type downCastExp)
+
++       1. (Let DOWNCAST typ typedExp be exp as downCastExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                 1. (Let castRes be $downcast(C, typ, val))  [hits: 148]
+
++                   1. Result in: % |- % : castRes as expRes  [hits: 148]
+
+      8. Case (% has type subExp)
+
++       1. (Let SUB typedExp typ be exp as subExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                 1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)  [hits: 148]
+
++                   1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))  [hits: 148]
+
++                     1. (Let subtypRes be $subtyp(C.GLOBAL.FUNC, tdenv, typ, val))  [hits: 148]
+
++                       1. If (subtypRes <: ok<bool>), then  [hits: 148]
+
++                         1. (Let OK b be subtypRes as ok<bool>)  [hits: 148]
+
++                           1. Result in: % |- % : OK BOOL b as expRes  [hits: 148]
+
+      9. Case (% has type matchExp)
+
++       1. (Let MATCH typedExp pat be exp as matchExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                 1. (Let b_matches be $matches(val, pat))  [hits: 148]
+
++                   1. Result in: % |- % : OK BOOL b_matches as expRes  [hits: 148]
+
+      10. Case (% has type tupExp)
+
++       1. (Let TUP typedExp*{typedExp <- typedExp*} be exp as tupExp)  [hits: 148]
+
++         1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++           1. Case analysis on expsRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expsRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val*>)
+
++               1. (Let OK val*{val <- val*} be expsRes as ok<val*>)  [hits: 148]
+
++                 1. Result in: % |- % : OK TUP val*{val <- val*} as expRes  [hits: 148]
+
+      11. Case (% has type injExp)
+
++       1. (Let INJ mixop typedExp*{typedExp <- typedExp*} be exp as injExp)  [hits: 148]
+
++         1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++           1. Case analysis on expsRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expsRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val*>)
+
++               1. (Let OK val*{val <- val*} be expsRes as ok<val*>)  [hits: 148]
+
++                 1. Result in: % |- % : OK INJ mixop val*{val <- val*} as expRes  [hits: 148]
+
+      12. Case (% has type strExp)
+
++       1. (Let STR expField*{expField <- expField*} be exp as strExp)  [hits: 148]
+
++         1. (Let atom typedExp be expField)*{expField <- expField*, atom -> atom*, typedExp -> typedExp*}  [hits: 148]
+
++           1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++             1. Case analysis on expsRes (total)  [hits: 148]
+
+                1. Case (% has type failure)
+
+-                 1. (Let failure be expsRes as failure)
+
+-                   1. Result in: % |- % : failure as expRes
+
+                2. Case (% has type ok<val*>)
+
++                 1. (Let OK val*{val <- val*} be expsRes as ok<val*>)  [hits: 148]
+
++                   1. If ((|atom*{atom <- atom*}| = |val*{val <- val*}|)), then  [hits: 148]
+
++                     1. (Let valField be atom val)*{atom <- atom*, val <- val*, valField -> valField*}  [hits: 148]
+
++                       1. Result in: % |- % : OK STR valField*{valField <- valField*} as expRes  [hits: 148]
+
+      13. Case (% has type optExp)
+
++       1. (Let OPT typedExp''?{typedExp'' <- typedExp''?} be exp as optExp)  [hits: 148]
+
++         1. Case analysis on typedExp''?{typedExp'' <- typedExp''?} (total)  [hits: 148]
+
+            1. Case (% matches pattern ())
+
++             1. Result in: % |- % : OK OPT ?() as expRes  [hits: 148]
+
+            2. Case (% matches pattern (_))
+
++             1. (Let ?(typedExp) be typedExp''?{typedExp'' <- typedExp''?})  [hits: 148]
+
++               1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++                 1. Case analysis on expRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expRes as failure)
+
+-                       1. Result in: % |- % : failure as expRes
+
+                    2. Case (% has type ok<val>)
+
++                     1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                       1. Result in: % |- % : OK OPT ?(val) as expRes  [hits: 148]
+
+      14. Case (% has type listExp)
+
++       1. (Let LIST typedExp*{typedExp <- typedExp*} be exp as listExp)  [hits: 148]
+
++         1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++           1. Case analysis on expsRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expsRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val*>)
+
++               1. (Let OK val*{val <- val*} be expsRes as ok<val*>)  [hits: 148]
+
++                 1. Result in: % |- % : OK LIST val*{val <- val*} as expRes  [hits: 148]
+
+      15. Case (% has type consExp)
+
++       1. (Let CONS typedExp_h typedExp_t be exp as consExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp_h : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val_h be expRes as ok<val>)  [hits: 148]
+
++                 1. (Eval_exp: C |- typedExp_t : expRes')  [hits: 148]
+
++                   1. Case analysis on expRes' (total)  [hits: 148]
+
+                      1. Case (% has type failure)
+
+-                       1. (Let failure be expRes' as failure)
+
+-                         1. Result in: % |- % : failure as expRes
+
+                      2. Case (% has type ok<val>)
+
++                       1. (Let OK val be expRes' as ok<val>)  [hits: 148]
+
++                         1. If (val matches LIST %), then  [hits: 148]
+
++                           1. (Let LIST val_t*{val_t <- val_t*} be val)  [hits: 148]
+
++                             1. Result in: % |- % : OK LIST val_h :: val_t*{val_t <- val_t*} as expRes  [hits: 148]
+
+      16. Case (% has type catExp)
+
++       1. (Let CAT typedExp_l typedExp_r be exp as catExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp_l : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                 1. Case analysis on val  [hits: 148]
+
+                    1. Case (% matches pattern LIST %)
+
++                     1. (Let LIST val_l*{val_l <- val_l*} be val)  [hits: 148]
+
++                       1. (Eval_exp: C |- typedExp_r : expRes')  [hits: 148]
+
++                         1. Case analysis on expRes' (total)  [hits: 148]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes' as failure)
+
+-                               1. Result in: % |- % : failure as expRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val' be expRes' as ok<val>)  [hits: 148]
+
++                               1. If (val' matches LIST %), then  [hits: 148]
+
++                                 1. (Let LIST val_r*{val_r <- val_r*} be val')  [hits: 148]
+
++                                   1. (Let val_res*{val_res <- val_res*} be val_l*{val_l <- val_l*} ++ val_r*{val_r <- val_r*})  [hits: 148]
+
++                                     1. Result in: % |- % : OK LIST val_res*{val_res <- val_res*} as expRes  [hits: 148]
+
+                    2. Case (% matches pattern TEXT %)
+
++                     1. (Let TEXT text_l be val)  [hits: 148]
+
++                       1. (Eval_exp: C |- typedExp_r : expRes')  [hits: 148]
+
++                         1. Case analysis on expRes' (total)  [hits: 148]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes' as failure)
+
+-                               1. Result in: % |- % : failure as expRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val' be expRes' as ok<val>)  [hits: 148]
+
++                               1. If (val' matches TEXT %), then  [hits: 148]
+
++                                 1. (Let TEXT t_r be val')  [hits: 148]
+
++                                   1. (Let t_res be text_l ++ t_r)  [hits: 148]
+
++                                     1. Result in: % |- % : OK TEXT t_res as expRes  [hits: 148]
+
+      17. Case (% has type memExp)
+
++       1. (Let MEM typedExp_e typedExp_s be exp as memExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp_e : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val_e be expRes as ok<val>)  [hits: 148]
+
++                 1. (Eval_exp: C |- typedExp_s : expRes')  [hits: 148]
+
++                   1. Case analysis on expRes' (total)  [hits: 148]
+
+                      1. Case (% has type failure)
+
+-                       1. (Let failure be expRes' as failure)
+
+-                         1. Result in: % |- % : failure as expRes
+
+                      2. Case (% has type ok<val>)
+
++                       1. (Let OK val' be expRes' as ok<val>)  [hits: 148]
+
++                         1. If (val' matches LIST %), then  [hits: 148]
+
++                           1. (Let LIST val*{val <- val*} be val')  [hits: 148]
+
++                             1. (Let b_mem be $exists_((val_e = val)*{val <- val*}))  [hits: 148]
+
++                               1. Result in: % |- % : OK BOOL b_mem as expRes  [hits: 148]
+
+      18. Case (% has type lenExp)
+
++       1. (Let LEN typedExp be exp as lenExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val' be expRes as ok<val>)  [hits: 148]
+
++                 1. Case analysis on val'  [hits: 148]
+
+                    1. Case (% matches pattern TEXT %)
+
++                     1. (Let TEXT t be val')  [hits: 5]
+
++                       1. (Let n be |t|)  [hits: 5]
+
++                         1. Result in: % |- % : OK NAT n as val as expRes  [hits: 5]
+
+                    2. Case (% matches pattern LIST %)
+
++                     1. (Let LIST val*{val <- val*} be val')  [hits: 148]
+
++                       1. (Let n be |val*{val <- val*}|)  [hits: 148]
+
++                         1. Result in: % |- % : OK NAT n as val as expRes  [hits: 148]
+
+      19. Case (% has type dotAccExp)
+
++       1. (Let DOT typedExp atom be exp as dotAccExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be expRes as ok<val>)  [hits: 148]
+
++                 1. (Let _exp '#' typ_b be typedExp)  [hits: 148]
+
++                   1. (Let typedPath be DOT ROOT as path '#' typ_b atom as path '#' typ')  [hits: 148]
+
++                     1. (Eval_path_acc: C |- val typedPath : pathRes)  [hits: 148]
+
++                       1. Result in: % |- % : pathRes as expRes  [hits: 148]
+
+      20. Case (% has type idxAccExp)
+
++       1. (Let IDX typedExp_b typedExp_i be exp as idxAccExp)  [hits: 36]
+
++         1. (Eval_exp: C |- typedExp_b : expRes)  [hits: 36]
+
++           1. Case analysis on expRes (total)  [hits: 36]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val_b be expRes as ok<val>)  [hits: 36]
+
++                 1. (Let _exp '#' typ_b be typedExp_b)  [hits: 36]
+
++                   1. (Let typedPath be IDX ROOT as path '#' typ_b typedExp_i as path '#' typ')  [hits: 36]
+
++                     1. (Eval_path_acc: C |- val_b typedPath : pathRes)  [hits: 36]
+
++                       1. Result in: % |- % : pathRes as expRes  [hits: 36]
+
+      21. Case (% has type sliceAccExp)
+
++       1. (Let SLICE typedExp_b typedExp_i typedExp_n be exp as sliceAccExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp_b : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val_b be expRes as ok<val>)  [hits: 148]
+
++                 1. (Let _exp '#' typ_b be typedExp_b)  [hits: 148]
+
++                   1. (Let typedPath be SLICE ROOT as path '#' typ_b typedExp_i typedExp_n as path '#' typ')  [hits: 148]
+
++                     1. (Eval_path_acc: C |- val_b typedPath : pathRes)  [hits: 148]
+
++                       1. Result in: % |- % : pathRes as expRes  [hits: 148]
+
+      22. Case (% has type updExp)
+
++       1. (Let UPD typedExp_b typedPath typedExp_f be exp as updExp)  [hits: 148]
+
++         1. (Eval_exp: C |- typedExp_b : expRes)  [hits: 148]
+
++           1. Case analysis on expRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be expRes as failure)
+
+-                 1. Result in: % |- % : failure as expRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val_b be expRes as ok<val>)  [hits: 148]
+
++                 1. (Eval_exp: C |- typedExp_f : expRes')  [hits: 148]
+
++                   1. Case analysis on expRes' (total)  [hits: 148]
+
+                      1. Case (% has type failure)
+
+-                       1. (Let failure be expRes' as failure)
+
+-                         1. Result in: % |- % : failure as expRes
+
+                      2. Case (% has type ok<val>)
+
++                       1. (Let OK val_f be expRes' as ok<val>)  [hits: 148]
+
++                         1. (Eval_path_upd: C |- val_b typedPath := val_f : pathRes)  [hits: 148]
+
++                           1. Result in: % |- % : pathRes as expRes  [hits: 148]
+
+      23. Case (% has type callExp)
+
++       1. (Let CALL id targ*{targ <- targ*} arg*{arg <- arg*} be exp as callExp)  [hits: 148]
+
++         1. (Eval_targs: C |- targ*{targ <- targ*} : typsRes)  [hits: 148]
+
++           1. If (typsRes <: ok<typ*>), then  [hits: 148]
+
++             1. (Let OK typ_input*{typ_input <- typ_input*} be typsRes as ok<typ*>)  [hits: 148]
+
++               1. (Eval_args: C |- arg*{arg <- arg*} : argsRes)  [hits: 148]
+
++                 1. Case analysis on argsRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be argsRes as failure)
+
+-                       1. Result in: % |- % : failure as expRes
+
+                    2. Case (% has type ok<val*>)
+
++                     1. (Let OK val_input*{val_input <- val_input*} be argsRes as ok<val*>)  [hits: 148]
+
++                       1. (Call_func: C |- id `< typ_input*{typ_input <- typ_input*} `> `( val_input*{val_input <- val_input*} `) : funcRes)  [hits: 148]
+
++                         1. Result in: % |- % : funcRes as expRes  [hits: 148]
+
+      24. Case (% has type iterExp)
+
++       1. (Let iterExp be exp as iterExp)  [hits: 148]
+
++         1. (Let varr'?{varr' <- varr'?} be $is_iter_on_var(iterExp as exp '#' typ'))  [hits: 148]
+
++           1. If (varr'?{varr' <- varr'?} matches (_)), then  [hits: 148]
+
++             1. (Let ?(varr) be varr'?{varr' <- varr'?})  [hits: 148]
+
++               1. (Let val'?{val' <- val'?} be $find_varr(C, varr))  [hits: 148]
+
++                 1. If (val'?{val' <- val'?} matches (_)), then  [hits: 148]
+
++                   1. (Let ?(val) be val'?{val' <- val'?})  [hits: 148]
+
++                     1. Result in: % |- % : OK val as expRes  [hits: 148]
+
++         2. If ($is_iter_on_var(iterExp as exp '#' typ') matches ()), then  [hits: 148]
+
++           1. (Let ITER typedExp iter vari*{vari <- vari*} be iterExp)  [hits: 148]
+
++             1. Case analysis on iter (total)  [hits: 148]
+
+                1. Case (% matches pattern QUEST)
+
+-                 1. (Let subOptRes be $sub_opt(C, vari*{vari <- vari*}))
+
+-                   1. If (subOptRes <: ok<ctx?>), then
+
+-                     1. (Let OK C_sub?{C_sub <- C_sub?} be subOptRes as ok<ctx?>)
+
+-                       1. (Eval_exp_maybe: C_sub?{C_sub <- C_sub?} |- typedExp : expOptRes)
+
+-                         1. Case analysis on expOptRes (total)
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expOptRes as failure)
+
+-                               1. Result in: % |- % : failure as expRes
+
+                            2. Case (% has type ok<val?>)
+
+-                             1. (Let OK val?{val <- val?} be expOptRes as ok<val?>)
+
+-                               1. Result in: % |- % : OK OPT val?{val <- val?} as expRes
+
+                2. Case (% matches pattern STAR)
+
++                 1. (Let subListRes be $sub_list(C, vari*{vari <- vari*}))  [hits: 148]
+
++                   1. If (subListRes <: ok<ctx*>), then  [hits: 148]
+
++                     1. (Let OK C_sub*{C_sub <- C_sub*} be subListRes as ok<ctx*>)  [hits: 148]
+
++                       1. (Eval_exp_each: C_sub*{C_sub <- C_sub*} |- typedExp : expsRes)  [hits: 148]
+
++                         1. Case analysis on expsRes (total)  [hits: 148]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expsRes as failure)
+
+-                               1. Result in: % |- % : failure as expRes
+
+                            2. Case (% has type ok<val*>)
+
++                             1. (Let OK val*{val <- val*} be expsRes as ok<val*>)  [hits: 148]
+
++                               1. Result in: % |- % : OK LIST val*{val <- val*} as expRes  [hits: 148]
+
++   2. If (exp <: num), then  [hits: 148]
+
++     1. (Let num be exp as num)  [hits: 148]
+
++       1. Result in: % |- % : OK num as val as expRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % : ERROR as expRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:49.1-53.21
+relation Eval_exps: C |- typedExp*{typedExp <- typedExp*} : %
+
++ 1. Case analysis on typedExp*{typedExp <- typedExp*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % : OK [] as expsRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let typedExp_h :: typedExp_t*{typedExp_t <- typedExp_t*} be typedExp*{typedExp <- typedExp*})  [hits: 148]
+
++       1. (Eval_exp: C |- typedExp_h : expRes)  [hits: 148]
+
++         1. Case analysis on expRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expRes as failure)
+
+-               1. Result in: % |- % : failure as expsRes
+
+            2. Case (% has type ok<val>)
+
++             1. (Let OK val_h be expRes as ok<val>)  [hits: 148]
+
++               1. (Eval_exps: C |- typedExp_t*{typedExp_t <- typedExp_t*} : expsRes)  [hits: 148]
+
++                 1. Case analysis on expsRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expsRes as failure)
+
+-                       1. Result in: % |- % : failure as expsRes
+
+                    2. Case (% has type ok<val*>)
+
++                     1. (Let OK val_t*{val_t <- val_t*} be expsRes as ok<val*>)  [hits: 148]
+
++                       1. Result in: % |- % : OK val_h :: val_t*{val_t <- val_t*} as expsRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:57.1-62.21
+relation Eval_exp_maybe: C'?{C' <- C'?} |- typedExp : %
+
+- 1. Case analysis on C'?{C' <- C'?} (total)
+
+    1. Case (% matches pattern ())
+
+-     1. Result in: % |- % : OK ?() as expOptRes
+
+    2. Case (% matches pattern (_))
+
+-     1. (Let ?(C) be C'?{C' <- C'?})
+
+-       1. (Eval_exp: C |- typedExp : expRes)
+
+-         1. Case analysis on expRes (total)
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expRes as failure)
+
+-               1. Result in: % |- % : failure as expOptRes
+
+            2. Case (% has type ok<val>)
+
+-             1. (Let OK val be expRes as ok<val>)
+
+-               1. Result in: % |- % : OK ?(val) as expOptRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:64.1-68.21
+relation Eval_exp_each: C*{C <- C*} |- typedExp : %
+
++ 1. Case analysis on C*{C <- C*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % : OK [] as expsRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let C_h :: C_t*{C_t <- C_t*} be C*{C <- C*})  [hits: 148]
+
++       1. (Eval_exp: C_h |- typedExp : expRes)  [hits: 148]
+
++         1. Case analysis on expRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expRes as failure)
+
+-               1. Result in: % |- % : failure as expsRes
+
+            2. Case (% has type ok<val>)
+
++             1. (Let OK val_h be expRes as ok<val>)  [hits: 148]
+
++               1. (Eval_exp_each: C_t*{C_t <- C_t*} |- typedExp : expsRes)  [hits: 148]
+
++                 1. Case analysis on expsRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be expsRes as failure)
+
+-                       1. Result in: % |- % : failure as expsRes
+
+                    2. Case (% has type ok<val*>)
+
++                     1. (Let OK val_t*{val_t <- val_t*} be expsRes as ok<val*>)  [hits: 148]
+
++                       1. Result in: % |- % : OK val_h :: val_t*{val_t <- val_t*} as expsRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:74.1-78.21
+relation Eval_path_acc: C |- val_b typedPath' : %
+
++ 1. (Let path '#' _typ be typedPath')  [hits: 148]
+
++   1. Case analysis on path (total)  [hits: 148]
+
+      1. Case (% has type rootPath)
+
++       1. (Let rootPath be path as rootPath)  [hits: 148]
+
++         1. Result in: % |- % % : OK val_b as pathRes  [hits: 148]
+
+      2. Case (% has type idxPath)
+
++       1. (Let IDX typedPath typedExp_i be path as idxPath)  [hits: 36]
+
++         1. (Eval_path_acc: C |- val_b typedPath : pathRes)  [hits: 36]
+
++           1. Case analysis on pathRes (total)  [hits: 36]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be pathRes as failure)
+
+-                 1. Result in: % |- % % : failure as pathRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val' be pathRes as ok<val>)  [hits: 36]
+
++                 1. Case analysis on val'  [hits: 36]
+
+                    1. Case (% matches pattern LIST %)
+
++                     1. (Let LIST val*{val <- val*} be val')  [hits: 34]
+
++                       1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 34]
+
++                         1. Case analysis on expRes (total)  [hits: 34]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes as failure)
+
+-                               1. Result in: % |- % % : failure as pathRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val'' be expRes as ok<val>)  [hits: 34]
+
++                               1. If (val'' <: num), then  [hits: 34]
+
++                                 1. (Let num be val'' as num)  [hits: 34]
+
++                                   1. If (num matches NAT %), then  [hits: 34]
+
++                                     1. (Let NAT n be num)  [hits: 34]
+
++                                       1. If ((n < |val*{val <- val*}|)), then  [hits: 34]
+
++                                         1. (Let val_idx be val*{val <- val*}[n])  [hits: 34]
+
++                                           1. Result in: % |- % % : OK val_idx as pathRes  [hits: 34]
+
+                    2. Case (% matches pattern TEXT %)
+
++                     1. (Let TEXT t be val')  [hits: 4]
+
++                       1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 4]
+
++                         1. Case analysis on expRes (total)  [hits: 4]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes as failure)
+
+-                               1. Result in: % |- % % : failure as pathRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val be expRes as ok<val>)  [hits: 4]
+
++                               1. If (val <: num), then  [hits: 4]
+
++                                 1. (Let num be val as num)  [hits: 4]
+
++                                   1. If (num matches NAT %), then  [hits: 4]
+
++                                     1. (Let NAT n be num)  [hits: 4]
+
++                                       1. If ((n < |t|)), then  [hits: 4]
+
++                                         1. (Let t_idx be t[n])  [hits: 4]
+
++                                           1. Result in: % |- % % : OK TEXT t_idx as pathRes  [hits: 4]
+
+      3. Case (% has type slicePath)
+
++       1. (Let SLICE typedPath typedExp_i typedExp_n be path as slicePath)  [hits: 148]
+
++         1. (Eval_path_acc: C |- val_b typedPath : pathRes)  [hits: 148]
+
++           1. Case analysis on pathRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be pathRes as failure)
+
+-                 1. Result in: % |- % % : failure as pathRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val' be pathRes as ok<val>)  [hits: 148]
+
++                 1. Case analysis on val'  [hits: 148]
+
+                    1. Case (% matches pattern TEXT %)
+
++                     1. (Let TEXT t be val')  [hits: 3]
+
++                       1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 3]
+
++                         1. Case analysis on expRes (total)  [hits: 3]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes as failure)
+
+-                               1. Result in: % |- % % : failure as pathRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val be expRes as ok<val>)  [hits: 3]
+
++                               1. If (val <: num), then  [hits: 3]
+
++                                 1. (Let num be val as num)  [hits: 3]
+
++                                   1. If (num matches NAT %), then  [hits: 3]
+
++                                     1. (Let NAT n_i be num)  [hits: 3]
+
++                                       1. (Eval_exp: C |- typedExp_n : expRes')  [hits: 3]
+
++                                         1. Case analysis on expRes' (total)  [hits: 3]
+
+                                            1. Case (% has type failure)
+
+-                                             1. (Let failure be expRes' as failure)
+
+-                                               1. Result in: % |- % % : failure as pathRes
+
+                                            2. Case (% has type ok<val>)
+
++                                             1. (Let OK val'' be expRes' as ok<val>)  [hits: 3]
+
++                                               1. If (val'' <: num), then  [hits: 3]
+
++                                                 1. (Let num' be val'' as num)  [hits: 3]
+
++                                                   1. If (num' matches NAT %), then  [hits: 3]
+
++                                                     1. (Let NAT n_n be num')  [hits: 3]
+
++                                                       1. If (((n_i + n_n) <= |t|)), then  [hits: 3]
+
++                                                         1. (Let val_slice be TEXT t[n_i : n_n])  [hits: 3]
+
++                                                           1. Result in: % |- % % : OK val_slice as pathRes  [hits: 3]
+
+                    2. Case (% matches pattern LIST %)
+
++                     1. (Let LIST val*{val <- val*} be val')  [hits: 148]
+
++                       1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 148]
+
++                         1. Case analysis on expRes (total)  [hits: 148]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes as failure)
+
+-                               1. Result in: % |- % % : failure as pathRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val'' be expRes as ok<val>)  [hits: 148]
+
++                               1. If (val'' <: num), then  [hits: 148]
+
++                                 1. (Let num be val'' as num)  [hits: 148]
+
++                                   1. If (num matches NAT %), then  [hits: 148]
+
++                                     1. (Let NAT n_i be num)  [hits: 148]
+
++                                       1. (Eval_exp: C |- typedExp_n : expRes')  [hits: 148]
+
++                                         1. Case analysis on expRes' (total)  [hits: 148]
+
+                                            1. Case (% has type failure)
+
+-                                             1. (Let failure be expRes' as failure)
+
+-                                               1. Result in: % |- % % : failure as pathRes
+
+                                            2. Case (% has type ok<val>)
+
++                                             1. (Let OK val''' be expRes' as ok<val>)  [hits: 148]
+
++                                               1. If (val''' <: num), then  [hits: 148]
+
++                                                 1. (Let num' be val''' as num)  [hits: 148]
+
++                                                   1. If (num' matches NAT %), then  [hits: 148]
+
++                                                     1. (Let NAT n_n be num')  [hits: 148]
+
++                                                       1. If (((n_i + n_n) <= |val*{val <- val*}|)), then  [hits: 148]
+
++                                                         1. (Let val_slice be LIST val*{val <- val*}[n_i : n_n])  [hits: 148]
+
++                                                           1. Result in: % |- % % : OK val_slice as pathRes  [hits: 148]
+
+      4. Case (% has type dotPath)
+
++       1. (Let DOT typedPath atom be path as dotPath)  [hits: 148]
+
++         1. (Eval_path_acc: C |- val_b typedPath : pathRes)  [hits: 148]
+
++           1. Case analysis on pathRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be pathRes as failure)
+
+-                 1. Result in: % |- % % : failure as pathRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val' be pathRes as ok<val>)  [hits: 148]
+
++                 1. If (val' matches STR %), then  [hits: 148]
+
++                   1. (Let STR valField*{valField <- valField*} be val')  [hits: 148]
+
++                     1. (Let atom_field val_field be valField)*{valField <- valField*, atom_field -> atom_field*, val_field -> val_field*}  [hits: 148]
+
++                       1. (Let val''?{val'' <- val''?} be $assoc_<atom, val>(atom, (atom_field, val_field)*{atom_field <- atom_field*, val_field <- val_field*}))  [hits: 148]
+
++                         1. If (val''?{val'' <- val''?} matches (_)), then  [hits: 148]
+
++                           1. (Let ?(val) be val''?{val'' <- val''?})  [hits: 148]
+
++                             1. Result in: % |- % % : OK val as pathRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % % : ERROR as pathRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:80.1-84.21
+relation Eval_path_upd: C |- val_b typedPath' := val_n' : %
+
++ 1. (Let path '#' _typ be typedPath')  [hits: 148]
+
++   1. Case analysis on path (total)  [hits: 148]
+
+      1. Case (% has type rootPath)
+
++       1. (Let rootPath be path as rootPath)  [hits: 148]
+
++         1. Result in: % |- % % := % : OK val_n' as pathRes  [hits: 148]
+
+      2. Case (% has type idxPath)
+
++       1. (Let IDX typedPath typedExp_i be path as idxPath)  [hits: 8]
+
++         1. (Eval_path_acc: C |- val_b typedPath : pathRes')  [hits: 8]
+
++           1. Case analysis on pathRes' (total)  [hits: 8]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be pathRes' as failure)
+
+-                 1. Result in: % |- % % := % : failure as pathRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val' be pathRes' as ok<val>)  [hits: 8]
+
++                 1. Case analysis on val'  [hits: 8]
+
+                    1. Case (% matches pattern LIST %)
+
++                     1. (Let LIST val*{val <- val*} be val')  [hits: 4]
+
++                       1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 4]
+
++                         1. Case analysis on expRes (total)  [hits: 4]
+
+                            1. Case (% has type failure)
+
+-                             1. (Let failure be expRes as failure)
+
+-                               1. Result in: % |- % % := % : failure as pathRes
+
+                            2. Case (% has type ok<val>)
+
++                             1. (Let OK val'' be expRes as ok<val>)  [hits: 4]
+
++                               1. If (val'' <: num), then  [hits: 4]
+
++                                 1. (Let num be val'' as num)  [hits: 4]
+
++                                   1. If (num matches NAT %), then  [hits: 4]
+
++                                     1. (Let NAT n_target be num)  [hits: 4]
+
++                                       1. If ((n_target < |val*{val <- val*}|)), then  [hits: 4]
+
++                                         1. (Let val_upd be LIST val*{val <- val*}[[n_target] = val_n'])  [hits: 4]
+
++                                           1. (Eval_path_upd: C |- val_b typedPath := val_upd : pathRes)  [hits: 4]
+
++                                             1. Result in: % |- % % := % : pathRes  [hits: 4]
+
+                    2. Case (% matches pattern TEXT %)
+
++                     1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 4]
+
++                       1. If (expRes <: failure), then  [hits: 4]
+
+-                         1. (Let failure be expRes as failure)
+
+-                           1. Result in: % |- % % := % : failure as pathRes
+
++         2. If (val_n' matches TEXT %), then  [hits: 8]
+
++           1. (Let TEXT t_n be val_n')  [hits: 4]
+
++             1. (Eval_path_acc: C |- val_b typedPath : pathRes')  [hits: 4]
+
++               1. If (pathRes' <: ok<val>), then  [hits: 4]
+
++                 1. (Let OK val be pathRes' as ok<val>)  [hits: 4]
+
++                   1. If (val matches TEXT %), then  [hits: 4]
+
++                     1. (Let TEXT t be val)  [hits: 4]
+
++                       1. (Eval_exp: C |- typedExp_i : expRes)  [hits: 4]
+
++                         1. If (expRes <: ok<val>), then  [hits: 4]
+
++                           1. (Let OK val' be expRes as ok<val>)  [hits: 4]
+
++                             1. If (val' <: num), then  [hits: 4]
+
++                               1. (Let num be val' as num)  [hits: 4]
+
++                                 1. If (num matches NAT %), then  [hits: 4]
+
++                                   1. (Let NAT n_target be num)  [hits: 4]
+
++                                     1. If ((n_target < |t|)), then  [hits: 4]
+
++                                       1. If ((|t_n| = 1)), then  [hits: 4]
+
++                                         1. (Let val_upd be TEXT t[[n_target] = t_n])  [hits: 4]
+
++                                           1. (Eval_path_upd: C |- val_b typedPath := val_upd : pathRes)  [hits: 4]
+
++                                             1. Result in: % |- % % := % : pathRes  [hits: 4]
+
+      3. Case (% has type slicePath)
+
+-       1. (Let SLICE typedPath typedExp_i typedExp_n be path as slicePath)
+
+-         1. (Eval_path_acc: C |- val_b typedPath : pathRes)
+
+-           1. Case analysis on pathRes (total)
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be pathRes as failure)
+
+-                 1. Result in: % |- % % := % : failure as pathRes
+
+              2. Case (% has type ok<val>)
+
+-               1. (Let OK val be pathRes as ok<val>)
+
+-                 1. If (val matches TEXT %), then
+
+-                   1. (Eval_exp: C |- typedExp_i : expRes)
+
+-                     1. Case analysis on expRes (total)
+
+                        1. Case (% has type failure)
+
+-                         1. (Let failure be expRes as failure)
+
+-                           1. Result in: % |- % % := % : failure as pathRes
+
+                        2. Case (% has type ok<val>)
+
+-                         1. (Let OK val' be expRes as ok<val>)
+
+-                           1. If (val' <: num), then
+
+-                             1. (Let num be val' as num)
+
+-                               1. If (num matches NAT %), then
+
+-                                 1. (Eval_exp: C |- typedExp_n : expRes')
+
+-                                   1. If (expRes' <: failure), then
+
+-                                     1. (Let failure be expRes' as failure)
+
+-                                       1. Result in: % |- % % := % : failure as pathRes
+
+-         2. If (val_n' matches TEXT %), then
+
+-           1. (Let TEXT t_n be val_n')
+
+-             1. (Eval_path_acc: C |- val_b typedPath : pathRes')
+
+-               1. If (pathRes' <: ok<val>), then
+
+-                 1. (Let OK val be pathRes' as ok<val>)
+
+-                   1. If (val matches TEXT %), then
+
+-                     1. (Let TEXT t be val)
+
+-                       1. (Eval_exp: C |- typedExp_i : expRes)
+
+-                         1. If (expRes <: ok<val>), then
+
+-                           1. (Let OK val' be expRes as ok<val>)
+
+-                             1. If (val' <: num), then
+
+-                               1. (Let num be val' as num)
+
+-                                 1. If (num matches NAT %), then
+
+-                                   1. (Let NAT n_i be num)
+
+-                                     1. (Eval_exp: C |- typedExp_n : expRes')
+
+-                                       1. If (expRes' <: ok<val>), then
+
+-                                         1. (Let OK val'' be expRes' as ok<val>)
+
+-                                           1. If (val'' <: num), then
+
+-                                             1. (Let num' be val'' as num)
+
+-                                               1. If (num' matches NAT %), then
+
+-                                                 1. (Let NAT n_n be num')
+
+-                                                   1. If (((n_i + n_n) <= |t|)), then
+
+-                                                     1. If ((|t_n| = n_n)), then
+
+-                                                       1. (Let val_upd be TEXT t[[n_i : n_n] = t_n])
+
+-                                                         1. (Eval_path_upd: C |- val_b typedPath := val_upd : pathRes)
+
+-                                                           1. Result in: % |- % % := % : pathRes
+
+-         3. (Eval_path_acc: C |- val_b typedPath : pathRes)
+
+-           1. If (pathRes <: ok<val>), then
+
+-             1. (Let OK val be pathRes as ok<val>)
+
+-               1. If (val matches LIST %), then
+
+-                 1. (Eval_exp: C |- typedExp_i : expRes)
+
+-                   1. Case analysis on expRes (total)
+
+                      1. Case (% has type failure)
+
+-                       1. (Let failure be expRes as failure)
+
+-                         1. Result in: % |- % % := % : failure as pathRes
+
+                      2. Case (% has type ok<val>)
+
+-                       1. (Let OK val' be expRes as ok<val>)
+
+-                         1. If (val' <: num), then
+
+-                           1. (Let num be val' as num)
+
+-                             1. If (num matches NAT %), then
+
+-                               1. (Eval_exp: C |- typedExp_n : expRes')
+
+-                                 1. If (expRes' <: failure), then
+
+-                                   1. (Let failure be expRes' as failure)
+
+-                                     1. Result in: % |- % % := % : failure as pathRes
+
+-         4. If (val_n' matches LIST %), then
+
+-           1. (Let LIST val_n*{val_n <- val_n*} be val_n')
+
+-             1. (Eval_path_acc: C |- val_b typedPath : pathRes')
+
+-               1. If (pathRes' <: ok<val>), then
+
+-                 1. (Let OK val' be pathRes' as ok<val>)
+
+-                   1. If (val' matches LIST %), then
+
+-                     1. (Let LIST val*{val <- val*} be val')
+
+-                       1. (Eval_exp: C |- typedExp_i : expRes)
+
+-                         1. If (expRes <: ok<val>), then
+
+-                           1. (Let OK val'' be expRes as ok<val>)
+
+-                             1. If (val'' <: num), then
+
+-                               1. (Let num be val'' as num)
+
+-                                 1. If (num matches NAT %), then
+
+-                                   1. (Let NAT n_i be num)
+
+-                                     1. (Eval_exp: C |- typedExp_n : expRes')
+
+-                                       1. If (expRes' <: ok<val>), then
+
+-                                         1. (Let OK val''' be expRes' as ok<val>)
+
+-                                           1. If (val''' <: num), then
+
+-                                             1. (Let num' be val''' as num)
+
+-                                               1. If (num' matches NAT %), then
+
+-                                                 1. (Let NAT n_n be num')
+
+-                                                   1. If (((n_i + n_n) <= |val*{val <- val*}|)), then
+
+-                                                     1. If ((|val_n*{val_n <- val_n*}| = n_n)), then
+
+-                                                       1. (Let val_upd be LIST val*{val <- val*}[[n_i : n_n] = val_n*{val_n <- val_n*}])
+
+-                                                         1. (Eval_path_upd: C |- val_b typedPath := val_upd : pathRes)
+
+-                                                           1. Result in: % |- % % := % : pathRes
+
+      4. Case (% has type dotPath)
+
++       1. (Let DOT typedPath atom be path as dotPath)  [hits: 148]
+
++         1. (Eval_path_acc: C |- val_b typedPath : pathRes')  [hits: 148]
+
++           1. Case analysis on pathRes' (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
+-               1. (Let failure be pathRes' as failure)
+
+-                 1. Result in: % |- % % := % : failure as pathRes
+
+              2. Case (% has type ok<val>)
+
++               1. (Let OK val be pathRes' as ok<val>)  [hits: 148]
+
++                 1. If (val matches STR %), then  [hits: 148]
+
++                   1. (Let STR valField*{valField <- valField*} be val)  [hits: 148]
+
++                     1. (Let atom_field val_field be valField)*{valField <- valField*, atom_field -> atom_field*, val_field -> val_field*}  [hits: 148]
+
++                       1. (Let valField_new be atom_field $ite<val>((atom = atom_field), val_n', val_field))*{atom_field <- atom_field*, val_field <- val_field*, valField_new -> valField_new*}  [hits: 148]
+
++                         1. (Let val_upd be STR valField_new*{valField_new <- valField_new*})  [hits: 148]
+
++                           1. (Eval_path_upd: C |- val_b typedPath := val_upd : pathRes)  [hits: 148]
+
++                             1. Result in: % |- % % := % : pathRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % % := % : ERROR as pathRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:88.1-92.21
+relation Eval_targs: C |- targ*{targ <- targ*} : %
+
++ 1. (Let theta be $theta_of_tdenv(C.LOCAL.TYP))  [hits: 148]
+
++   1. (Let typsRes be $subst_typs(theta, targ*{targ <- targ*}))  [hits: 148]
+
++     1. Result in: % |- % : typsRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % : ERROR as typsRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:98.1-102.21
+relation Eval_arg: C |- arg : %
+
++ 1. Case analysis on arg (total)  [hits: 148]
+
+    1. Case (% has type expArg)
+
++     1. (Let EXP typedExp be arg as expArg)  [hits: 148]
+
++       1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++         1. If (expRes <: argRes), then  [hits: 148]
+
++           1. (Let argRes be expRes as argRes)  [hits: 148]
+
++             1. Result in: % |- % : argRes  [hits: 148]
+
+    2. Case (% has type funArg)
+
++     1. (Let FUN id be arg as funArg)  [hits: 148]
+
++       1. (Let id_global be $resolve_func_param(C, id))  [hits: 148]
+
++         1. Result in: % |- % : OK FUNC id_global as argRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % : ERROR as argRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:106.1-110.21
+relation Eval_args: C |- arg*{arg <- arg*} : %
+
++ 1. Case analysis on arg*{arg <- arg*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % : OK [] as argsRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let arg_h :: arg_t*{arg_t <- arg_t*} be arg*{arg <- arg*})  [hits: 148]
+
++       1. (Eval_arg: C |- arg_h : argRes)  [hits: 148]
+
++         1. Case analysis on argRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be argRes as failure)
+
+-               1. Result in: % |- % : failure as argsRes
+
+            2. Case (% has type ok<val>)
+
++             1. (Let OK val_h be argRes as ok<val>)  [hits: 148]
+
++               1. (Eval_args: C |- arg_t*{arg_t <- arg_t*} : argsRes)  [hits: 148]
+
++                 1. Case analysis on argsRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be argsRes as failure)
+
+-                       1. Result in: % |- % : failure as argsRes
+
+                    2. Case (% has type ok<val*>)
+
++                     1. (Let OK val_t*{val_t <- val_t*} be argsRes as ok<val*>)  [hits: 148]
+
++                       1. Result in: % |- % : OK val_h :: val_t*{val_t <- val_t*} as argsRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:116.1-120.21
+relation Eval_prem: C |- prem' : %
+
++ 1. Case analysis on prem' (total)  [hits: 148]
+
+    1. Case (% has type relPrem)
+
++     1. (Let REL id ':' typedExp*{typedExp <- typedExp*} '->' typedExp_out*{typedExp_out <- typedExp_out*} be prem' as relPrem)  [hits: 148]
+
++       1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++         1. Case analysis on expsRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expsRes as failure)
+
+-               1. Result in: % |- % : failure as premRes
+
+            2. Case (% has type ok<val*>)
+
++             1. (Let OK val*{val <- val*} be expsRes as ok<val*>)  [hits: 148]
+
++               1. (Call_rel: C |- id `( val*{val <- val*} `) : relRes)  [hits: 148]
+
++                 1. Case analysis on relRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
++                     1. (Let failure be relRes as failure)  [hits: 9]
+
++                       1. Result in: % |- % : failure as premRes  [hits: 9]
+
+                    2. Case (% has type ok<val*>)
+
++                     1. (Let OK val_out*{val_out <- val_out*} be relRes as ok<val*>)  [hits: 148]
+
++                       1. (Assign_exps: C |- typedExp_out*{typedExp_out <- typedExp_out*} := val_out*{val_out <- val_out*} : assignRes)  [hits: 148]
+
++                         1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                           1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++                             1. Result in: % |- % : OK C_assign as premRes  [hits: 148]
+
+    2. Case (% has type ifPrem)
+
++     1. (Let IF typedExp be prem' as ifPrem)  [hits: 148]
+
++       1. (Eval_exp: C |- typedExp : expRes)  [hits: 148]
+
++         1. If (expRes <: failure), then  [hits: 148]
+
+-           1. (Let failure be expRes as failure)
+
+-             1. Result in: % |- % : failure as premRes
+
++         2. Case analysis on expRes  [hits: 148]
+
+            1. Case (% = OK BOOL false as expRes)
+
++             1. Result in: % |- % : UNMATCH as premRes  [hits: 148]
+
+            2. Case (% = OK BOOL true as expRes)
+
++             1. Result in: % |- % : OK C as premRes  [hits: 148]
+
+    3. Case (% has type ifHoldPrem)
+
++     1. (Let IFHOLD id ':' typedExp*{typedExp <- typedExp*} be prem' as ifHoldPrem)  [hits: 148]
+
++       1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++         1. Case analysis on expsRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expsRes as failure)
+
+-               1. Result in: % |- % : failure as premRes
+
+            2. Case (% has type ok<val*>)
+
++             1. (Let OK val_input*{val_input <- val_input*} be expsRes as ok<val*>)  [hits: 148]
+
++               1. (Call_rel: C |- id `( val_input*{val_input <- val_input*} `) : relRes)  [hits: 148]
+
++                 1. If (relRes <: failure), then  [hits: 148]
+
++                   1. (Let failure be relRes as failure)  [hits: 137]
+
++                     1. Result in: % |- % : failure as premRes  [hits: 137]
+
++                 2. If ((relRes = OK [] as relRes)), then  [hits: 148]
+
++                   1. Result in: % |- % : OK C as premRes  [hits: 148]
+
+    4. Case (% has type ifNotHoldPrem)
+
++     1. (Let IFNOTHOLD id ':' typedExp*{typedExp <- typedExp*} be prem' as ifNotHoldPrem)  [hits: 148]
+
++       1. (Eval_exps: C |- typedExp*{typedExp <- typedExp*} : expsRes)  [hits: 148]
+
++         1. Case analysis on expsRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expsRes as failure)
+
+-               1. Result in: % |- % : failure as premRes
+
+            2. Case (% has type ok<val*>)
+
++             1. (Let OK val_input*{val_input <- val_input*} be expsRes as ok<val*>)  [hits: 148]
+
++               1. (Call_rel: C |- id `( val_input*{val_input <- val_input*} `) : relRes)  [hits: 148]
+
++                 1. Case analysis on relRes (total)  [hits: 148]
+
+                    1. Case (% has type error)
+
+-                     1. (Let error be relRes as error)
+
+-                       1. Result in: % |- % : ERROR as premRes
+
+                    2. Case (% has type ok<val*>)
+
++                     1. Result in: % |- % : UNMATCH as premRes  [hits: 148]
+
+                    3. Case (% has type unmatch)
+
++                     1. (Let unmatch be relRes as unmatch)  [hits: 137]
+
++                       1. Result in: % |- % : OK C as premRes  [hits: 137]
+
+    5. Case (% has type letPrem)
+
++     1. (Let LET typedExp_l '=' typedExp_r be prem' as letPrem)  [hits: 148]
+
++       1. (Eval_exp: C |- typedExp_r : expRes)  [hits: 148]
+
++         1. Case analysis on expRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expRes as failure)
+
+-               1. Result in: % |- % : failure as premRes
+
+            2. Case (% has type ok<val>)
+
++             1. (Let OK val_r be expRes as ok<val>)  [hits: 148]
+
++               1. (Assign_exp: C |- typedExp_l := val_r : assignRes)  [hits: 148]
+
++                 1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                   1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++                     1. Result in: % |- % : OK C_assign as premRes  [hits: 148]
+
+    6. Case (% has type iterPrem)
+
++     1. (Let ITER prem iter '<-' vari_bound*{vari_bound <- vari_bound*} '->' vari*{vari <- vari*} be prem' as iterPrem)  [hits: 148]
+
++       1. Case analysis on iter (total)  [hits: 148]
+
+          1. Case (% matches pattern QUEST)
+
+-           1. (Let subOptRes be $sub_opt(C, vari_bound*{vari_bound <- vari_bound*}))
+
+-             1. If (subOptRes <: ok<ctx?>), then
+
+-               1. (Let OK C_sub?{C_sub <- C_sub?} be subOptRes as ok<ctx?>)
+
+-                 1. (Eval_prem_maybe: C_sub?{C_sub <- C_sub?} |- prem : premOptRes)
+
+-                   1. Case analysis on premOptRes (total)
+
+                      1. Case (% has type failure)
+
+-                       1. (Let failure be premOptRes as failure)
+
+-                         1. Result in: % |- % : failure as premRes
+
+                      2. Case (% has type ok<ctx?>)
+
+-                       1. (Let OK C'?{C' <- C'?} be premOptRes as ok<ctx?>)
+
+-                         1. If (C'?{C' <- C'?} matches (_)), then
+
+-                           1. (Let ?(C_sub_res) be C'?{C' <- C'?})
+
+-                             1. (Let val?{val <- val?} be $find_vari(C_sub_res, vari))*{vari <- vari*, val? -> val?*}
+
+-                               1. If (val?{val <- val?} matches (_))*{val? <- val?*}, then
+
+-                                 1. (Let ?(val_bind) be val?{val <- val?})*{val? <- val?*, val_bind -> val_bind*}
+
+-                                   1. (Let vari_bind_iter be $iterate_vari(vari, [QUEST]))*{vari <- vari*, vari_bind_iter -> vari_bind_iter*}
+
+-                                     1. (Let C_res be $add_varis(C, vari_bind_iter*{vari_bind_iter <- vari_bind_iter*}, OPT ?(val_bind)*{val_bind <- val_bind*}))
+
+-                                       1. Result in: % |- % : OK C_res as premRes
+
+-                   2. If ((premOptRes = OK ?() as premOptRes)), then
+
+-                     1. (Let vari_bind_iter be $iterate_vari(vari, [QUEST]))*{vari <- vari*, vari_bind_iter -> vari_bind_iter*}
+
+-                       1. (Let val_bind*{val_bind <- val_bind*} be $repeat_<val>(OPT ?(), |vari*{vari <- vari*}|))
+
+-                         1. (Let C_res be $add_varis(C, vari_bind_iter*{vari_bind_iter <- vari_bind_iter*}, val_bind*{val_bind <- val_bind*}))
+
+-                           1. Result in: % |- % : OK C_res as premRes
+
+          2. Case (% matches pattern STAR)
+
++           1. If ((OK [] as subListRes = $sub_list(C, vari_bound*{vari_bound <- vari_bound*}))), then  [hits: 148]
+
++             1. (Let vari_bind_iter be $iterate_vari(vari, [STAR]))*{vari <- vari*, vari_bind_iter -> vari_bind_iter*}  [hits: 148]
+
++               1. (Let val_bind*{val_bind <- val_bind*} be $repeat_<val>(LIST [], |vari*{vari <- vari*}|))  [hits: 148]
+
++                 1. (Let C_res be $add_varis(C, vari_bind_iter*{vari_bind_iter <- vari_bind_iter*}, val_bind*{val_bind <- val_bind*}))  [hits: 148]
+
++                   1. Result in: % |- % : OK C_res as premRes  [hits: 148]
+
++           2. (Let subListRes be $sub_list(C, vari_bound*{vari_bound <- vari_bound*}))  [hits: 148]
+
++             1. If (subListRes <: ok<ctx*>), then  [hits: 148]
+
++               1. (Let OK C_sub*{C_sub <- C_sub*} be subListRes as ok<ctx*>)  [hits: 148]
+
++                 1. If (C_sub*{C_sub <- C_sub*} matches _ :: _), then  [hits: 148]
+
++                   1. (Eval_prem_each: C_sub*{C_sub <- C_sub*} |- prem : premIterRes)  [hits: 148]
+
++                     1. Case analysis on premIterRes (total)  [hits: 148]
+
+                        1. Case (% has type failure)
+
++                         1. (Let failure be premIterRes as failure)  [hits: 148]
+
++                           1. Result in: % |- % : failure as premRes  [hits: 148]
+
+                        2. Case (% has type ok<ctx*>)
+
++                         1. (Let OK C_sub_res*{C_sub_res <- C_sub_res*} be premIterRes as ok<ctx*>)  [hits: 148]
+
++                           1. (Let val*{val <- val*}?{val* <- val*?} be $find_varis(C_sub_res, vari*{vari <- vari*}))*{C_sub_res <- C_sub_res*, val*? -> val*?*}  [hits: 148]
+
++                             1. If (val*{val <- val*}?{val* <- val*?} matches (_))*{val*? <- val*?*}, then  [hits: 148]
+
++                               1. (Let ?(val_sub_bind*{val_sub_bind <- val_sub_bind*}) be val*{val <- val*}?{val* <- val*?})*{val*? <- val*?*, val_sub_bind* -> val_sub_bind**}  [hits: 148]
+
++                                 1. (Let val_bind*{val_bind <- val_bind*}*{val_bind* <- val_bind**} be $transpose_<val>(val_sub_bind*{val_sub_bind <- val_sub_bind*}*{val_sub_bind* <- val_sub_bind**}))  [hits: 148]
+
++                                   1. (Let val_res_bind be LIST val_bind*{val_bind <- val_bind*})*{val_bind* <- val_bind**, val_res_bind -> val_res_bind*}  [hits: 148]
+
++                                     1. (Let vari_bind_iter be $iterate_vari(vari, [STAR]))*{vari <- vari*, vari_bind_iter -> vari_bind_iter*}  [hits: 148]
+
++                                       1. (Let C_res be $add_varis(C, vari_bind_iter*{vari_bind_iter <- vari_bind_iter*}, val_res_bind*{val_res_bind <- val_res_bind*}))  [hits: 148]
+
++                                         1. Result in: % |- % : OK C_res as premRes  [hits: 148]
+
+    7. Case (% has type debugPrem)
+
+-     1. (Let DEBUG typedExp be prem' as debugPrem)
+
+-       1. (Eval_exp: C |- typedExp : expRes)
+
+-         1. Case analysis on expRes (total)
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be expRes as failure)
+
+-               1. Result in: % |- % : failure as premRes
+
+            2. Case (% has type ok<val>)
+
+-             1. (Let OK val be expRes as ok<val>)
+
+-               1. Debug: val
+
+-               2. Result in: % |- % : OK C as premRes
+
+  2. Otherwise,
+
+-   1. Result in: % |- % : ERROR as premRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:122.1-126.21
+relation Eval_prems: C |- prem*{prem <- prem*} : %
+
++ 1. Case analysis on prem*{prem <- prem*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % : OK C as premRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let prem_h :: prem_t*{prem_t <- prem_t*} be prem*{prem <- prem*})  [hits: 148]
+
++       1. (Eval_prem: C |- prem_h : premRes')  [hits: 148]
+
++         1. Case analysis on premRes' (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
++             1. (Let failure be premRes' as failure)  [hits: 148]
+
++               1. Result in: % |- % : failure as premRes  [hits: 148]
+
+            2. Case (% has type ok<ctx>)
+
++             1. (Let OK C_h be premRes' as ok<ctx>)  [hits: 148]
+
++               1. (Eval_prems: C_h |- prem_t*{prem_t <- prem_t*} : premRes)  [hits: 148]
+
++                 1. Result in: % |- % : premRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:130.1-134.21
+relation Eval_prem_maybe: C'?{C' <- C'?} |- prem : %
+
+- 1. Case analysis on C'?{C' <- C'?} (total)
+
+    1. Case (% matches pattern ())
+
+-     1. Result in: % |- % : OK ?() as premOptRes
+
+    2. Case (% matches pattern (_))
+
+-     1. (Let ?(C) be C'?{C' <- C'?})
+
+-       1. (Eval_prem: C |- prem : premRes)
+
+-         1. Case analysis on premRes (total)
+
+            1. Case (% has type failure)
+
+-             1. (Let failure be premRes as failure)
+
+-               1. Result in: % |- % : failure as premOptRes
+
+            2. Case (% has type ok<ctx>)
+
+-             1. (Let OK C_res be premRes as ok<ctx>)
+
+-               1. Result in: % |- % : OK ?(C_res) as premOptRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:138.1-142.21
+relation Eval_prem_each: C*{C <- C*} |- prem : %
+
++ 1. Case analysis on C*{C <- C*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % : OK [] as premIterRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let C_h :: C_t*{C_t <- C_t*} be C*{C <- C*})  [hits: 148]
+
++       1. (Eval_prem: C_h |- prem : premRes)  [hits: 148]
+
++         1. Case analysis on premRes (total)  [hits: 148]
+
+            1. Case (% has type failure)
+
++             1. (Let failure be premRes as failure)  [hits: 148]
+
++               1. Result in: % |- % : failure as premIterRes  [hits: 148]
+
+            2. Case (% has type ok<ctx>)
+
++             1. (Let OK C_res be premRes as ok<ctx>)  [hits: 148]
+
++               1. (Eval_prem_each: C_t*{C_t <- C_t*} |- prem : premIterRes)  [hits: 148]
+
++                 1. Case analysis on premIterRes (total)  [hits: 148]
+
+                    1. Case (% has type failure)
+
+-                     1. (Let failure be premIterRes as failure)
+
+-                       1. Result in: % |- % : failure as premIterRes
+
+                    2. Case (% has type ok<ctx*>)
+
++                     1. (Let OK C_t_res*{C_t_res <- C_t_res*} be premIterRes as ok<ctx*>)  [hits: 148]
+
++                       1. Result in: % |- % : OK C_res :: C_t_res*{C_t_res <- C_t_res*} as premIterRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:150.1-155.21
+relation Call_func: C |- id `< typ*{typ <- typ*} `> `( val*{val <- val*} `) : %
+
++ 1. (Let id_global be $resolve_func_param(C, id))  [hits: 148]
+
++   1. (Let funcDefn'?{funcDefn' <- funcDefn'?} be $find_func(C, id_global))  [hits: 148]
+
++     1. If (funcDefn'?{funcDefn' <- funcDefn'?} matches (_)), then  [hits: 148]
+
++       1. (Let ?(funcDefn) be funcDefn'?{funcDefn' <- funcDefn'?})  [hits: 148]
+
++         1. Case analysis on funcDefn  [hits: 148]
+
+            1. Case (% has type externFuncDefn)
+
++             1. (Let EXTFUNC id_func _tparam*{_tparam <- _tparam*} _param*{_param <- _param*} ':' _typ be funcDefn as externFuncDefn)  [hits: 148]
+
++               1. (Call_extern_func: |- id_func `< typ*{typ <- typ*} `> `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++                 1. Result in: % |- % `< % `> `( % `) : funcRes  [hits: 148]
+
+            2. Case (% has type builtinFuncDefn)
+
++             1. (Let BUILTINFUNC id_func _tparam*{_tparam <- _tparam*} _param*{_param <- _param*} ':' _typ be funcDefn as builtinFuncDefn)  [hits: 148]
+
++               1. (Call_builtin_func: |- id_func `< typ*{typ <- typ*} `> `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++                 1. Result in: % |- % `< % `> `( % `) : funcRes  [hits: 148]
+
++ 2. If (typ*{typ <- typ*} matches []), then  [hits: 148]
+
++   1. (Let id_global be $resolve_func_param(C, id))  [hits: 148]
+
++     1. (Let funcDefn'?{funcDefn' <- funcDefn'?} be $find_func(C, id_global))  [hits: 148]
+
++       1. If (funcDefn'?{funcDefn' <- funcDefn'?} matches (_)), then  [hits: 148]
+
++         1. (Let ?(funcDefn) be funcDefn'?{funcDefn' <- funcDefn'?})  [hits: 148]
+
++           1. If (funcDefn <: tableFuncDefn), then  [hits: 148]
+
++             1. (Let tableFuncDefn be funcDefn as tableFuncDefn)  [hits: 148]
+
++               1. (Call_table_func: C |- tableFuncDefn `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++                 1. Result in: % |- % `< % `> `( % `) : funcRes  [hits: 148]
+
++ 3. (Let id_global be $resolve_func_param(C, id))  [hits: 148]
+
++   1. (Let funcDefn'?{funcDefn' <- funcDefn'?} be $find_func(C, id_global))  [hits: 148]
+
++     1. If (funcDefn'?{funcDefn' <- funcDefn'?} matches (_)), then  [hits: 148]
+
++       1. (Let ?(funcDefn) be funcDefn'?{funcDefn' <- funcDefn'?})  [hits: 148]
+
++         1. If (funcDefn <: definedFuncDefn), then  [hits: 148]
+
++           1. (Let definedFuncDefn be funcDefn as definedFuncDefn)  [hits: 148]
+
++             1. (Call_defined_func: C |- definedFuncDefn `< typ*{typ <- typ*} `> `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++               1. Result in: % |- % `< % `> `( % `) : funcRes  [hits: 148]
+
+  4. Otherwise,
+
+-   1. Result in: % |- % `< % `> `( % `) : ERROR as funcRes
+
+;; towers/../spec-meta/3-execution/3.02-relation.watsup:159.1-163.21
+relation Call_rel: C |- id `( val*{val <- val*} `) : %
+
++ 1. (Let relDefn'?{relDefn' <- relDefn'?} be $find_rel(C, id))  [hits: 148]
+
++   1. If (relDefn'?{relDefn' <- relDefn'?} matches (_)), then  [hits: 148]
+
++     1. (Let ?(relDefn) be relDefn'?{relDefn' <- relDefn'?})  [hits: 148]
+
++       1. Case analysis on relDefn (total)  [hits: 148]
+
+          1. Case (% has type externRelDefn)
+
++           1. (Let EXTREL id_rel ':' _typ*{_typ <- _typ*} '->' _typ'*{_typ' <- _typ'*} be relDefn as externRelDefn)  [hits: 143]
+
++             1. (Call_extern_rel: |- id_rel `( val*{val <- val*} `) : relRes)  [hits: 143]
+
++               1. Result in: % |- % `( % `) : relRes  [hits: 143]
+
+          2. Case (% has type definedRelDefn)
+
++           1. (Let definedRelDefn be relDefn as definedRelDefn)  [hits: 148]
+
++             1. (Call_defined_rel: C |- definedRelDefn `( val*{val <- val*} `) : relRes)  [hits: 148]
+
++               1. Result in: % |- % `( % `) : relRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as relRes
+
+;; towers/../spec-meta/3-execution/3.03-eval-ops.watsup:7.1-9.52
+def $numUnOp(numUnOp, num)
+
+- 1. Case analysis on numUnOp (total)
+
+    1. Case (% matches pattern PLUS)
+
+-     1. Case analysis on num (total)
+
+        1. Case (% matches pattern NAT %)
+
+-         1. (Let NAT n be num)
+
+-           1. Return NAT n as val
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i be num)
+
+-           1. Return INT i as val
+
+    2. Case (% matches pattern MINUS)
+
+-     1. Case analysis on num (total)
+
+        1. Case (% matches pattern NAT %)
+
+-         1. (Let NAT n be num)
+
+-           1. Return INT -n as int as val
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i be num)
+
+-           1. Return INT -i as val
+
+;; towers/../spec-meta/3-execution/3.03-eval-ops.watsup:21.1-24.66
+def $boolBinOp(boolBinOp, b_l, b_r)
+
++ 1. Case analysis on boolBinOp (total)  [hits: 148]
+
+    1. Case (% matches pattern AND)
+
++     1. Return (b_l /\ b_r)  [hits: 148]
+
+    2. Case (% matches pattern OR)
+
++     1. Return (b_l \/ b_r)  [hits: 148]
+
+    3. Case (% matches pattern IMPL)
+
++     1. Return (b_l => b_r)  [hits: 148]
+
+    4. Case (% matches pattern EQUIV)
+
+-     1. Return (b_l <=> b_r)
+
+;; towers/../spec-meta/3-execution/3.03-eval-ops.watsup:38.1-40.62
+def $numBinOp(numBinOp, num, num')
+
++ 1. Case analysis on numBinOp  [hits: 148]
+
+    1. Case (% matches pattern ADD)
+
++     1. Case analysis on num (total)  [hits: 148]
+
+        1. Case (% matches pattern NAT %)
+
++         1. (Let NAT n_l be num)  [hits: 148]
+
++           1. If (num' matches NAT %), then  [hits: 148]
+
++             1. (Let NAT n_r be num')  [hits: 148]
+
++               1. Return OK NAT (n_l + n_r) as val as numBinOpRes  [hits: 148]
+
+        2. Case (% matches pattern INT %)
+
++         1. (Let INT i_l be num)  [hits: 16]
+
++           1. If (num' matches INT %), then  [hits: 16]
+
++             1. (Let INT i_r be num')  [hits: 16]
+
++               1. Return OK INT (i_l + i_r) as val as numBinOpRes  [hits: 16]
+
+    2. Case (% matches pattern SUB)
+
++     1. Case analysis on num (total)  [hits: 148]
+
+        1. Case (% matches pattern NAT %)
+
++         1. (Let NAT n_l be num)  [hits: 148]
+
++           1. If (num' matches NAT %), then  [hits: 148]
+
++             1. (Let NAT n_r be num')  [hits: 148]
+
++               1. Return OK INT (n_l - n_r) as val as numBinOpRes  [hits: 148]
+
+        2. Case (% matches pattern INT %)
+
++         1. (Let INT i_l be num)  [hits: 4]
+
++           1. If (num' matches INT %), then  [hits: 4]
+
++             1. (Let INT i_r be num')  [hits: 4]
+
++               1. Return OK INT (i_l - i_r) as val as numBinOpRes  [hits: 4]
+
+    3. Case (% matches pattern MUL)
+
+-     1. Case analysis on num (total)
+
+        1. Case (% matches pattern NAT %)
+
+-         1. (Let NAT n_l be num)
+
+-           1. If (num' matches NAT %), then
+
+-             1. (Let NAT n_r be num')
+
+-               1. Return OK NAT (n_l * n_r) as val as numBinOpRes
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i_l be num)
+
+-           1. If (num' matches INT %), then
+
+-             1. (Let INT i_r be num')
+
+-               1. Return OK INT (i_l * i_r) as val as numBinOpRes
+
+    4. Case (% matches pattern DIV)
+
+-     1. Case analysis on num (total)
+
+        1. Case (% matches pattern NAT %)
+
+-         1. (Let NAT n_l be num)
+
+-           1. If (num' matches NAT %), then
+
+-             1. (Let NAT n_r be num')
+
+-               1. If ((n_r =/= 0)), then
+
+-                 1. Return OK NAT (n_l / n_r) as val as numBinOpRes
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i_l be num)
+
+-           1. If (num' matches INT %), then
+
+-             1. (Let INT i_r be num')
+
+-               1. If ((i_r =/= +0)), then
+
+-                 1. Return OK INT (i_l / i_r) as val as numBinOpRes
+
+    5. Case (% matches pattern MOD)
+
+-     1. Case analysis on num (total)
+
+        1. Case (% matches pattern NAT %)
+
+-         1. (Let NAT n_l be num)
+
+-           1. If (num' matches NAT %), then
+
+-             1. (Let NAT n_r be num')
+
+-               1. If ((n_r =/= 0)), then
+
+-                 1. Return OK NAT (n_l \ n_r) as val as numBinOpRes
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i_l be num)
+
+-           1. If (num' matches INT %), then
+
+-             1. (Let INT i_r be num')
+
+-               1. If ((i_r =/= +0)), then
+
+-                 1. Return OK INT (i_l \ i_r) as val as numBinOpRes
+
+  2. Otherwise,
+
+-   1. Return ERROR as numBinOpRes
+
+;; towers/../spec-meta/3-execution/3.03-eval-ops.watsup:60.1-63.70
+def $polyCmpOp(polyCmpOp, val_l, val_r)
+
++ 1. Case analysis on polyCmpOp (total)  [hits: 148]
+
+    1. Case (% matches pattern EQ)
+
++     1. Return (val_l = val_r)  [hits: 148]
+
+    2. Case (% matches pattern NE)
+
++     1. Return (val_l =/= val_r)  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.03-eval-ops.watsup:75.1-77.66
+def $numCmpOp(numCmpOp, num, num')
+
++ 1. Case analysis on numCmpOp (total)  [hits: 148]
+
+    1. Case (% matches pattern LT)
+
++     1. Case analysis on num (total)  [hits: 40]
+
+        1. Case (% matches pattern NAT %)
+
++         1. (Let NAT n_l be num)  [hits: 40]
+
++           1. If (num' matches NAT %), then  [hits: 40]
+
++             1. (Let NAT n_r be num')  [hits: 40]
+
++               1. Return OK (n_l < n_r) as numCmpRes  [hits: 40]
+
+        2. Case (% matches pattern INT %)
+
++         1. (Let INT i_l be num)  [hits: 4]
+
++           1. If (num' matches INT %), then  [hits: 4]
+
++             1. (Let INT i_r be num')  [hits: 4]
+
++               1. Return OK (i_l < i_r) as numCmpRes  [hits: 4]
+
+    2. Case (% matches pattern GT)
+
++     1. Case analysis on num (total)  [hits: 148]
+
+        1. Case (% matches pattern NAT %)
+
++         1. (Let NAT n_l be num)  [hits: 148]
+
++           1. If (num' matches NAT %), then  [hits: 148]
+
++             1. (Let NAT n_r be num')  [hits: 148]
+
++               1. Return OK (n_l > n_r) as numCmpRes  [hits: 148]
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i_l be num)
+
+-           1. If (num' matches INT %), then
+
+-             1. (Let INT i_r be num')
+
+-               1. Return OK (i_l > i_r) as numCmpRes
+
+    3. Case (% matches pattern LE)
+
++     1. Case analysis on num (total)  [hits: 148]
+
+        1. Case (% matches pattern NAT %)
+
++         1. (Let NAT n_l be num)  [hits: 148]
+
++           1. If (num' matches NAT %), then  [hits: 148]
+
++             1. (Let NAT n_r be num')  [hits: 148]
+
++               1. Return OK (n_l <= n_r) as numCmpRes  [hits: 148]
+
+        2. Case (% matches pattern INT %)
+
+-         1. (Let INT i_l be num)
+
+-           1. If (num' matches INT %), then
+
+-             1. (Let INT i_r be num')
+
+-               1. Return OK (i_l <= i_r) as numCmpRes
+
+    4. Case (% matches pattern GE)
+
++     1. Case analysis on num (total)  [hits: 4]
+
+        1. Case (% matches pattern NAT %)
+
+-         1. (Let NAT n_l be num)
+
+-           1. If (num' matches NAT %), then
+
+-             1. (Let NAT n_r be num')
+
+-               1. Return OK (n_l >= n_r) as numCmpRes
+
+        2. Case (% matches pattern INT %)
+
++         1. (Let INT i_l be num)  [hits: 4]
+
++           1. If (num' matches INT %), then  [hits: 4]
+
++             1. (Let INT i_r be num')  [hits: 4]
+
++               1. Return OK (i_l >= i_r) as numCmpRes  [hits: 4]
+
+  2. Otherwise,
+
+-   1. Return ERROR as numCmpRes
+
+;; towers/../spec-meta/3-execution/3.03-eval-ops.watsup:95.1-97.51
+def $matches(val', pat)
+
++ 1. Case analysis on val'  [hits: 148]
+
+    1. Case (% matches pattern INJ %)
+
++     1. (Let INJ mixop_v val*{val <- val*} be val')  [hits: 148]
+
++       1. If (pat matches INJ %), then  [hits: 148]
+
++         1. (Let INJ mixop_p be pat)  [hits: 148]
+
++           1. Return (mixop_v = mixop_p)  [hits: 148]
+
+    2. Case (% matches pattern LIST %)
+
++     1. (Let LIST val*{val <- val*} be val')  [hits: 148]
+
++       1. If (pat <: listPat), then  [hits: 148]
+
++         1. (Let listPat be pat as listPat)  [hits: 148]
+
++           1. Case analysis on listPat (total)  [hits: 148]
+
+              1. Case (% matches pattern CONS)
+
++               1. Return (|val*{val <- val*}| > 0)  [hits: 148]
+
+              2. Case (% matches pattern FIXED %)
+
++               1. (Let FIXED n be listPat)  [hits: 148]
+
++                 1. Return (|val*{val <- val*}| = n)  [hits: 148]
+
+              3. Case (% matches pattern NIL)
+
++               1. Return (|val*{val <- val*}| = 0)  [hits: 148]
+
+    3. Case (% matches pattern OPT %)
+
++     1. (Let OPT val?{val <- val?} be val')  [hits: 148]
+
++       1. If (pat <: optPat), then  [hits: 148]
+
++         1. (Let optPat be pat as optPat)  [hits: 148]
+
++           1. Case analysis on optPat (total)  [hits: 148]
+
+              1. Case (% matches pattern SOME)
+
++               1. Return (val?{val <- val?} =/= ?())  [hits: 148]
+
+              2. Case (% matches pattern NONE)
+
++               1. Return (val?{val <- val?} = ?())  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return false
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:9.1-11.75
+def $subtyp(fenv, tdenv, typ', val'')
+
++ 1. Case analysis on typ' (total)  [hits: 148]
+
+    1. Case (% has type optyp)
+
++     1. (Let optyp be typ' as optyp)  [hits: 148]
+
++       1. Case analysis on optyp  [hits: 148]
+
+          1. Case (% matches pattern BOOL)
+
++           1. If (val'' matches BOOL %), then  [hits: 148]
+
++             1. Return OK true as subtypRes  [hits: 148]
+
+          2. Case (% matches pattern TEXT)
+
++           1. If (val'' matches TEXT %), then  [hits: 148]
+
++             1. Return OK true as subtypRes  [hits: 148]
+
+    2. Case (% matches pattern VAR % %)
+
++     1. (Let VAR id targ*{targ <- targ*} be typ')  [hits: 148]
+
++       1. Return $subtyp_var(fenv, tdenv, id, targ*{targ <- targ*}, val'')  [hits: 148]
+
+    3. Case (% matches pattern TUP %)
+
++     1. (Let TUP typ*{typ <- typ*} be typ')  [hits: 147]
+
++       1. If (val'' matches TUP %), then  [hits: 147]
+
++         1. (Let TUP val*{val <- val*} be val'')  [hits: 147]
+
++           1. Return $subtyps(fenv, tdenv, typ*{typ <- typ*}, val*{val <- val*})  [hits: 147]
+
+    4. Case (% matches pattern ITER % %)
+
++     1. (Let ITER typ iter be typ')  [hits: 148]
+
++       1. Case analysis on iter (total)  [hits: 148]
+
+          1. Case (% matches pattern QUEST)
+
++           1. If (val'' matches OPT %), then  [hits: 148]
+
++             1. (Let OPT val'?{val' <- val'?} be val'')  [hits: 148]
+
++               1. If (val'?{val' <- val'?} matches (_)), then  [hits: 148]
+
++                 1. (Let ?(val) be val'?{val' <- val'?})  [hits: 148]
+
++                   1. Return $subtyp(fenv, tdenv, typ, val)  [hits: 148]
+
++           2. If ((val'' = OPT ?())), then  [hits: 148]
+
++             1. Return OK true as subtypRes  [hits: 148]
+
+          2. Case (% matches pattern STAR)
+
++           1. If (val'' matches LIST %), then  [hits: 148]
+
++             1. (Let LIST val*{val <- val*} be val'')  [hits: 148]
+
++               1. Return $subtyp_list(fenv, tdenv, typ, val*{val <- val*})  [hits: 148]
+
+    5. Case (% matches pattern FUNC % % %)
+
+-     1. (Let FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret be typ')
+
+-       1. If (val'' matches FUNC %), then
+
+-         1. (Let FUNC id be val'')
+
+-           1. Return $subtyp_func(fenv, tdenv, FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret, id)
+
++ 2. If (typ' <: numtyp), then  [hits: 148]
+
++   1. (Let numtyp be typ' as numtyp)  [hits: 148]
+
++     1. Case analysis on numtyp (total)  [hits: 148]
+
+        1. Case (% matches pattern NAT)
+
++         1. If (val'' <: num), then  [hits: 148]
+
++           1. (Let num be val'' as num)  [hits: 148]
+
++             1. Case analysis on num (total)  [hits: 148]
+
+                1. Case (% matches pattern NAT %)
+
++                 1. Return OK true as subtypRes  [hits: 148]
+
+                2. Case (% matches pattern INT %)
+
++                 1. (Let INT i be num)  [hits: 148]
+
++                   1. Return OK (i >= 0 as int) as subtypRes  [hits: 148]
+
+        2. Case (% matches pattern INT)
+
++         1. If (val'' <: num), then  [hits: 148]
+
++           1. Return OK true as subtypRes  [hits: 148]
+
+  3. Otherwise,
+
+-   1. Return OK false as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:13.1-16.43
+def $subtyp_var(fenv, tdenv, id, targ*{targ <- targ*}, val)
+
++ 1. (Let typDef'?{typDef' <- typDef'?} be $find_map<id, typDef>(tdenv, id))  [hits: 148]
+
++   1. If (typDef'?{typDef' <- typDef'?} matches (_)), then  [hits: 148]
+
++     1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})  [hits: 148]
+
++       1. Return $subtyp_def(fenv, tdenv, typDef, targ*{targ <- targ*}, val)  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ERROR as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:18.1-21.43
+def $subtyp_def(fenv, tdenv, typDef, typ'*{typ' <- typ'*}, val)
+
++ 1. Case analysis on typDef  [hits: 148]
+
+    1. Case (% has type externTypDefn)
+
++     1. If (typ'*{typ' <- typ'*} matches []), then  [hits: 148]
+
++       1. Return $subtyp_extern(val)  [hits: 148]
+
+    2. Case (% has type definedTypDefn)
+
++     1. (Let TYP _id tparam*{tparam <- tparam*} '=' deftyp be typDef as definedTypDefn)  [hits: 148]
+
++       1. Case analysis on deftyp (total)  [hits: 148]
+
+          1. Case (% matches pattern ALIAS %)
+
++           1. (Let ALIAS typ be deftyp)  [hits: 148]
+
++             1. If ((|typ'*{typ' <- typ'*}| = |tparam*{tparam <- tparam*}|)), then  [hits: 148]
+
++               1. (Let theta be `{ tparam ':' typ'*{typ' <- typ'*, tparam <- tparam*} `})  [hits: 148]
+
++                 1. (Let typRes be $subst_typ(theta, typ))  [hits: 148]
+
++                   1. If (typRes <: ok<typ>), then  [hits: 148]
+
++                     1. (Let OK typ_subst be typRes as ok<typ>)  [hits: 148]
+
++                       1. Return $subtyp(fenv, tdenv, typ_subst, val)  [hits: 148]
+
+          2. Case (% matches pattern VARIANT %)
+
++           1. (Let VARIANT typCase*{typCase <- typCase*} be deftyp)  [hits: 148]
+
++             1. If ((|typ'*{typ' <- typ'*}| = |tparam*{tparam <- tparam*}|)), then  [hits: 148]
+
++               1. (Let theta be `{ tparam ':' typ'*{typ' <- typ'*, tparam <- tparam*} `})  [hits: 148]
+
++                 1. Return $subtyp_variant(fenv, tdenv, theta, typCase*{typCase <- typCase*}, val)  [hits: 148]
+
+          3. Case (% matches pattern STRUCT %)
+
++           1. (Let STRUCT typField*{typField <- typField*} be deftyp)  [hits: 122]
+
++             1. If ((|typ'*{typ' <- typ'*}| = |tparam*{tparam <- tparam*}|)), then  [hits: 122]
+
++               1. (Let theta be `{ tparam ':' typ'*{typ' <- typ'*, tparam <- tparam*} `})  [hits: 122]
+
++                 1. Return $subtyp_struct(fenv, tdenv, theta, typField*{typField <- typField*}, val)  [hits: 122]
+
+  2. Otherwise,
+
+-   1. Return ERROR as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:23.1-24.74
+def $subtyp_extern(val)
+
++ 1. If (val matches EXT %), then  [hits: 148]
+
++   1. Return OK true as subtypRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return OK false as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:26.1-29.43
+def $subtyp_variant(fenv, tdenv, theta, typCase*{typCase <- typCase*}, val')
+
++ 1. If (val' matches INJ %), then  [hits: 148]
+
++   1. (Let INJ mixop val*{val <- val*} be val')  [hits: 148]
+
++     1. (Let mixop_case typ_case*{typ_case <- typ_case*} be typCase)*{typCase <- typCase*, mixop_case -> mixop_case*, typ_case* -> typ_case**}  [hits: 148]
+
++       1. (Let typ*{typ <- typ*}?{typ* <- typ*?} be $assoc_<mixop, typ*>(mixop, (mixop_case, typ_case*{typ_case <- typ_case*})*{mixop_case <- mixop_case*, typ_case* <- typ_case**}))  [hits: 148]
+
++         1. If (typ*{typ <- typ*}?{typ* <- typ*?} matches (_)), then  [hits: 148]
+
++           1. (Let ?(typ_case_found*{typ_case_found <- typ_case_found*}) be typ*{typ <- typ*}?{typ* <- typ*?})  [hits: 148]
+
++             1. Return $subtyp_case(fenv, tdenv, theta, typ_case_found*{typ_case_found <- typ_case_found*}, val*{val <- val*})  [hits: 148]
+
+  2. Otherwise,
+
++   1. Return OK false as subtypRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:31.1-34.43
+def $subtyp_struct(fenv, tdenv, theta, typField*{typField <- typField*}, val)
+
++ 1. If (val matches STR %), then  [hits: 122]
+
++   1. (Let STR valField*{valField <- valField*} be val)  [hits: 122]
+
++     1. (Let atom typ_field be typField)*{typField <- typField*, atom -> atom*, typ_field -> typ_field*}  [hits: 122]
+
++       1. (Let atom' val_field be valField)*{valField <- valField*, atom' -> atom'*, val_field -> val_field*}  [hits: 122]
+
++         1. If ((|atom*{atom <- atom*}| = |atom'*{atom' <- atom'*}|)), then  [hits: 122]
+
++           1. If ((atom' = atom))*{atom <- atom*, atom' <- atom'*}, then  [hits: 122]
+
++             1. Return $subtyp_case(fenv, tdenv, theta, typ_field*{typ_field <- typ_field*}, val_field*{val_field <- val_field*})  [hits: 122]
+
+  2. Otherwise,
+
+-   1. Return OK false as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:36.1-39.43
+def $subtyp_case(fenv, tdenv, theta, typ*{typ <- typ*}, val*{val <- val*})
+
++ 1. (Let typsRes be $subst_typs(theta, typ*{typ <- typ*}))  [hits: 148]
+
++   1. If (typsRes <: ok<typ*>), then  [hits: 148]
+
++     1. (Let OK typ_subst*{typ_subst <- typ_subst*} be typsRes as ok<typ*>)  [hits: 148]
+
++       1. Return $subtyps(fenv, tdenv, typ_subst*{typ_subst <- typ_subst*}, val*{val <- val*})  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ERROR as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:41.1-43.75
+def $subtyps(fenv, tdenv, typ*{typ <- typ*}, val*{val <- val*})
+
++ 1. Case analysis on typ*{typ <- typ*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Case analysis on val*{val <- val*} (total)  [hits: 148]
+
+        1. Case (% matches pattern [])
+
++         1. Return OK true as subtypRes  [hits: 148]
+
+        2. Case (% matches pattern _ :: _)
+
+-         1. Return OK false as subtypRes
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let typ_h :: typ_t*{typ_t <- typ_t*} be typ*{typ <- typ*})  [hits: 148]
+
++       1. Case analysis on val*{val <- val*} (total)  [hits: 148]
+
+          1. Case (% matches pattern _ :: _)
+
++           1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 148]
+
++             1. If ((OK true as subtypRes = $subtyp(fenv, tdenv, typ_h, val_h))), then  [hits: 148]
+
++               1. Return $subtyps(fenv, tdenv, typ_t*{typ_t <- typ_t*}, val_t*{val_t <- val_t*})  [hits: 148]
+
+              1. Else Dangling
+
++             2. (Let subtypRes be $subtyp(fenv, tdenv, typ_h, val_h))  [hits: 148]
+
++               1. If ((subtypRes =/= OK true as subtypRes)), then  [hits: 148]
+
++                 1. Return subtypRes  [hits: 3]
+
+                1. Else Dangling
+
+          2. Case (% matches pattern [])
+
+-           1. Return OK false as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:45.1-47.75
+def $subtyp_list(fenv, tdenv, typ, val*{val <- val*})
+
++ 1. Case analysis on val*{val <- val*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Return OK true as subtypRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 148]
+
++       1. If ((OK true as subtypRes = $subtyp(fenv, tdenv, typ, val_h))), then  [hits: 148]
+
++         1. Return $subtyp_list(fenv, tdenv, typ, val_t*{val_t <- val_t*})  [hits: 148]
+
+        1. Else Dangling
+
++       2. (Let subtypRes be $subtyp(fenv, tdenv, typ, val_h))  [hits: 148]
+
++         1. If ((subtypRes =/= OK true as subtypRes)), then  [hits: 148]
+
+-           1. Return subtypRes
+
+          1. Else Dangling
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:49.1-51.75
+def $subtyp_func(fenv, tdenv, typ, id)
+
+- 1. (Let funcDefn'?{funcDefn' <- funcDefn'?} be $find_map<id, funcDefn>(fenv, id))
+
+-   1. If (funcDefn'?{funcDefn' <- funcDefn'?} matches (_)), then
+
+-     1. (Let ?(funcDefn) be funcDefn'?{funcDefn' <- funcDefn'?})
+
+-       1. Return $equiv_func_typ(tdenv, typ, $func_typ(funcDefn)) as subtypRes
+
+  2. Otherwise,
+
+-   1. Return ERROR as subtypRes
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:138.1-139.44
+def $param_typ(param')
+
+- 1. Case analysis on param' (total)
+
+    1. Case (% has type expParam)
+
+-     1. (Let EXP typ be param' as expParam)
+
+-       1. Return typ
+
+    2. Case (% has type funParam)
+
+-     1. (Let FUN id ':' tparam*{tparam <- tparam*} param*{param <- param*} '->' typ be param' as funParam)
+
+-       1. Return FUNC tparam*{tparam <- tparam*} $param_typ(param)*{param <- param*} typ
+
+;; towers/../spec-meta/3-execution/3.04.1-typ-match.watsup:144.1-145.48
+def $func_typ(funcDefn)
+
+- 1. Case analysis on funcDefn (total)
+
+    1. Case (% has type externFuncDefn)
+
+-     1. (Let EXTFUNC id tparam*{tparam <- tparam*} param*{param <- param*} ':' typ be funcDefn as externFuncDefn)
+
+-       1. Return FUNC tparam*{tparam <- tparam*} $param_typ(param)*{param <- param*} typ
+
+    2. Case (% has type builtinFuncDefn)
+
+-     1. (Let BUILTINFUNC id tparam*{tparam <- tparam*} param*{param <- param*} ':' typ be funcDefn as builtinFuncDefn)
+
+-       1. Return FUNC tparam*{tparam <- tparam*} $param_typ(param)*{param <- param*} typ
+
+    3. Case (% has type tableFuncDefn)
+
+-     1. (Let TABLEFUNC _id param*{param <- param*} ':' typ '=' tblRow*{tblRow <- tblRow*} be funcDefn as tableFuncDefn)
+
+-       1. Return FUNC [] $param_typ(param)*{param <- param*} typ
+
+    4. Case (% has type definedFuncDefn)
+
+-     1. (Let FUNC _id tparam*{tparam <- tparam*} param*{param <- param*} ':' typ '=' clause*{clause <- clause*} elsClause?{elsClause <- elsClause?} be funcDefn as definedFuncDefn)
+
+-       1. Return FUNC tparam*{tparam <- tparam*} $param_typ(param)*{param <- param*} typ
+
+;; towers/../spec-meta/3-execution/3.04.2-typ-cast.watsup:10.1-11.73
+def $upcast(C, typ', val'')
+
++ 1. Case analysis on typ'  [hits: 148]
+
+    1. Case (% has type numtyp)
+
++     1. (Let numtyp be typ' as numtyp)  [hits: 145]
+
++       1. Case analysis on numtyp (total)  [hits: 145]
+
+          1. Case (% matches pattern INT)
+
++           1. If (val'' <: num), then  [hits: 145]
+
++             1. (Let num be val'' as num)  [hits: 145]
+
++               1. Case analysis on num (total)  [hits: 145]
+
+                  1. Case (% matches pattern INT %)
+
+-                   1. (Let INT i be num)
+
+-                     1. Return OK INT i as val as castRes
+
+                  2. Case (% matches pattern NAT %)
+
++                   1. (Let NAT n be num)  [hits: 145]
+
++                     1. Return OK INT n as int as val as castRes  [hits: 145]
+
+          2. Case (% matches pattern NAT)
+
+-           1. If (val'' <: num), then
+
+-             1. (Let num be val'' as num)
+
+-               1. If (num matches NAT %), then
+
+-                 1. (Let NAT n be num)
+
+-                   1. Return OK NAT n as val as castRes
+
+    2. Case (% matches pattern VAR % %)
+
++     1. (Let VAR id targ*{targ <- targ*} be typ')  [hits: 148]
+
++       1. (Let typDef'?{typDef' <- typDef'?} be $find_typ(C, id))  [hits: 148]
+
++         1. If (typDef'?{typDef' <- typDef'?} matches (_)), then  [hits: 148]
+
++           1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})  [hits: 148]
+
++             1. If (typDef <: definedTypDefn), then  [hits: 148]
+
++               1. (Let TYP _id tparam*{tparam <- tparam*} '=' deftyp be typDef as definedTypDefn)  [hits: 148]
+
++                 1. Case analysis on deftyp (total)  [hits: 148]
+
+                    1. Case (% matches pattern ALIAS %)
+
++                     1. (Let ALIAS typ be deftyp)  [hits: 143]
+
++                       1. If ((|targ*{targ <- targ*}| = |tparam*{tparam <- tparam*}|)), then  [hits: 143]
+
++                         1. (Let theta be `{ tparam ':' targ*{targ <- targ*, tparam <- tparam*} `})  [hits: 143]
+
++                           1. (Let typRes be $subst_typ(theta, typ))  [hits: 143]
+
++                             1. If (typRes <: ok<typ>), then  [hits: 143]
+
++                               1. (Let OK typ_subst be typRes as ok<typ>)  [hits: 143]
+
++                                 1. Return $upcast(C, typ_subst, val'')  [hits: 143]
+
+                    2. Case (% matches pattern VARIANT %)
+
++                     1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)  [hits: 148]
+
++                       1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))  [hits: 148]
+
++                         1. If ((OK true as subtypRes = $subtyp(C.GLOBAL.FUNC, tdenv, VAR id targ*{targ <- targ*}, val''))), then  [hits: 148]
+
++                           1. Return OK val'' as castRes  [hits: 148]
+
+                    3. Case (% matches pattern STRUCT %)
+
+-                     1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)
+
+-                       1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))
+
+-                         1. If ((OK true as subtypRes = $subtyp(C.GLOBAL.FUNC, tdenv, VAR id targ*{targ <- targ*}, val''))), then
+
+-                           1. Return OK val'' as castRes
+
++       2. If (targ*{targ <- targ*} matches []), then  [hits: 148]
+
++         1. If (val'' matches EXT %), then  [hits: 148]
+
+-           1. (Let EXT json be val'')
+
+-             1. (Let typDef'?{typDef' <- typDef'?} be $find_typ(C, id))
+
+-               1. If (typDef'?{typDef' <- typDef'?} matches (_)), then
+
+-                 1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})
+
+-                   1. If (typDef <: externTypDefn), then
+
+-                     1. Return OK EXT json as castRes
+
+    3. Case (% matches pattern TUP %)
+
+-     1. (Let TUP typ*{typ <- typ*} be typ')
+
+-       1. If (val'' matches TUP %), then
+
+-         1. (Let TUP val*{val <- val*} be val'')
+
+-           1. (Let castsRes be $upcasts(C, typ*{typ <- typ*}, val*{val <- val*}))
+
+-             1. If (castsRes <: ok<val*>), then
+
+-               1. (Let OK val_cast*{val_cast <- val_cast*} be castsRes as ok<val*>)
+
+-                 1. Return OK TUP val_cast*{val_cast <- val_cast*} as castRes
+
+    4. Case (% matches pattern ITER % %)
+
++     1. (Let ITER typ iter be typ')  [hits: 144]
+
++       1. Case analysis on iter (total)  [hits: 144]
+
+          1. Case (% matches pattern QUEST)
+
++           1. If ((val'' = OPT ?())), then  [hits: 143]
+
+-             1. Return OK OPT ?() as castRes
+
++           2. If (val'' matches OPT %), then  [hits: 143]
+
++             1. (Let OPT val'?{val' <- val'?} be val'')  [hits: 143]
+
++               1. If (val'?{val' <- val'?} matches (_)), then  [hits: 143]
+
++                 1. (Let ?(val) be val'?{val' <- val'?})  [hits: 143]
+
++                   1. (Let castRes be $upcast(C, typ, val))  [hits: 143]
+
++                     1. If (castRes <: ok<val>), then  [hits: 143]
+
++                       1. (Let OK val_cast be castRes as ok<val>)  [hits: 143]
+
++                         1. Return OK OPT ?(val_cast) as castRes  [hits: 143]
+
+          2. Case (% matches pattern STAR)
+
++           1. If (val'' matches LIST %), then  [hits: 55]
+
++             1. (Let LIST val*{val <- val*} be val'')  [hits: 55]
+
++               1. (Let castsRes be $upcasts(C, $repeat_<typ>(typ, |val*{val <- val*}|), val*{val <- val*}))  [hits: 55]
+
++                 1. If (castsRes <: ok<val*>), then  [hits: 55]
+
++                   1. (Let OK val_cast*{val_cast <- val_cast*} be castsRes as ok<val*>)  [hits: 55]
+
++                     1. Return OK LIST val_cast*{val_cast <- val_cast*} as castRes  [hits: 55]
+
+    5. Case (% matches pattern FUNC % % %)
+
+-     1. (Let FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret be typ')
+
+-       1. If (val'' matches FUNC %), then
+
+-         1. (Let FUNC id be val'')
+
+-           1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)
+
+-             1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))
+
+-               1. If ((OK true as subtypRes = $subtyp(C.GLOBAL.FUNC, tdenv, FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret, FUNC id))), then
+
+-                 1. Return OK FUNC id as castRes
+
++ 2. If (typ' <: optyp), then  [hits: 148]
+
++   1. (Let optyp be typ' as optyp)  [hits: 145]
+
++     1. Case analysis on optyp  [hits: 145]
+
+        1. Case (% matches pattern BOOL)
+
+-         1. If (val'' matches BOOL %), then
+
+-           1. (Let BOOL b be val'')
+
+-             1. Return OK BOOL b as castRes
+
+        2. Case (% matches pattern TEXT)
+
+-         1. If (val'' matches TEXT %), then
+
+-           1. (Let TEXT t be val'')
+
+-             1. Return OK TEXT t as castRes
+
+  3. Otherwise,
+
+-   1. Return ERROR as castRes
+
+;; towers/../spec-meta/3-execution/3.04.2-typ-cast.watsup:12.1-13.86
+def $upcasts(C, typ*{typ <- typ*}, val*{val <- val*})
+
++ 1. Case analysis on typ*{typ <- typ*} (total)  [hits: 55]
+
+    1. Case (% matches pattern [])
+
++     1. If (val*{val <- val*} matches []), then  [hits: 55]
+
++       1. Return OK [] as castsRes  [hits: 55]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let typ_h :: typ_t*{typ_t <- typ_t*} be typ*{typ <- typ*})  [hits: 27]
+
++       1. If (val*{val <- val*} matches _ :: _), then  [hits: 27]
+
++         1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 27]
+
++           1. (Let castRes be $upcast(C, typ_h, val_h))  [hits: 27]
+
++             1. If (castRes <: ok<val>), then  [hits: 27]
+
++               1. (Let OK val_cast be castRes as ok<val>)  [hits: 27]
+
++                 1. (Let castsRes be $upcasts(C, typ_t*{typ_t <- typ_t*}, val_t*{val_t <- val_t*}))  [hits: 27]
+
++                   1. If (castsRes <: ok<val*>), then  [hits: 27]
+
++                     1. (Let OK val_t_cast*{val_t_cast <- val_t_cast*} be castsRes as ok<val*>)  [hits: 27]
+
++                       1. Return OK val_cast :: val_t_cast*{val_t_cast <- val_t_cast*} as castsRes  [hits: 27]
+
+  2. Otherwise,
+
+-   1. Return ERROR as castsRes
+
+;; towers/../spec-meta/3-execution/3.04.2-typ-cast.watsup:59.1-60.75
+def $downcast(C, typ', val'')
+
++ 1. Case analysis on typ'  [hits: 148]
+
+    1. Case (% has type numtyp)
+
++     1. (Let numtyp be typ' as numtyp)  [hits: 148]
+
++       1. Case analysis on numtyp (total)  [hits: 148]
+
+          1. Case (% matches pattern NAT)
+
++           1. If (val'' <: num), then  [hits: 148]
+
++             1. (Let num be val'' as num)  [hits: 148]
+
++               1. Case analysis on num (total)  [hits: 148]
+
+                  1. Case (% matches pattern NAT %)
+
+-                   1. (Let NAT n be num)
+
+-                     1. Return OK NAT n as val as castRes
+
+                  2. Case (% matches pattern INT %)
+
++                   1. (Let INT i be num)  [hits: 148]
+
++                     1. If (i <: nat), then  [hits: 148]
+
++                       1. (Let n be i as nat)  [hits: 148]
+
++                         1. Return OK NAT n as val as castRes  [hits: 148]
+
+          2. Case (% matches pattern INT)
+
+-           1. If (val'' <: num), then
+
+-             1. (Let num be val'' as num)
+
+-               1. Return OK num as val as castRes
+
+    2. Case (% matches pattern VAR % %)
+
++     1. (Let VAR id targ*{targ <- targ*} be typ')  [hits: 148]
+
++       1. (Let typDef'?{typDef' <- typDef'?} be $find_typ(C, id))  [hits: 148]
+
++         1. If (typDef'?{typDef' <- typDef'?} matches (_)), then  [hits: 148]
+
++           1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})  [hits: 148]
+
++             1. If (typDef <: definedTypDefn), then  [hits: 148]
+
++               1. (Let TYP _id tparam*{tparam <- tparam*} '=' deftyp be typDef as definedTypDefn)  [hits: 148]
+
++                 1. Case analysis on deftyp (total)  [hits: 148]
+
+                    1. Case (% matches pattern ALIAS %)
+
++                     1. (Let ALIAS typ be deftyp)  [hits: 148]
+
++                       1. If ((|targ*{targ <- targ*}| = |tparam*{tparam <- tparam*}|)), then  [hits: 148]
+
++                         1. (Let theta be `{ tparam ':' targ*{targ <- targ*, tparam <- tparam*} `})  [hits: 148]
+
++                           1. (Let typRes be $subst_typ(theta, typ))  [hits: 148]
+
++                             1. If (typRes <: ok<typ>), then  [hits: 148]
+
++                               1. (Let OK typ_subst be typRes as ok<typ>)  [hits: 148]
+
++                                 1. Return $downcast(C, typ_subst, val'')  [hits: 148]
+
+                    2. Case (% matches pattern VARIANT %)
+
++                     1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)  [hits: 148]
+
++                       1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))  [hits: 148]
+
++                         1. If ((OK true as subtypRes = $subtyp(C.GLOBAL.FUNC, tdenv, VAR id targ*{targ <- targ*}, val''))), then  [hits: 148]
+
++                           1. Return OK val'' as castRes  [hits: 148]
+
+                    3. Case (% matches pattern STRUCT %)
+
+-                     1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)
+
+-                       1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))
+
+-                         1. If ((OK true as subtypRes = $subtyp(C.GLOBAL.FUNC, tdenv, VAR id targ*{targ <- targ*}, val''))), then
+
+-                           1. Return OK val'' as castRes
+
++       2. If (targ*{targ <- targ*} matches []), then  [hits: 148]
+
++         1. If (val'' matches EXT %), then  [hits: 148]
+
+-           1. (Let EXT json be val'')
+
+-             1. (Let typDef'?{typDef' <- typDef'?} be $find_typ(C, id))
+
+-               1. If (typDef'?{typDef' <- typDef'?} matches (_)), then
+
+-                 1. (Let ?(typDef) be typDef'?{typDef' <- typDef'?})
+
+-                   1. If (typDef <: externTypDefn), then
+
+-                     1. Return OK EXT json as castRes
+
+    3. Case (% matches pattern TUP %)
+
++     1. (Let TUP typ*{typ <- typ*} be typ')  [hits: 147]
+
++       1. If (val'' matches TUP %), then  [hits: 147]
+
++         1. (Let TUP val*{val <- val*} be val'')  [hits: 147]
+
++           1. (Let castsRes be $downcasts(C, typ*{typ <- typ*}, val*{val <- val*}))  [hits: 147]
+
++             1. If (castsRes <: ok<val*>), then  [hits: 147]
+
++               1. (Let OK val_cast*{val_cast <- val_cast*} be castsRes as ok<val*>)  [hits: 147]
+
++                 1. Return OK TUP val_cast*{val_cast <- val_cast*} as castRes  [hits: 147]
+
+    4. Case (% matches pattern ITER % %)
+
++     1. (Let ITER typ iter be typ')  [hits: 148]
+
++       1. Case analysis on iter (total)  [hits: 148]
+
+          1. Case (% matches pattern QUEST)
+
+-           1. If ((val'' = OPT ?())), then
+
+-             1. Return OK OPT ?() as castRes
+
+-           2. If (val'' matches OPT %), then
+
+-             1. (Let OPT val'?{val' <- val'?} be val'')
+
+-               1. If (val'?{val' <- val'?} matches (_)), then
+
+-                 1. (Let ?(val) be val'?{val' <- val'?})
+
+-                   1. (Let castRes be $downcast(C, typ, val))
+
+-                     1. If (castRes <: ok<val>), then
+
+-                       1. (Let OK val_cast be castRes as ok<val>)
+
+-                         1. Return OK OPT ?(val_cast) as castRes
+
+          2. Case (% matches pattern STAR)
+
++           1. If (val'' matches LIST %), then  [hits: 148]
+
++             1. (Let LIST val*{val <- val*} be val'')  [hits: 148]
+
++               1. (Let castsRes be $downcasts(C, $repeat_<typ>(typ, |val*{val <- val*}|), val*{val <- val*}))  [hits: 148]
+
++                 1. If (castsRes <: ok<val*>), then  [hits: 148]
+
++                   1. (Let OK val_cast*{val_cast <- val_cast*} be castsRes as ok<val*>)  [hits: 148]
+
++                     1. Return OK LIST val_cast*{val_cast <- val_cast*} as castRes  [hits: 148]
+
+    5. Case (% matches pattern FUNC % % %)
+
+-     1. (Let FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret be typ')
+
+-       1. If (val'' matches FUNC %), then
+
+-         1. (Let FUNC id be val'')
+
+-           1. (Let `{ id_local ':' typDef_local*{id_local <- id_local*, typDef_local <- typDef_local*} `} be C.LOCAL.TYP)
+
+-             1. (Let tdenv be $adds_map<id, typDef>(C.GLOBAL.TYP, id_local*{id_local <- id_local*}, typDef_local*{typDef_local <- typDef_local*}))
+
+-               1. If ((OK true as subtypRes = $subtyp(C.GLOBAL.FUNC, tdenv, FUNC tparam*{tparam <- tparam*} typ*{typ <- typ*} typ_ret, FUNC id))), then
+
+-                 1. Return OK FUNC id as castRes
+
++ 2. If (typ' <: optyp), then  [hits: 148]
+
++   1. (Let optyp be typ' as optyp)  [hits: 148]
+
++     1. Case analysis on optyp  [hits: 148]
+
+        1. Case (% matches pattern BOOL)
+
+-         1. If (val'' matches BOOL %), then
+
+-           1. (Let BOOL b be val'')
+
+-             1. Return OK BOOL b as castRes
+
+        2. Case (% matches pattern TEXT)
+
++         1. If (val'' matches TEXT %), then  [hits: 143]
+
++           1. (Let TEXT t be val'')  [hits: 143]
+
++             1. Return OK TEXT t as castRes  [hits: 143]
+
+  3. Otherwise,
+
+-   1. Return ERROR as castRes
+
+;; towers/../spec-meta/3-execution/3.04.2-typ-cast.watsup:61.1-62.88
+def $downcasts(C, typ*{typ <- typ*}, val*{val <- val*})
+
++ 1. Case analysis on typ*{typ <- typ*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. If (val*{val <- val*} matches []), then  [hits: 148]
+
++       1. Return OK [] as castsRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let typ_h :: typ_t*{typ_t <- typ_t*} be typ*{typ <- typ*})  [hits: 148]
+
++       1. If (val*{val <- val*} matches _ :: _), then  [hits: 148]
+
++         1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 148]
+
++           1. (Let castRes be $downcast(C, typ_h, val_h))  [hits: 148]
+
++             1. If (castRes <: ok<val>), then  [hits: 148]
+
++               1. (Let OK val_cast be castRes as ok<val>)  [hits: 148]
+
++                 1. (Let castsRes be $downcasts(C, typ_t*{typ_t <- typ_t*}, val_t*{val_t <- val_t*}))  [hits: 148]
+
++                   1. If (castsRes <: ok<val*>), then  [hits: 148]
+
++                     1. (Let OK val_t_cast*{val_t_cast <- val_t_cast*} be castsRes as ok<val*>)  [hits: 148]
+
++                       1. Return OK val_cast :: val_t_cast*{val_t_cast <- val_t_cast*} as castsRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Return ERROR as castsRes
+
+;; towers/../spec-meta/3-execution/3.05-eval-assign.watsup:7.1-11.21
+relation Assign_exp: C |- typedExp'' := val''' : %
+
++ 1. (Let exp '#' typ be typedExp'')  [hits: 148]
+
++   1. Case analysis on exp  [hits: 148]
+
+      1. Case (% has type varExp)
+
++       1. (Let VAR id be exp as varExp)  [hits: 148]
+
++         1. (Let C_assign be $add_varr(C, id [], val'''))  [hits: 148]
+
++           1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+      2. Case (% has type tupExp)
+
++       1. (Let TUP typedExp*{typedExp <- typedExp*} be exp as tupExp)  [hits: 148]
+
++         1. If (val''' matches TUP %), then  [hits: 148]
+
++           1. (Let TUP val*{val <- val*} be val''')  [hits: 148]
+
++             1. (Assign_exps: C |- typedExp*{typedExp <- typedExp*} := val*{val <- val*} : assignRes)  [hits: 148]
+
++               1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                 1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++                   1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+      3. Case (% has type injExp)
+
++       1. (Let INJ mixop typedExp*{typedExp <- typedExp*} be exp as injExp)  [hits: 148]
+
++         1. If (val''' matches INJ %), then  [hits: 148]
+
++           1. (Let INJ mixop' val*{val <- val*} be val''')  [hits: 148]
+
++             1. If ((mixop = mixop')), then  [hits: 148]
+
++               1. (Assign_exps: C |- typedExp*{typedExp <- typedExp*} := val*{val <- val*} : assignRes)  [hits: 148]
+
++                 1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                   1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++                     1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+      4. Case (% has type strExp)
+
+-       1. (Let STR expField*{expField <- expField*} be exp as strExp)
+
+-         1. If (val''' matches STR %), then
+
+-           1. (Let STR valField*{valField <- valField*} be val''')
+
+-             1. (Let atom val be valField)*{valField <- valField*, atom -> atom*, val -> val*}
+
+-               1. (Let atom' typedExp be expField)*{expField <- expField*, atom' -> atom'*, typedExp -> typedExp*}
+
+-                 1. If ((|atom*{atom <- atom*}| = |atom'*{atom' <- atom'*}|)), then
+
+-                   1. If ((atom' = atom))*{atom <- atom*, atom' <- atom'*}, then
+
+-                     1. (Assign_exps: C |- typedExp*{typedExp <- typedExp*} := val*{val <- val*} : assignRes)
+
+-                       1. If (assignRes <: ok<ctx>), then
+
+-                         1. (Let OK C_assign be assignRes as ok<ctx>)
+
+-                           1. Result in: % |- % := % : OK C_assign as assignRes
+
+      5. Case (% has type optExp)
+
++       1. (Let OPT typedExp'?{typedExp' <- typedExp'?} be exp as optExp)  [hits: 148]
+
++         1. If (val''' matches OPT %), then  [hits: 148]
+
++           1. (Let OPT val'?{val' <- val'?} be val''')  [hits: 148]
+
++             1. Case analysis on typedExp'?{typedExp' <- typedExp'?} (total)  [hits: 148]
+
+                1. Case (% matches pattern (_))
+
++                 1. (Let ?(typedExp) be typedExp'?{typedExp' <- typedExp'?})  [hits: 148]
+
++                   1. If (val'?{val' <- val'?} matches (_)), then  [hits: 148]
+
++                     1. (Let ?(val) be val'?{val' <- val'?})  [hits: 148]
+
++                       1. (Assign_exp: C |- typedExp := val : assignRes)  [hits: 148]
+
++                         1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                           1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++                             1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+                2. Case (% matches pattern ())
+
+-                 1. If (val'?{val' <- val'?} matches ()), then
+
+-                   1. Result in: % |- % := % : OK C as assignRes
+
+      6. Case (% has type listExp)
+
++       1. (Let LIST typedExp*{typedExp <- typedExp*} be exp as listExp)  [hits: 148]
+
++         1. If (val''' matches LIST %), then  [hits: 148]
+
++           1. (Let LIST val*{val <- val*} be val''')  [hits: 148]
+
++             1. (Assign_exps: C |- typedExp*{typedExp <- typedExp*} := val*{val <- val*} : assignRes)  [hits: 148]
+
++               1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                 1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++                   1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+      7. Case (% has type consExp)
+
++       1. (Let CONS typedExp_h typedExp_t be exp as consExp)  [hits: 148]
+
++         1. If (val''' matches LIST %), then  [hits: 148]
+
++           1. (Let LIST val*{val <- val*} be val''')  [hits: 148]
+
++             1. If (val*{val <- val*} matches _ :: _), then  [hits: 148]
+
++               1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 148]
+
++                 1. (Assign_exp: C |- typedExp_h := val_h : assignRes)  [hits: 148]
+
++                   1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++                     1. (Let OK C_h be assignRes as ok<ctx>)  [hits: 148]
+
++                       1. (Assign_exp: C_h |- typedExp_t := LIST val_t*{val_t <- val_t*} : assignRes')  [hits: 148]
+
++                         1. If (assignRes' <: ok<ctx>), then  [hits: 148]
+
++                           1. (Let OK C_t be assignRes' as ok<ctx>)  [hits: 148]
+
++                             1. Result in: % |- % := % : OK C_t as assignRes  [hits: 148]
+
+      8. Case (% has type iterExp)
+
++       1. (Let iterExp be exp as iterExp)  [hits: 148]
+
++         1. (Let varr'?{varr' <- varr'?} be $is_iter_on_var(iterExp as exp '#' typ))  [hits: 148]
+
++           1. If (varr'?{varr' <- varr'?} matches (_)), then  [hits: 148]
+
++             1. (Let ?(varr) be varr'?{varr' <- varr'?})  [hits: 148]
+
++               1. (Let C_assign be $add_varr(C, varr, val'''))  [hits: 148]
+
++                 1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
++         2. If ((val''' = OPT ?())), then  [hits: 148]
+
++           1. If ($is_iter_on_var(iterExp as exp '#' typ) matches ()), then  [hits: 148]
+
+-             1. (Let ITER typedExp iter vari*{vari <- vari*} be iterExp)
+
+-               1. If (iter matches QUEST), then
+
+-                 1. (Let vari_iter be $iterate_vari(vari, [QUEST]))*{vari <- vari*, vari_iter -> vari_iter*}
+
+-                   1. (Let val_bind*{val_bind <- val_bind*} be $repeat_<val>(OPT ?(), |vari_iter*{vari_iter <- vari_iter*}|))
+
+-                     1. (Let C_assign be $add_varis(C, vari_iter*{vari_iter <- vari_iter*}, val_bind*{val_bind <- val_bind*}))
+
+-                       1. Result in: % |- % := % : OK C_assign as assignRes
+
++         3. Case analysis on val'''  [hits: 148]
+
+            1. Case (% matches pattern OPT %)
+
++             1. (Let OPT val'?{val' <- val'?} be val''')  [hits: 148]
+
++               1. If (val'?{val' <- val'?} matches (_)), then  [hits: 148]
+
++                 1. (Let ?(val) be val'?{val' <- val'?})  [hits: 148]
+
++                   1. If ($is_iter_on_var(iterExp as exp '#' typ) matches ()), then  [hits: 148]
+
+-                     1. (Let ITER typedExp iter vari*{vari <- vari*} be iterExp)
+
+-                       1. If (iter matches QUEST), then
+
+-                         1. (Assign_exp: C |- typedExp := val : assignRes)
+
+-                           1. If (assignRes <: ok<ctx>), then
+
+-                             1. (Let OK C_body be assignRes as ok<ctx>)
+
+-                               1. (Let vari_iter be $iterate_vari(vari, [QUEST]))*{vari <- vari*, vari_iter -> vari_iter*}
+
+-                                 1. (Let val''?{val'' <- val''?} be $find_vari(C_body, vari))*{vari <- vari*, val''? -> val''?*}
+
+-                                   1. If (val''?{val'' <- val''?} matches (_))*{val''? <- val''?*}, then
+
+-                                     1. (Let ?(val_sub) be val''?{val'' <- val''?})*{val''? <- val''?*, val_sub -> val_sub*}
+
+-                                       1. (Let C_assign be $add_varis(C_body, vari_iter*{vari_iter <- vari_iter*}, OPT ?(val_sub)*{val_sub <- val_sub*}))
+
+-                                         1. Result in: % |- % := % : OK C_assign as assignRes
+
+            2. Case (% matches pattern LIST %)
+
++             1. (Let LIST val*{val <- val*} be val''')  [hits: 148]
+
++               1. If ($is_iter_on_var(iterExp as exp '#' typ) matches ()), then  [hits: 148]
+
++                 1. (Let ITER typedExp iter vari*{vari <- vari*} be iterExp)  [hits: 148]
+
++                   1. If (iter matches STAR), then  [hits: 148]
+
++                     1. (Let C_local be C[LOCAL.VAL = $empty_map<varr, val>])  [hits: 148]
+
++                       1. (Assign_exp: C_local |- typedExp := val : assignRes)*{val <- val*, assignRes -> assignRes*}  [hits: 148]
+
++                         1. If (assignRes <: ok<ctx>)*{assignRes <- assignRes*}, then  [hits: 148]
+
++                           1. (Let OK C_sub be assignRes as ok<ctx>)*{assignRes <- assignRes*, C_sub -> C_sub*}  [hits: 148]
+
++                             1. (Let vari_iter be $iterate_vari(vari, [STAR]))*{vari <- vari*, vari_iter -> vari_iter*}  [hits: 148]
+
++                               1. (Let val'*{val' <- val'*}?{val'* <- val'*?} be $finds_vari(C_sub*{C_sub <- C_sub*}, vari))*{vari <- vari*, val'*? -> val'*?*}  [hits: 148]
+
++                                 1. If (val'*{val' <- val'*}?{val'* <- val'*?} matches (_))*{val'*? <- val'*?*}, then  [hits: 148]
+
++                                   1. (Let ?(val_sub*{val_sub <- val_sub*}) be val'*{val' <- val'*}?{val'* <- val'*?})*{val'*? <- val'*?*, val_sub* -> val_sub**}  [hits: 148]
+
++                                     1. (Let val_bind be LIST val_sub*{val_sub <- val_sub*})*{val_sub* <- val_sub**, val_bind -> val_bind*}  [hits: 148]
+
++                                       1. (Let C_assign be $add_varis(C, vari_iter*{vari_iter <- vari_iter*}, val_bind*{val_bind <- val_bind*}))  [hits: 148]
+
++                                         1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % := % : ERROR as assignRes
+
+;; towers/../spec-meta/3-execution/3.05-eval-assign.watsup:13.1-17.21
+relation Assign_exps: C |- typedExp*{typedExp <- typedExp*} := val*{val <- val*} : %
+
++ 1. Case analysis on typedExp*{typedExp <- typedExp*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. If (val*{val <- val*} matches []), then  [hits: 148]
+
++       1. Result in: % |- % := % : OK C as assignRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let typedExp_h :: typedExp_t*{typedExp_t <- typedExp_t*} be typedExp*{typedExp <- typedExp*})  [hits: 148]
+
++       1. If (val*{val <- val*} matches _ :: _), then  [hits: 148]
+
++         1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 148]
+
++           1. (Assign_exp: C |- typedExp_h := val_h : assignRes)  [hits: 148]
+
++             1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++               1. (Let OK C_h be assignRes as ok<ctx>)  [hits: 148]
+
++                 1. (Assign_exps: C_h |- typedExp_t*{typedExp_t <- typedExp_t*} := val_t*{val_t <- val_t*} : assignRes')  [hits: 148]
+
++                   1. If (assignRes' <: ok<ctx>), then  [hits: 148]
+
++                     1. (Let OK C_t be assignRes' as ok<ctx>)  [hits: 148]
+
++                       1. Result in: % |- % := % : OK C_t as assignRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % := % : ERROR as assignRes
+
+;; towers/../spec-meta/3-execution/3.05-eval-assign.watsup:19.1-23.21
+relation Assign_arg: C |- arg := val : %
+
++ 1. Case analysis on arg (total)  [hits: 148]
+
+    1. Case (% has type expArg)
+
++     1. (Let EXP typedExp be arg as expArg)  [hits: 148]
+
++       1. (Assign_exp: C |- typedExp := val : assignRes)  [hits: 148]
+
++         1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++           1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++             1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+    2. Case (% has type funArg)
+
++     1. (Let FUN id be arg as funArg)  [hits: 148]
+
++       1. If (val matches FUNC %), then  [hits: 148]
+
++         1. (Let FUNC id_global be val)  [hits: 148]
+
++           1. (Let C_assign be $add_func(C, id, id_global))  [hits: 148]
+
++             1. Result in: % |- % := % : OK C_assign as assignRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % := % : ERROR as assignRes
+
+;; towers/../spec-meta/3-execution/3.05-eval-assign.watsup:25.1-29.21
+relation Assign_args: C |- arg*{arg <- arg*} := val*{val <- val*} : %
+
++ 1. Case analysis on arg*{arg <- arg*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. If (val*{val <- val*} matches []), then  [hits: 148]
+
++       1. Result in: % |- % := % : OK C as assignRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let arg_h :: arg_t*{arg_t <- arg_t*} be arg*{arg <- arg*})  [hits: 148]
+
++       1. If (val*{val <- val*} matches _ :: _), then  [hits: 148]
+
++         1. (Let val_h :: val_t*{val_t <- val_t*} be val*{val <- val*})  [hits: 148]
+
++           1. (Assign_arg: C |- arg_h := val_h : assignRes)  [hits: 148]
+
++             1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++               1. (Let OK C_h be assignRes as ok<ctx>)  [hits: 148]
+
++                 1. (Assign_args: C_h |- arg_t*{arg_t <- arg_t*} := val_t*{val_t <- val_t*} : assignRes')  [hits: 148]
+
++                   1. If (assignRes' <: ok<ctx>), then  [hits: 148]
+
++                     1. (Let OK C_t be assignRes' as ok<ctx>)  [hits: 148]
+
++                       1. Result in: % |- % := % : OK C_t as assignRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % := % : ERROR as assignRes
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:7.1-11.21
+relation Eval_clause: C |- clause `( val*{val <- val*} `) : %
+
++ 1. (Let arg*{arg <- arg*} '=' typedExp_out '-' prem*{prem <- prem*} be clause)  [hits: 148]
+
++   1. (Assign_args: C |- arg*{arg <- arg*} := val*{val <- val*} : assignRes)  [hits: 148]
+
++     1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++       1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++         1. (Eval_prems: C_assign |- prem*{prem <- prem*} : premRes)  [hits: 148]
+
++           1. Case analysis on premRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
++               1. (Let failure be premRes as failure)  [hits: 148]
+
++                 1. Result in: % |- % `( % `) : failure as funcRes  [hits: 148]
+
+              2. Case (% has type ok<ctx>)
+
++               1. (Let OK C_prem be premRes as ok<ctx>)  [hits: 148]
+
++                 1. (Eval_exp: C_prem |- typedExp_out : expRes)  [hits: 148]
+
++                   1. If (expRes <: funcRes), then  [hits: 148]
+
++                     1. (Let funcRes be expRes as funcRes)  [hits: 148]
+
++                       1. Result in: % |- % `( % `) : funcRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as funcRes
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:34.1-39.21
+relation Eval_clauses: C |- clause*{clause <- clause*} `( val*{val <- val*} `) : %
+
++ 1. Case analysis on clause*{clause <- clause*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % `( % `) : UNMATCH as funcRes  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let clause_h :: clause_t*{clause_t <- clause_t*} be clause*{clause <- clause*})  [hits: 148]
+
++       1. (Eval_clause: C |- clause_h `( val*{val <- val*} `) : funcRes')  [hits: 148]
+
++         1. Case analysis on funcRes'  [hits: 148]
+
+            1. Case (% has type unmatch)
+
++             1. (Let unmatch be funcRes' as unmatch)  [hits: 148]
+
++               1. (Eval_clauses: C |- clause_t*{clause_t <- clause_t*} `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++                 1. Result in: % |- % `( % `) : funcRes  [hits: 148]
+
+            2. Case (% has type ok<val>)
+
++             1. (Let OK val_out be funcRes' as ok<val>)  [hits: 148]
+
++               1. (Eval_clauses_on_ok: C |- clause_t*{clause_t <- clause_t*} `( val*{val <- val*} `) : unitRes)  [hits: 148]
+
++                 1. If (unitRes matches OK), then  [hits: 148]
+
++                   1. Result in: % |- % `( % `) : OK val_out as funcRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as funcRes
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:41.1-46.21
+relation Eval_clauses_on_ok: C |- clause*{clause <- clause*} `( val*{val <- val*} `) : %
+
++ 1. Case analysis on clause*{clause <- clause*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % `( % `) : OK  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let clause_h :: clause_t*{clause_t <- clause_t*} be clause*{clause <- clause*})  [hits: 148]
+
++       1. (Eval_clause: C |- clause_h `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++         1. If (funcRes <: unmatch), then  [hits: 148]
+
++           1. (Let unmatch be funcRes as unmatch)  [hits: 148]
+
++             1. (Eval_clauses_on_ok: C |- clause_t*{clause_t <- clause_t*} `( val*{val <- val*} `) : unitRes)  [hits: 148]
+
++               1. Result in: % |- % `( % `) : unitRes  [hits: 148]
+
+          1. Else Dangling
+
++         2. If ((funcRes =/= UNMATCH as funcRes)), then  [hits: 148]
+
+-           1. Result in: % |- % `( % `) : ERROR as unitRes
+
+          2. Else Dangling
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:90.1-94.21
+relation Eval_tblrow: C |- tblRow `( val*{val <- val*} `) : %
+
++ 1. (Let arg*{arg <- arg*} '=' typedExp_out '-' prem*{prem <- prem*} be tblRow)  [hits: 148]
+
++   1. (Let C_callee be C[LOCAL = $empty_localLayer])  [hits: 148]
+
++     1. (Assign_args: C_callee |- arg*{arg <- arg*} := val*{val <- val*} : assignRes)  [hits: 148]
+
++       1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++         1. (Let OK C_callee_assign be assignRes as ok<ctx>)  [hits: 148]
+
++           1. (Eval_prems: C_callee_assign |- prem*{prem <- prem*} : premRes)  [hits: 148]
+
++             1. Case analysis on premRes (total)  [hits: 148]
+
+                1. Case (% has type failure)
+
++                 1. (Let failure be premRes as failure)  [hits: 148]
+
++                   1. Result in: % |- % `( % `) : failure as funcRes  [hits: 148]
+
+                2. Case (% has type ok<ctx>)
+
++                 1. (Let OK C_callee_prem be premRes as ok<ctx>)  [hits: 148]
+
++                   1. (Eval_exp: C_callee_prem |- typedExp_out : expRes)  [hits: 148]
+
++                     1. If (expRes <: funcRes), then  [hits: 148]
+
++                       1. (Let funcRes be expRes as funcRes)  [hits: 148]
+
++                         1. Result in: % |- % `( % `) : funcRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as funcRes
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:121.1-126.21
+relation Eval_tblrows: C |- tblRow*{tblRow <- tblRow*} `( val*{val <- val*} `) : %
+
++ 1. Case analysis on tblRow*{tblRow <- tblRow*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
+-     1. Result in: % |- % `( % `) : UNMATCH as funcRes
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let tblRow_h :: tblRow_t*{tblRow_t <- tblRow_t*} be tblRow*{tblRow <- tblRow*})  [hits: 148]
+
++       1. (Eval_tblrow: C |- tblRow_h `( val*{val <- val*} `) : funcRes')  [hits: 148]
+
++         1. If (funcRes' <: unmatch), then  [hits: 148]
+
++           1. (Let unmatch be funcRes' as unmatch)  [hits: 148]
+
++             1. (Eval_tblrows: C |- tblRow_t*{tblRow_t <- tblRow_t*} `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++               1. Result in: % |- % `( % `) : funcRes  [hits: 148]
+
+          1. Else Dangling
+
++         2. If ((funcRes' =/= UNMATCH as funcRes)), then  [hits: 148]
+
++           1. Result in: % |- % `( % `) : funcRes'  [hits: 148]
+
+          2. Else Dangling
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:147.1-151.21
+relation Call_table_func: C |- tableFuncDefn `( val*{val <- val*} `) : %
+
++ 1. (Let TABLEFUNC _id _param*{_param <- _param*} ':' _typ '=' tblRow*{tblRow <- tblRow*} be tableFuncDefn)  [hits: 148]
+
++   1. (Eval_tblrows: C |- tblRow*{tblRow <- tblRow*} `( val*{val <- val*} `) : funcRes)  [hits: 148]
+
++     1. Result in: % |- % `( % `) : funcRes  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.10-eval-call-func.watsup:160.1-165.21
+relation Call_defined_func: C |- definedFuncDefn `< typ*{typ <- typ*} `> `( val*{val <- val*} `) : %
+
++ 1. (Let FUNC _id tparam*{tparam <- tparam*} _param*{_param <- _param*} ':' _typ '=' clause*{clause <- clause*} elsClause?{elsClause <- elsClause?} be definedFuncDefn)  [hits: 148]
+
++   1. If ((|tparam*{tparam <- tparam*}| = |typ*{typ <- typ*}|)), then  [hits: 148]
+
++     1. (Let tdenv be `{ tparam ':' TYP tparam [] '=' ALIAS typ as typDef*{tparam <- tparam*, typ <- typ*} `})  [hits: 148]
+
++       1. (Let C_callee be C[LOCAL = $empty_localLayer[TYP = tdenv]])  [hits: 148]
+
++         1. (Eval_clauses: C_callee |- clause*{clause <- clause*} `( val*{val <- val*} `) : funcRes')  [hits: 148]
+
++           1. If (funcRes' <: unmatch), then  [hits: 148]
+
++             1. (Let unmatch be funcRes' as unmatch)  [hits: 148]
+
++               1. (Eval_clause: C_callee |- elsClause `( val*{val <- val*} `) : funcRes_els)?{elsClause <- elsClause?, funcRes_els -> funcRes_els?}  [hits: 148]
+
++                 1. (Let funcRes be $deopt_<funcRes>(funcRes_els?{funcRes_els <- funcRes_els?}, UNMATCH as funcRes))  [hits: 148]
+
++                   1. Result in: % |- % `< % `> `( % `) : funcRes  [hits: 148]
+
++           2. If ((funcRes' =/= UNMATCH as funcRes)), then  [hits: 148]
+
++             1. Result in: % |- % `< % `> `( % `) : funcRes'  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `< % `> `( % `) : ERROR as funcRes
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:7.1-11.21
+relation Eval_rul: C |- rul `( val*{val <- val*} `) : %
+
++ 1. (Let _id ':' typedExp*{typedExp <- typedExp*} '->' typedExp'*{typedExp' <- typedExp'*} '-' prem*{prem <- prem*} be rul)  [hits: 148]
+
++   1. (Assign_exps: C |- typedExp*{typedExp <- typedExp*} := val*{val <- val*} : assignRes)  [hits: 148]
+
++     1. If (assignRes <: ok<ctx>), then  [hits: 148]
+
++       1. (Let OK C_assign be assignRes as ok<ctx>)  [hits: 148]
+
++         1. (Eval_prems: C_assign |- prem*{prem <- prem*} : premRes)  [hits: 148]
+
++           1. Case analysis on premRes (total)  [hits: 148]
+
+              1. Case (% has type failure)
+
++               1. (Let failure be premRes as failure)  [hits: 148]
+
++                 1. Result in: % |- % `( % `) : failure as relRes  [hits: 148]
+
+              2. Case (% has type ok<ctx>)
+
++               1. (Let OK C_prem be premRes as ok<ctx>)  [hits: 148]
+
++                 1. (Eval_exps: C_prem |- typedExp'*{typedExp' <- typedExp'*} : expsRes)  [hits: 148]
+
++                   1. If (expsRes <: relRes), then  [hits: 148]
+
++                     1. (Let relRes be expsRes as relRes)  [hits: 148]
+
++                       1. Result in: % |- % `( % `) : relRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as relRes
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:34.1-39.21
+relation Eval_ruls: C |- rul*{rul <- rul*} `( val*{val <- val*} `) : %
+
++ 1. Case analysis on rul*{rul <- rul*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % `( % `) : UNMATCH as relRes  [hits: 137]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let rul_h :: rul_t*{rul_t <- rul_t*} be rul*{rul <- rul*})  [hits: 148]
+
++       1. (Eval_rul: C |- rul_h `( val*{val <- val*} `) : relRes')  [hits: 148]
+
++         1. Case analysis on relRes'  [hits: 148]
+
+            1. Case (% has type unmatch)
+
++             1. (Let unmatch be relRes' as unmatch)  [hits: 148]
+
++               1. (Eval_ruls: C |- rul_t*{rul_t <- rul_t*} `( val*{val <- val*} `) : relRes)  [hits: 148]
+
++                 1. Result in: % |- % `( % `) : relRes  [hits: 148]
+
+            2. Case (% has type ok<val*>)
+
++             1. (Let OK val_out*{val_out <- val_out*} be relRes' as ok<val*>)  [hits: 148]
+
++               1. (Eval_ruls_on_ok: C |- rul_t*{rul_t <- rul_t*} `( val*{val <- val*} `) : unitRes)  [hits: 148]
+
++                 1. If (unitRes matches OK), then  [hits: 148]
+
++                   1. Result in: % |- % `( % `) : OK val_out*{val_out <- val_out*} as relRes  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as relRes
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:41.1-46.21
+relation Eval_ruls_on_ok: C |- rul*{rul <- rul*} `( val*{val <- val*} `) : %
+
++ 1. Case analysis on rul*{rul <- rul*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Result in: % |- % `( % `) : OK  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let rul_h :: rul_t*{rul_t <- rul_t*} be rul*{rul <- rul*})  [hits: 148]
+
++       1. (Eval_rul: C |- rul_h `( val*{val <- val*} `) : relRes)  [hits: 148]
+
++         1. If (relRes <: unmatch), then  [hits: 148]
+
++           1. (Let unmatch be relRes as unmatch)  [hits: 148]
+
++             1. (Eval_ruls_on_ok: C |- rul_t*{rul_t <- rul_t*} `( val*{val <- val*} `) : unitRes)  [hits: 148]
+
++               1. Result in: % |- % `( % `) : unitRes  [hits: 148]
+
+          1. Else Dangling
+
++         2. If ((relRes =/= UNMATCH as relRes)), then  [hits: 148]
+
+-           1. Result in: % |- % `( % `) : ERROR as unitRes
+
+          2. Else Dangling
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:88.1-92.21
+relation Call_defined_rel: C |- definedRelDefn `( val*{val <- val*} `) : %
+
++ 1. (Let REL _id ':' _typ*{_typ <- _typ*} '->' _typ'*{_typ' <- _typ'*} '=' rulGroup*{rulGroup <- rulGroup*} elsGroup?{elsGroup <- elsGroup?} be definedRelDefn)  [hits: 148]
+
++   1. (Let C_local be C[LOCAL = $empty_localLayer])  [hits: 148]
+
++     1. (Let rul*{rul <- rul*} be $ruls_of_rulgroups(rulGroup*{rulGroup <- rulGroup*}))  [hits: 148]
+
++       1. (Eval_ruls: C_local |- rul*{rul <- rul*} `( val*{val <- val*} `) : relRes')  [hits: 148]
+
++         1. If (relRes' <: unmatch), then  [hits: 148]
+
++           1. (Let unmatch be relRes' as unmatch)  [hits: 137]
+
++             1. (Let rul_els be $rul_of_elsgroup(elsGroup))?{elsGroup <- elsGroup?, rul_els -> rul_els?}  [hits: 137]
+
++               1. (Eval_rul: C_local |- rul_els `( val*{val <- val*} `) : relRes_els)?{rul_els <- rul_els?, relRes_els -> relRes_els?}  [hits: 137]
+
++                 1. (Let relRes be $deopt_<relRes>(relRes_els?{relRes_els <- relRes_els?}, UNMATCH as relRes))  [hits: 137]
+
++                   1. Result in: % |- % `( % `) : relRes  [hits: 137]
+
++         2. If ((relRes' =/= UNMATCH as relRes)), then  [hits: 148]
+
++           1. Result in: % |- % `( % `) : relRes'  [hits: 148]
+
+  2. Otherwise,
+
+-   1. Result in: % |- % `( % `) : ERROR as relRes
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:94.1-95.46
+def $ruls_of_rulgroup(id ':' rul*{rul <- rul*})
+
++ 1. Return rul*{rul <- rul*}  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:98.1-99.58
+def $ruls_of_rulgroups(rulGroup*{rulGroup <- rulGroup*})
+
++ 1. Case analysis on rulGroup*{rulGroup <- rulGroup*} (total)  [hits: 148]
+
+    1. Case (% matches pattern [])
+
++     1. Return []  [hits: 148]
+
+    2. Case (% matches pattern _ :: _)
+
++     1. (Let rulGroup_h :: rulGroup_t*{rulGroup_t <- rulGroup_t*} be rulGroup*{rulGroup <- rulGroup*})  [hits: 148]
+
++       1. Return $ruls_of_rulgroup(rulGroup_h) ++ $ruls_of_rulgroups(rulGroup_t*{rulGroup_t <- rulGroup_t*})  [hits: 148]
+
+;; towers/../spec-meta/3-execution/3.11-eval-call-rel.watsup:104.1-105.50
+def $rul_of_elsgroup(id ':' rul)
+
++ 1. Return rul  [hits: 23]
+
+;; towers/../spec-meta/4-entry.watsup:5.1-9.30
+relation Eval_rel: spec |- id `( val*{val <- val*} `) : %
+
+- 1. (Let C be $load_ctx($empty_ctx, spec))
+
+-   1. (Call_rel: C |- id `( val*{val <- val*} `) : relRes)
+
+-     1. If (relRes <: ok<val*>), then
+
+-       1. (Let OK val'*{val' <- val'*} be relRes as ok<val*>)
+
+-         1. Result in: % |- % `( % `) : val'*{val' <- val'*}
+
+      1. Else Dangling
+
+;; towers/../spec-meta/4-entry.watsup:11.1-15.29
+relation Eval_func: spec |- id `( val*{val <- val*} `) : %
+
+- 1. (Let C be $load_ctx($empty_ctx, spec))
+
+-   1. (Call_func: C |- id `< [] `> `( val*{val <- val*} `) : funcRes)
+
+-     1. If (funcRes <: ok<val>), then
+
+-       1. (Let OK val' be funcRes as ok<val>)
+
+-         1. Result in: % |- % `( % `) : val'
+
+      1. Else Dangling
