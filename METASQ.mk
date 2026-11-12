@@ -2,8 +2,8 @@
 # TEST_LOG=DIR writes per-test timing logs of the metacirc run and sim targets
 # TIMEOUT=SECONDS records a source of those targets still running after it as a timeout
 # SUITE=NAME runs only that registered suite in those targets
-# SUITE=NAME and GROUP=NAME select the registered suite and group of the sim-group targets,
-# which require both
+# SUITE=NAME and GROUP=NAME select the registered suite and group of the run-group and sim-group
+# targets, which require both
 
 CARGO := cargo
 RUST_DIR = p4spectec
@@ -69,10 +69,10 @@ test-metacirc-run-k:
 test-metacirc-run-redex:
 	cd $(RUST_DIR) && env -u UPDATE_EXPECT $(METACIRC_TEST) run redex --input p4 $(CORPUS_ARGS)
 
-# One group of a P4 corpus suite of suites/metacirc/run-group.toml through the AL/P4, IL/P4,
+# One group of a P4 corpus suite of suites/metacirc/run-group.toml through the AL/P4,
 # K/P4, or Redex/P4 tower, against the group's expected file for the suite
 GROUP_ARGS = --suite $(SUITE) --group $(GROUP) $(if $(TIMEOUT),--timeout $(TIMEOUT))
-RUN_GROUP_TARGETS := test-metacirc-run-group-al test-metacirc-run-group-il test-metacirc-run-group-k test-metacirc-run-group-redex
+RUN_GROUP_TARGETS := test-metacirc-run-group-al test-metacirc-run-group-k test-metacirc-run-group-redex
 
 $(RUN_GROUP_TARGETS):
 	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=run-positive GROUP=1))

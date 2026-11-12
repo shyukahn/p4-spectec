@@ -40,9 +40,8 @@ TEST_TARGETS := test test-expected test-elab test-algo test-structure test-prose
 $(TEST_TARGETS):
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
 
-
 METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al \
-  test-metacirc-run-k test-metacirc-run-redex  \
+  test-metacirc-run-k test-metacirc-run-redex \
   test-metacirc-run-group-al \
   test-metacirc-run-group-k test-metacirc-run-group-redex \
   test-metacirc-sim-al \

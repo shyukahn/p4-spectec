@@ -1,7 +1,7 @@
 # P4 corpus groups through a metacircular P4 tower:
 # `run-group <config> --suite <name> --group <name>`
-# (make test-metacirc-run-group-al, test-metacirc-run-group-il, test-metacirc-run-group-k,
-# test-metacirc-run-group-redex, each with SUITE=<name> and GROUP=<name>).
+# (make test-metacirc-run-group-al, test-metacirc-run-group-k, test-metacirc-run-group-redex,
+# each with SUITE=<name> and GROUP=<name>).
 #
 # Each suite runs every .p4 file under `root` through its tower for the configuration's base,
 # whose top level must take P4.
@@ -12,7 +12,7 @@
 # a timeout matches any expected outcome with a warning.
 # A configuration selects the `base` language of the tower (see `run.toml`),
 # memoization (`cache`), and determinism checking (`det`).
-# `run-group-split <size>...` (make metacirc-run-group-split) takes the only registered suite,
+# `run-group-split <size>...` takes the only registered suite,
 # and lists its programs not excluded by `split.excludes`, in path order,
 # in `<suite>.exclude` of the folders `split.groups`, as many in each as its size;
 # the sizes must sum to the number of those programs.
@@ -38,12 +38,6 @@ cache = true
 det = true
 
 [[configs]]
-name = "il"
-base = "il"
-cache = true
-det = true
-
-[[configs]]
 name = "k"
 base = "k"
 cache = true
@@ -57,7 +51,7 @@ det = true
 
 [[suites]]
 name = "run-positive"
-towers = { al = "towers/al-p4-ok.json", il = "towers/il-p4-ok.json", k = "towers/k-p4-ok.json", redex = "towers/redex-p4-ok.json" }
+towers = { al = "towers/al-p4-ok.json", k = "towers/k-p4-ok.json", redex = "towers/redex-p4-ok.json" }
 root = "p4c/testdata/p4_16_samples"
 
 [[groups]]

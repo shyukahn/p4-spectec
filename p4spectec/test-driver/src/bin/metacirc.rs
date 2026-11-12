@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 
 use p4spectec_test::{
     harness::{self, Result},
-    metacirc::{run, sim, sim_group},
+    metacirc::{run, run_group, sim, sim_group},
 };
 
 /// Selects an execution through towers.

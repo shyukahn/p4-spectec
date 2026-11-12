@@ -48,3 +48,21 @@ name = "run-negative"
 towers = { al = "towers/al-p4-ok.json", k = "towers/k-p4-ok.json", redex = "towers/redex-p4-ok.json" }
 root = "p4c/testdata/p4_16_errors"
 expected = "p4spectec/test-driver/expected/run/neg.expected"
+
+[[suites]]
+name = "spec-meta-rel-succ"
+towers = { al = "towers/al-rel.json", k = "towers/k-detcheck.json", redex = "towers/redex-detcheck.json" }
+root = "testdata/spec-meta/rel/succ"
+outcome = "success"
+
+[[suites]]
+name = "spec-meta-rel-err"
+towers = { al = "towers/al-rel.json", k = "towers/k-detcheck.json", redex = "towers/redex-detcheck.json" }
+root = "testdata/spec-meta/rel/err"
+outcome = "failure"
+
+[[suites]]
+name = "spec-meta-func-succ"
+towers = { al = "towers/al-func.json", k = "towers/k-detcheck-func.json", redex = "towers/redex-detcheck-func.json" }
+root = "testdata/spec-meta/func/succ"
+outcome = "success"

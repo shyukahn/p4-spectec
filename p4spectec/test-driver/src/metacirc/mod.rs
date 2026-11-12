@@ -4,8 +4,7 @@
 //! under a `config::Configuration`,
 //! comparing with the main driver's expectations;
 //! `run_group` runs groups of P4 corpus programs, comparing with each group's expectations;
-//! `sim_group` runs groups of simulation tests, comparing with each group's expectations;
-//! `metaparse` checks that the meta codecs round-trip.
+//! and `sim_group` runs groups of simulation tests, comparing with each group's expectations.
 
 pub mod config;
 pub mod run;

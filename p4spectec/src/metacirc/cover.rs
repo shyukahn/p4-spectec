@@ -38,8 +38,7 @@ pub fn base_specdir(config: &TowerConfig) -> Result<&Path> {
 pub fn program_suffix(config: &TowerConfig) -> Result<&'static str> {
     match config.top_lang() {
         Lang::P4 => Ok(".p4"),
-        Lang::Al | Lang::AlExt | Lang::IlExt => Ok(".watsup"),
-        Lang::Kore => Err(config_invalid("cover-run requires a P4 or script top level")),
+        Lang::Al => Ok(".watsup"),
     }
 }
 
