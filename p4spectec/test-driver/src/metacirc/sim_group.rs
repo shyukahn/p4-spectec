@@ -294,7 +294,9 @@ fn check_groups(registration: &Registration) -> Result<()> {
                 (true, [_]) | (false, []) => continue,
                 (true, []) => "run by no group".to_owned(),
                 (true, _) => format!("run by groups {}", names.join(", ")),
-                (false, _) => format!("excluded by the split but run by groups {}", names.join(", ")),
+                (false, _) => {
+                    format!("excluded by the split but run by groups {}", names.join(", "))
+                }
             };
             problems.push(format!(
                 "{}: {} {}: {problem}",

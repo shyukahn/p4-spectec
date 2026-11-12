@@ -29,9 +29,7 @@
 //! | `al`                | `Al`            | spec-meta's AL               |
 
 use super::super::engine::{InterfaceSt, RuntimeK, RuntimeRedex, StateK, StateRedex};
-use super::super::protocol::{
-    Protocol, ProtocolKind, ProtocolStK, ProtocolStRedex, ProtocolStSt,
-};
+use super::super::protocol::{Protocol, ProtocolKind, ProtocolStK, ProtocolStRedex, ProtocolStSt};
 use super::super::{BaseConfig, Repr, Result, TowerConfig, config::Lang, error::config_invalid};
 use super::{Base, BaseK, BaseRedex, PreparedLevel, Top, Tower, Upper};
 use crate::{
