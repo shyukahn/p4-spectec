@@ -29,6 +29,7 @@ log
 !logs/metacirc-sim-redex-ebpf-p4testgen.log
 !logs/metacirc-sim-redex-psa-p4c.log
 !logs/metacirc-sim-redex-v1model-p4c.log
+logs/*.csv
 **/.DS_Store
 spec-meta-k/kompiled
 spec-meta-k-detcheck/kompiled

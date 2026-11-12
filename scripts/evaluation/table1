@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+"""Table 1: meta-meta-execution results on the P4 test suites."""
+
+import argparse
+from pathlib import Path
+
+from evaluation import (DIR_LOGS, PATH_CONFIG, count, is_incomplete, load_config, load_suites,
+                        notes_incomplete, render, rules, total, towers)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--logs", type=Path, default=DIR_LOGS, help="directory of the CSVs")
+    parser.add_argument("--config", type=Path, default=PATH_CONFIG, help="suite config")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    keys = towers(config)
+    loaded = load_suites(args.logs, config)
+
+    headers = [("", "Suite"), ("", "Total")]
+    for key in keys:
+        headers += [(config["columns"][key], label) for label in ("Pass", "Fail", "Timeout")]
+    rows = []
+    for suite, cells in loaded:
+        row = [suite["name"], f"{total(config, cells):,}"]
+        for key in keys:
+            cell = cells[key]
+            if len(cell) == 0:
+                row += ["-"] * 3
+                continue
+            n_pass = count(cell, suite["pass"])
+            n_timeout = count(cell, ["timeout"])
+            mark = "*" if is_incomplete(config, cells, key) else ""
+            row += [f"{n:,}{mark}" for n in (n_pass, len(cell) - n_pass - n_timeout, n_timeout)]
+        rows.append(row)
+
+    print("Table 1. Meta-meta-execution results on the P4 test suites.\n")
+    print(render(headers, rows, rules(config)))
+    notes = notes_incomplete(config, loaded, keys)
+    if notes:
+        print("\n" + "\n".join(notes))
+
+
+if __name__ == "__main__":
+    main()

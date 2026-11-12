@@ -39,6 +39,9 @@ debug
 !/logs/metacirc-sim-redex-psa-p4c.log
 !/logs/metacirc-sim-redex-v1model-p4c.log
 
+# CSVs converted from logs
+/logs/*.csv
+
 # MacOS
 *.DS_Store
 

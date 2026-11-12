@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Table 2: median time per test in seconds."""
+
+import argparse
+import math
+from pathlib import Path
+
+from evaluation import (DIR_LOGS, META, PATH_CONFIG, is_incomplete, load_config, load_suites,
+                        median_time, notes_incomplete, render, rules, towers)
+
+
+def format_time(secs, timeout):
+    if secs is None:
+        return "-"
+    if math.isinf(secs):
+        return f">{timeout}"
+    if secs < 0.01:
+        return "<0.01"
+    return f"{secs:.2f}"
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--logs", type=Path, default=DIR_LOGS, help="directory of the CSVs")
+    parser.add_argument("--config", type=Path, default=PATH_CONFIG, help="suite config")
+    args = parser.parse_args()
+    config = load_config(args.config)
+    keys = [META] + towers(config)
+    loaded = load_suites(args.logs, config)
+
+    headers = [("", "Suite"), ("", config["columns"][META])]
+    headers += [("Meta-meta", config["columns"][key]) for key in keys[1:]]
+    rows = []
+    for suite, cells in loaded:
+        row = [suite["name"]]
+        for key in keys:
+            mark = "*" if is_incomplete(config, cells, key) else ""
+            row.append(format_time(median_time(cells[key]), config["timeout"]) + mark)
+        rows.append(row)
+
+    print(f"Table 2. Median time per test (s). >{config['timeout']} denotes that at least half "
+          "of the tests time out.\n")
+    print(render(headers, rows, rules(config)))
+    notes = notes_incomplete(config, loaded, keys)
+    if notes:
+        print("\n" + "\n".join(notes))
+
+
+if __name__ == "__main__":
+    main()

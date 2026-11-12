@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+"""Converts test logs into `<log>.csv` beside each log, dropping excluded tests.
+
+Without arguments, converts every logs/*.log.
+"""
+
+import argparse
+from pathlib import Path
+
+from evaluation import DIR_LOGS, parse_log, write_csv
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("logs", nargs="*", type=Path, help="log files (default: logs/*.log)")
+    args = parser.parse_args()
+    for path in args.logs or sorted(DIR_LOGS.glob("*.log")):
+        rows = parse_log(path)
+        path_csv = path.with_suffix(".csv")
+        write_csv(path_csv, rows)
+        print(f"{path_csv}: {len(rows)} tests")
+
+
+if __name__ == "__main__":
+    main()

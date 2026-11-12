@@ -1,0 +1,70 @@
+# Suites of Tables 1 and 2, read from the CSVs that `log2csv` writes into logs/.
+#
+# Each column key of a suite lists its sources: the name of a log without its extension,
+# optionally `<log>#<section>` to take only one `== <section> (...)` part of that log.
+# A suite's results under a column are the union of the tests in its sources.
+# `pass` lists the results counted as a pass (a negative test passes by failing).
+# `rule = true` draws a horizontal rule above the suite.
+
+# Seconds after which a test is recorded as a timeout
+timeout = 300
+
+# Column titles; `meta` (the P4 spec run directly) appears only in Table 2
+[columns]
+meta = "Meta"
+al = "P4ST^P4ST"
+redex = "P4ST^Redex"
+k = "P4ST^K"
+
+[[suites]]
+name = "POS"
+pass = ["pass"]
+meta = ["run-sl#pos"]
+al = ["metacirc-p4-al-run-positive"]
+redex = ["metacirc-p4-redex-run-positive"]
+k = ["metacirc-p4-k-run-positive"]
+
+[[suites]]
+name = "NEG"
+pass = ["fail"]
+meta = ["run-sl#neg"]
+al = ["metacirc-p4-al-run-negative"]
+redex = ["metacirc-p4-redex-run-negative"]
+k = ["metacirc-p4-k-run-negative"]
+
+[[suites]]
+name = "EBPF"
+rule = true
+pass = ["pass"]
+meta = ["sim-sl#ebpf-p4c", "sim-sl#ebpf-p4testgen"]
+al = ["metacirc-sim-al-ebpf-p4c", "metacirc-sim-al-ebpf-p4testgen"]
+redex = ["metacirc-sim-redex-ebpf-p4c", "metacirc-sim-redex-ebpf-p4testgen"]
+k = ["metacirc-sim-k-ebpf-p4c", "metacirc-sim-k-ebpf-p4testgen"]
+
+[[suites]]
+name = "VMOD"
+pass = ["pass"]
+meta = ["sim-sl#v1model-p4c", "sim-sl#v1model-p4testgen"]
+al = ["metacirc-sim-al-v1model-p4c", "metacirc-sim-al-v1model-p4testgen"]
+redex = [
+  "metacirc-sim-redex-v1model-p4c",
+  "metacirc-sim-group-redex-v1model-p4testgen-group1",
+  "metacirc-sim-group-redex-v1model-p4testgen-group2",
+  "metacirc-sim-group-redex-v1model-p4testgen-group3",
+  "metacirc-sim-group-redex-v1model-p4testgen-group4",
+]
+k = [
+  "metacirc-sim-k-v1model-p4c",
+  "metacirc-sim-group-k-v1model-p4testgen-group1",
+  "metacirc-sim-group-k-v1model-p4testgen-group2",
+  "metacirc-sim-group-k-v1model-p4testgen-group3",
+  "metacirc-sim-group-k-v1model-p4testgen-group4",
+]
+
+[[suites]]
+name = "PSA"
+pass = ["pass"]
+meta = ["sim-sl#psa-p4c"]
+al = ["metacirc-sim-al-psa-p4c"]
+redex = ["metacirc-sim-redex-psa-p4c"]
+k = ["metacirc-sim-k-psa-p4c"]
