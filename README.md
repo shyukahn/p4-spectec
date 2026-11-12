@@ -185,10 +185,10 @@ Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
 
 | suite | architecture | STF tests |
 |---|---|---|
-| `v1model-p4c` | v1model | `p4c/testdata/p4_16_samples/` |
-| `v1model-p4testgen` | v1model | `testdata/p4testgen/` |
 | `ebpf-p4c` | ebpf | `p4c/testdata/p4_16_samples/` |
 | `ebpf-p4testgen` | ebpf | `testdata/p4testgen/` |
+| `v1model-p4c` | v1model | `p4c/testdata/p4_16_samples/` |
+| `v1model-p4testgen` | v1model | `testdata/p4testgen/` |
 | `psa-p4c` | psa | `p4c/testdata/p4_16_samples/` |
 
 ### Running a single program
@@ -247,7 +247,7 @@ metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 
 metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
 ```
 
-- `<ARCH>`: the architecture of the P4 program, one of `v1model`, `ebpf`, or `psa`.
+- `<ARCH>`: the architecture of the P4 program, one of `ebpf`, `v1model`, or `psa`.
 - `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
 - `<PROGRAM>`: the P4 program to simulate.
 - `<STF>`: the STF test to run on the P4 program.
@@ -317,10 +317,10 @@ make test-metacirc-run-al-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 # run all suites
 make test-metacirc-sim-al TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-sim-al SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-al SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-al SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-al SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-al SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-al SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
@@ -361,10 +361,10 @@ make test-metacirc-run-redex-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 # run all suites
 make test-metacirc-sim-redex TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-sim-redex SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-redex SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-redex SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-redex SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-redex SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
@@ -395,10 +395,10 @@ make test-metacirc-run-k-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 # run all suites
 make test-metacirc-sim-k TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-sim-k SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-k SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-k SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-metacirc-sim-k SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
@@ -457,16 +457,19 @@ and write one report per run into `coverage/`; `COV_DIR=<DIR>` writes them into 
 - `metacirc-cover-run-p4` type-checks the programs of `run-positive` and `run-negative`
   through `towers/al-p4-ok.json`, and writes `run-p4.cov`.
 - `metacirc-cover-sim` runs the STF tests of the simulation suites through `towers/al-p4.json`,
-  one architecture at a time, and writes `sim-v1model.cov`, `sim-ebpf.cov`, and `sim-psa.cov`.
-  `ARCH=<ARCH>` runs only one of `v1model`, `ebpf`, or `psa`.
+  one architecture at a time, and writes `sim-ebpf.cov`, `sim-v1model.cov`, and `sim-psa.cov`.
+  `ARCH=<ARCH>` runs only one of `ebpf`, `v1model`, or `psa`.
 
 ```sh
 # measure coverage of the script suites
 make metacirc-cover-run-st
 # measure coverage of the type-checking suites
 make metacirc-cover-run-p4
-# measure coverage of the simulation suites, for all architectures or only one
+# measure coverage of the simulation suites for all architectures
 make metacirc-cover-sim
+# measure coverage of the simulation suites for each architecture separately
+make metacirc-cover-sim ARCH=ebpf
+make metacirc-cover-sim ARCH=v1model
 make metacirc-cover-sim ARCH=psa
 ```
 
