@@ -35,7 +35,7 @@ def main():
         rows.append(row)
 
     print("Table 1. Meta-meta-execution results on the P4 test suites.\n")
-    print(render(headers, rows, rules(config)))
+    print(render(headers, rows, rules(config["suites"])))
     notes = notes_incomplete(config, loaded, keys)
     if notes:
         print("\n" + "\n".join(notes))

@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Table 3: SL instruction coverage of P4ST^P4ST."""
+
+import argparse
+import sys
+from pathlib import Path
+
+from evaluation import PATH_CONFIG_COVERAGE, load_config, read_coverage, render
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("coverage", type=Path, help="directory of the coverage reports, such as coverage")
+    parser.add_argument("--config", type=Path, default=PATH_CONFIG_COVERAGE, help="report config")
+    args = parser.parse_args()
+    config = load_config(args.config)
+
+    both = config["static"] + config["dynamic"]
+    table = [("P4 static", config["static"]), ("P4 dynamic", config["dynamic"]),
+             ("Both", both), ("+ Custom", both + config["custom"])]
+
+    reports = {}
+    for name in sorted({name for _, names in table for name in names}):
+        path = args.coverage / f"{name}.cov"
+        if path.exists():
+            reports[name] = read_coverage(path)
+    sizes = {len(hits) for hits in reports.values()}
+    if len(sizes) > 1:
+        sys.exit("error: the coverage reports have different numbers of instructions")
+    n_total = sizes.pop() if sizes else 0
+
+    rows, notes = [], []
+    for name_row, names in table:
+        found = [reports[name] for name in names if name in reports]
+        missing = [name for name in names if name not in reports]
+        if not found:
+            rows.append([name_row, "-", "-"])
+            notes.append(f"- {name_row}: no report for {', '.join(missing)}")
+            continue
+        covered = sum(any(hits) for hits in zip(*found))
+        mark = ""
+        if missing:
+            mark = "*"
+            notes.append(f"* {name_row}: no report for {', '.join(missing)}")
+        rows.append([name_row, f"{covered:,}{mark}", f"{100 * covered / n_total:.2f}%{mark}"])
+
+    print(f"Table 3. Coverage of P4ST^P4ST, out of {n_total:,} SL instructions.\n")
+    print(render([("", "Tests"), ("", "Covered"), ("", "(%)")], rows, rules=[3]))
+    if notes:
+        print("\n" + "\n".join(notes))
+
+
+if __name__ == "__main__":
+    main()

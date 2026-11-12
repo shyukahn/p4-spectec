@@ -1,4 +1,4 @@
-"""Shared code of the evaluation scripts: log parsing, CSV I/O, suite config, and tables."""
+"""Shared code of the evaluation scripts: log parsing, CSV I/O, suite config, coverage, and tables."""
 
 import csv
 import math
@@ -11,6 +11,7 @@ from pathlib import Path
 DIR_SCRIPT = Path(__file__).resolve().parent
 DIR_LOGS = DIR_SCRIPT.parent.parent / "logs"
 PATH_CONFIG = DIR_SCRIPT / "suites.toml"
+PATH_CONFIG_COVERAGE = DIR_SCRIPT / "coverage.toml"
 
 FIELDS = ["section", "test", "result", "time"]
 META = "meta"
@@ -223,6 +224,15 @@ def render(headers, rows, rules=()):
     return "\n".join(out)
 
 
-def rules(config):
-    """Row indices of suites marked `rule = true`."""
-    return [i for i, suite in enumerate(config["suites"]) if suite.get("rule")]
+def rules(entries):
+    """Indices of the table rows marked `rule = true`."""
+    return [i for i, entry in enumerate(entries) if entry.get("rule")]
+
+
+# Coverage
+
+
+def read_coverage(path):
+    """Returns the hit flags of the instructions of a coverage report, in order."""
+    return [line.startswith("+ ") for line in path.read_text().splitlines()
+            if line.startswith(("+ ", "- "))]

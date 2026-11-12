@@ -40,7 +40,7 @@ def main():
 
     print(f"Table 2. Median time per test (s). >{config['timeout']} denotes that at least half "
           "of the tests time out.\n")
-    print(render(headers, rows, rules(config)))
+    print(render(headers, rows, rules(config["suites"])))
     notes = notes_incomplete(config, loaded, keys)
     if notes:
         print("\n" + "\n".join(notes))

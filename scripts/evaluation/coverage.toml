@@ -1,0 +1,10 @@
+# Coverage reports of Table 3, read from the directory given to table3.
+#
+# Each key lists the names of the reports without `.cov`;
+# a row covers an instruction when any of its reports covers it.
+# Row "Both" takes the reports of `static` and `dynamic`,
+# and row "+ Custom" takes those of `custom` in addition.
+
+static = ["run-p4"]
+dynamic = ["sim-ebpf", "sim-v1model", "sim-psa"]
+custom = ["run-st-rel", "run-st-func"]
