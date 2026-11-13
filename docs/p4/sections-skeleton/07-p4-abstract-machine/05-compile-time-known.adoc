@@ -38,7 +38,6 @@ ifndef::release[]
 NOTE: It is questionable whether instances constructed by instance declarations
 and constructor invocations should be considered local compile-time known
 values. So, the corresponding bullet is commented out in this document.
-A related spec issue is made here: https://github.com/p4lang/p4-spec/issues/1309.
 endif::[]
 
 // 1080
