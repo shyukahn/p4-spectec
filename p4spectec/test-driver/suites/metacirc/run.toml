@@ -1,6 +1,6 @@
 # Corpus runs through metacircular towers: `run <config>`
-# (make test-metacirc-run-{al,k,redex}-p4 for P4 suites
-# and test-metacirc-run-{al,k,redex}-st for script suites).
+# (make test-mm-run-{al,k,redex}-p4 for P4 suites
+# and test-mm-run-{al,k,redex}-st for script suites).
 #
 # A configuration selects the `base` language of the towers it runs,
 # memoization (`cache`), and determinism checking (`det`).

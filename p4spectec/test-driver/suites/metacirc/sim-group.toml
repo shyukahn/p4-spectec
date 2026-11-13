@@ -1,6 +1,6 @@
 # Simulation groups through a metacircular P4 tower:
 # `sim-group <config> --suite <name> --group <name>`
-# (make test-metacirc-sim-group-al, test-metacirc-sim-group-k, test-metacirc-sim-group-redex,
+# (make test-mm-sim-group-al, test-mm-sim-group-k, test-mm-sim-group-redex,
 # each with SUITE=<name> and GROUP=<name>).
 #
 # Each suite pairs every .p4 file under `p4` that includes the `arch` model

@@ -94,7 +94,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profil
 (cd p4spectec && rustup toolchain install)
 
 # build the Rust implementation and the test drivers
-make build metacirc
+make build metameta
 (cd p4spectec && cargo build --locked --release --manifest-path test-driver/Cargo.toml --target-dir target --bins)
 ```
 
@@ -181,11 +181,11 @@ Rebuild with these commands after modifying the implementation or the specificat
 ```sh
 # build the P4-SpecTec binary bin/p4spectec
 make
-# build the meta-meta execution binary bin/metacirc
-make metacirc
-# build bin/metacirc, and compile spec-meta-k and spec-meta-k-detcheck
+# build the meta-meta execution binary bin/metameta
+make metameta
+# build bin/metameta, and compile spec-meta-k and spec-meta-k-detcheck
 make kompile
-# build bin/metacirc, and compile spec-meta-redex and spec-meta-redex-detcheck
+# build bin/metameta, and compile spec-meta-redex and spec-meta-redex-detcheck
 make redex
 # remove the binaries, the compiled meta specifications, and the Rust build outputs
 make clean
@@ -228,16 +228,16 @@ Tests listed in `excludes/static/` and `excludes/dynamic/` are skipped.
 
 ### Running a single program
 
-The `metacirc` binary runs a single P4-SpecTec script, P4 program, or STF test through a tower.
+The `metameta` binary runs a single P4-SpecTec script, P4 program, or STF test through a tower.
 For installation option 3, either add the `bin` folder of the repository root to `PATH`,
-or run it as `./bin/metacirc` instead of `metacirc`.
+or run it as `./bin/metameta` instead of `metameta`.
 
-Run `metacirc run-meta --help` or `metacirc sim --help` for the full list of options.
+Run `metameta run-meta --help` or `metameta sim --help` for the full list of options.
 
 #### P4-SpecTec script
 
 ```sh
-metacirc run-meta -p <SCRIPT> <CONFIG>
+metameta run-meta -p <SCRIPT> <CONFIG>
 ```
 
 - `<SCRIPT>`: the P4-SpecTec script to run.
@@ -249,17 +249,17 @@ metacirc run-meta -p <SCRIPT> <CONFIG>
 
 ```sh
 # P4ST^P4ST
-metacirc run-meta -p testdata/spec-meta/rel/succ/exp-iter.watsup towers/al-rel.json
+metameta run-meta -p testdata/spec-meta/rel/succ/exp-iter.watsup towers/al-rel.json
 # P4ST^Redex
-metacirc run-meta -p testdata/spec-meta/rel/succ/exp-iter.watsup towers/redex-detcheck.json
+metameta run-meta -p testdata/spec-meta/rel/succ/exp-iter.watsup towers/redex-detcheck.json
 # P4ST^K
-metacirc run-meta -p testdata/spec-meta/func/succ/entry-func.watsup towers/k-detcheck-func.json
+metameta run-meta -p testdata/spec-meta/func/succ/entry-func.watsup towers/k-detcheck-func.json
 ```
 
 #### P4 type checking
 
 ```sh
-metacirc run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
+metameta run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
 ```
 
 - `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
@@ -269,17 +269,17 @@ metacirc run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
 
 ```sh
 # P4ST^P4ST
-metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/al-p4-ok.json
+metameta run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/al-p4-ok.json
 # P4ST^Redex
-metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/redex-p4-ok.json
+metameta run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/redex-p4-ok.json
 # P4ST^K
-metacirc run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/k-p4-ok.json
+metameta run-meta -i p4c/p4include -p p4c/testdata/p4_16_samples/action-bind.p4 towers/k-p4-ok.json
 ```
 
 #### P4 simulation
 
 ```sh
-metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
+metameta sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
 ```
 
 - `<ARCH>`: the architecture of the P4 program, one of `ebpf`, `v1model`, or `psa`.
@@ -291,11 +291,11 @@ metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
 
 ```sh
 # P4ST^P4ST
-metacirc sim --arch psa -i p4c/p4include -p p4c/testdata/p4_16_samples/hash-extern-bmv2.p4 --stf p4c/testdata/p4_16_samples/hash-extern-bmv2.stf towers/al-p4.json
+metameta sim --arch psa -i p4c/p4include -p p4c/testdata/p4_16_samples/hash-extern-bmv2.p4 --stf p4c/testdata/p4_16_samples/hash-extern-bmv2.stf towers/al-p4.json
 # P4ST^Redex
-metacirc sim --arch ebpf -i p4c/p4include -p p4c/testdata/p4_16_samples/action_call_ebpf.p4 --stf p4c/testdata/p4_16_samples/action_call_ebpf.stf towers/redex-p4.json
+metameta sim --arch ebpf -i p4c/p4include -p p4c/testdata/p4_16_samples/action_call_ebpf.p4 --stf p4c/testdata/p4_16_samples/action_call_ebpf.stf towers/redex-p4.json
 # P4ST^K
-metacirc sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/action-synth.p4 --stf testdata/p4testgen/action-synth/action-synth_1.stf towers/k-p4.json
+metameta sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/action-synth.p4 --stf testdata/p4testgen/action-synth/action-synth_1.stf towers/k-p4.json
 ```
 
 ### Meta-execution of P4^P4ST
@@ -325,44 +325,44 @@ They take the options below:
 - `TIMEOUT=300` runs each test case with a timeout of 300 seconds.
 - `TEST_LOG=logs` writes a per-test timing log into `logs/`.
 
-`test-metacirc-run-al-st` runs the script suites.
+`test-mm-run-al-st` runs the script suites.
 
 ```sh
 # run all suites
-make test-metacirc-run-al-st TEST_LOG=logs
+make test-mm-run-al-st TEST_LOG=logs
 # run each suite separately
-make test-metacirc-run-al-st SUITE=spec-meta-rel-succ TEST_LOG=logs
-make test-metacirc-run-al-st SUITE=spec-meta-rel-err TEST_LOG=logs
-make test-metacirc-run-al-st SUITE=spec-meta-func-succ TEST_LOG=logs
+make test-mm-run-al-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-mm-run-al-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-mm-run-al-st SUITE=spec-meta-func-succ TEST_LOG=logs
 ```
 
-`test-metacirc-run-al-p4` runs the type-checking suites.
+`test-mm-run-al-p4` runs the type-checking suites.
 
 ```sh
 # run all suites
-make test-metacirc-run-al-p4 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-al-p4 TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-run-al-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-run-al-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-al-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-al-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
 
-`test-metacirc-sim-al` runs the simulation suites.
+`test-mm-sim-al` runs the simulation suites.
 
 ```sh
 # run all suites
-make test-metacirc-sim-al TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-al TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-sim-al SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-al SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-al SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-al SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-al SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-al SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-al SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-al SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
 ### Meta-meta-execution of P4ST^Redex and P4ST^K
 
 > [!WARNING]
-> Running the entire test suites on $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$ can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
+> Running the entire test suites on $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$ can take a very long time. `make test-mm-run-redex-p4` and `make test-mm-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
 
 The commands below run the P4-SpecTec scripts and $\text{P4}^{\text{P4ST}}$ on $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$.
 The scripts run on `spec-meta-redex-detcheck` and `spec-meta-k-detcheck`,
@@ -372,77 +372,77 @@ $\text{P4}^{\text{P4ST}}$ runs on `spec-meta-redex`, through the towers `towers/
 and on `spec-meta-k`, through the towers `towers/k-p4-ok.json` and `towers/k-p4.json`.
 They take the same options as the commands for $\text{P4ST}^{\text{P4ST}}$.
 
-`test-metacirc-run-redex-st` runs the script suites.
+`test-mm-run-redex-st` runs the script suites.
 
 ```sh
 # run all suites
-make test-metacirc-run-redex-st TEST_LOG=logs
+make test-mm-run-redex-st TEST_LOG=logs
 # run each suite separately
-make test-metacirc-run-redex-st SUITE=spec-meta-rel-succ TEST_LOG=logs
-make test-metacirc-run-redex-st SUITE=spec-meta-rel-err TEST_LOG=logs
-make test-metacirc-run-redex-st SUITE=spec-meta-func-succ TEST_LOG=logs
+make test-mm-run-redex-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-mm-run-redex-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-mm-run-redex-st SUITE=spec-meta-func-succ TEST_LOG=logs
 ```
 
-`test-metacirc-run-redex-p4` runs the type-checking suites.
+`test-mm-run-redex-p4` runs the type-checking suites.
 
 ```sh
 # run all suites
-make test-metacirc-run-redex-p4 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-redex-p4 TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-run-redex-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-run-redex-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-redex-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-redex-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
 
-`test-metacirc-sim-redex` runs the simulation suites.
+`test-mm-sim-redex` runs the simulation suites.
 
 ```sh
 # run all suites
-make test-metacirc-sim-redex TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-redex TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-sim-redex SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-redex SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-redex SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-redex SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-redex SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-redex SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-redex SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-redex SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-redex SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-redex SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
-`test-metacirc-run-k-st` runs the script suites.
+`test-mm-run-k-st` runs the script suites.
 
 ```sh
 # run all suites
-make test-metacirc-run-k-st TEST_LOG=logs
+make test-mm-run-k-st TEST_LOG=logs
 # run each suite separately
-make test-metacirc-run-k-st SUITE=spec-meta-rel-succ TEST_LOG=logs
-make test-metacirc-run-k-st SUITE=spec-meta-rel-err TEST_LOG=logs
-make test-metacirc-run-k-st SUITE=spec-meta-func-succ TEST_LOG=logs
+make test-mm-run-k-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-mm-run-k-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-mm-run-k-st SUITE=spec-meta-func-succ TEST_LOG=logs
 ```
 
-`test-metacirc-run-k-p4` runs the type-checking suites.
+`test-mm-run-k-p4` runs the type-checking suites.
 
 ```sh
 # run all suites
-make test-metacirc-run-k-p4 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-k-p4 TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-run-k-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-run-k-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-k-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-k-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
 
-`test-metacirc-sim-k` runs the simulation suites.
+`test-mm-sim-k` runs the simulation suites.
 
 ```sh
 # run all suites
-make test-metacirc-sim-k TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-k TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-metacirc-sim-k SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-k SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-k SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-k SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-k SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-k SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-k SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-k SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
 ### Grouped P4 type checking and simulation
 
-`test-metacirc-run-group-<base>` runs one of three groups of the `run-positive`
+`test-mm-run-group-<base>` runs one of three groups of the `run-positive`
 type-checking suite, so that the suite can be split over three commands.
 `SUITE` and `GROUP` are required. Group `<n>` skips the programs listed in
 `excludes/static/` and the other groups' folders under `excludes/metacirc-groups/run/`,
@@ -451,12 +451,12 @@ Groups 1, 2, and 3 have 927, 170, and 170 programs, respectively.
 
 ```sh
 # run each group separately
-make test-metacirc-run-group-redex SUITE=run-positive GROUP=1 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-run-group-redex SUITE=run-positive GROUP=2 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-run-group-redex SUITE=run-positive GROUP=3 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-group-redex SUITE=run-positive GROUP=1 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-group-redex SUITE=run-positive GROUP=2 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-group-redex SUITE=run-positive GROUP=3 TIMEOUT=300 TEST_LOG=logs
 ```
 
-`test-metacirc-sim-group-<base>` runs one of four groups of the `v1model-p4testgen`
+`test-mm-sim-group-<base>` runs one of four groups of the `v1model-p4testgen`
 simulation suite, so that the suite can be split over four commands.
 `SUITE` and `GROUP` are required. Group `<n>` skips the tests listed in
 `excludes/static/`, `excludes/dynamic/`, and the other groups' folders under
@@ -466,46 +466,46 @@ Since $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$ take a long time
 
 ```sh
 # run each group separately
-make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-group-redex SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-redex SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-redex SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-redex SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-redex SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
 ```
 
 ```sh
 # run each group separately
-make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
-make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-k SUITE=v1model-p4testgen GROUP=1 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-k SUITE=v1model-p4testgen GROUP=2 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-k SUITE=v1model-p4testgen GROUP=3 TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-group-k SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_LOG=logs
 ```
 
 ### P4ST^P4ST coverage
 
-`metacirc cover-run` and `metacirc cover-sim` measure the SL instruction coverage of
+`metameta cover-run` and `metameta cover-sim` measure the SL instruction coverage of
 $\text{P4ST}^{\text{P4ST}}$ over many inputs.
 The commands below run them on the test suites through the towers of $\text{P4ST}^{\text{P4ST}}$,
 and write one report per run into `coverage/`; `COV_DIR=<DIR>` writes them into `<DIR>` instead.
 
-- `metacirc-cover-run-st` runs the scripts of the script suites through `towers/al-rel.json`
+- `mm-cover-run-st` runs the scripts of the script suites through `towers/al-rel.json`
   and `towers/al-func.json`, and writes `run-st-rel.cov` and `run-st-func.cov`.
-- `metacirc-cover-run-p4` type-checks the programs of `run-positive` and `run-negative`
+- `mm-cover-run-p4` type-checks the programs of `run-positive` and `run-negative`
   through `towers/al-p4-ok.json`, and writes `run-p4.cov`.
-- `metacirc-cover-sim` runs the STF tests of the simulation suites through `towers/al-p4.json`,
+- `mm-cover-sim` runs the STF tests of the simulation suites through `towers/al-p4.json`,
   one architecture at a time, and writes `sim-ebpf.cov`, `sim-v1model.cov`, and `sim-psa.cov`.
   `ARCH=<ARCH>` runs only one of `ebpf`, `v1model`, or `psa`.
 
 ```sh
 # measure coverage of the script suites
-make metacirc-cover-run-st
+make mm-cover-run-st
 # measure coverage of the type-checking suites
-make metacirc-cover-run-p4
+make mm-cover-run-p4
 # measure coverage of the simulation suites for all architectures
-make metacirc-cover-sim
+make mm-cover-sim
 # measure coverage of the simulation suites for each architecture separately
-make metacirc-cover-sim ARCH=ebpf
-make metacirc-cover-sim ARCH=v1model
-make metacirc-cover-sim ARCH=psa
+make mm-cover-sim ARCH=ebpf
+make mm-cover-sim ARCH=v1model
+make mm-cover-sim ARCH=psa
 ```
 
 Each command prints the outcomes of the inputs and the coverage of each run last, for example:

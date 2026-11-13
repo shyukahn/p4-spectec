@@ -45,19 +45,19 @@ TEST_TARGETS := test test-expected test-p4parse test-run-p4 test-run-st test-sim
 $(TEST_TARGETS):
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
 
-METACIRC_TARGETS := metacirc kompile redex test-metacirc-run-al-p4 \
-  test-metacirc-run-k-p4 test-metacirc-run-redex-p4 \
-  test-metacirc-run-al-st test-metacirc-run-k-st test-metacirc-run-redex-st \
-  test-metacirc-run-group-al \
-  test-metacirc-run-group-k test-metacirc-run-group-redex \
-  test-metacirc-sim-al \
-  test-metacirc-sim-k test-metacirc-sim-redex test-metacirc-sim-group-al \
-  test-metacirc-sim-group-k test-metacirc-sim-group-redex \
-  metacirc-cover-run-p4 metacirc-cover-run-st metacirc-cover-sim
+METAMETA_TARGETS := metameta kompile redex test-mm-run-al-p4 \
+  test-mm-run-k-p4 test-mm-run-redex-p4 \
+  test-mm-run-al-st test-mm-run-k-st test-mm-run-redex-st \
+  test-mm-run-group-al \
+  test-mm-run-group-k test-mm-run-group-redex \
+  test-mm-sim-al \
+  test-mm-sim-k test-mm-sim-redex test-mm-sim-group-al \
+  test-mm-sim-group-k test-mm-sim-group-redex \
+  mm-cover-run-p4 mm-cover-run-st mm-cover-sim
 
-.PHONY: $(METACIRC_TARGETS)
-$(METACIRC_TARGETS):
-	$(MAKE) -f METASQ.mk CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
+.PHONY: $(METAMETA_TARGETS)
+$(METAMETA_TARGETS):
+	$(MAKE) -f METAMETA.mk CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
 
 # Specification documents
 .PHONY: p4spec-draft p4spec-draft-html p4spec-release p4spec-release-html
@@ -73,5 +73,5 @@ p4spec-release-html:
 
 clean:
 	rm -f ./$(SPEC) ./$(STAT)
-	$(MAKE) -f METASQ.mk clean
+	$(MAKE) -f METAMETA.mk clean
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" clean
