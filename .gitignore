@@ -38,6 +38,8 @@ debug
 !/logs/metacirc-sim-redex-ebpf-p4testgen.log
 !/logs/metacirc-sim-redex-psa-p4c.log
 !/logs/metacirc-sim-redex-v1model-p4c.log
+!/logs/run-sl.log
+!/logs/sim-sl.log
 
 # CSVs converted from logs
 /logs/*.csv
