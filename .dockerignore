@@ -21,9 +21,11 @@ log
 !logs/metacirc-sim-group-k-v1model-p4testgen-group1.log
 !logs/metacirc-sim-group-k-v1model-p4testgen-group2.log
 !logs/metacirc-sim-group-k-v1model-p4testgen-group3.log
+!logs/metacirc-sim-group-k-v1model-p4testgen-group4.log
 !logs/metacirc-sim-group-redex-v1model-p4testgen-group1.log
 !logs/metacirc-sim-group-redex-v1model-p4testgen-group2.log
 !logs/metacirc-sim-group-redex-v1model-p4testgen-group3.log
+!logs/metacirc-sim-group-redex-v1model-p4testgen-group4.log
 !logs/metacirc-sim-k-ebpf-p4c.log
 !logs/metacirc-sim-k-ebpf-p4testgen.log
 !logs/metacirc-sim-k-psa-p4c.log
