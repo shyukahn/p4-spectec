@@ -1,5 +1,28 @@
 # Meta-Meta Artifact
 
+## Table of Contents
+
+- [1. Installation](#1-installation)
+  - [Option 1: Build the Docker image](#option-1-build-the-docker-image)
+  - [Option 2: Pull the Docker image from DockerHub](#option-2-pull-the-docker-image-from-dockerhub)
+  - [Option 3: Build from source on Ubuntu 24.04](#option-3-build-from-source-on-ubuntu-2404)
+- [2. File structure](#2-file-structure)
+- [3. Evaluation](#3-evaluation)
+  - [Building](#building)
+  - [Test suites](#test-suites)
+  - [Running a single program](#running-a-single-program)
+    - [P4-SpecTec script](#p4-spectec-script)
+    - [P4 type checking](#p4-type-checking)
+    - [P4 simulation](#p4-simulation)
+  - [Meta-execution of P4^P4ST](#meta-execution-of-p4p4st)
+  - [Meta-meta-execution of P4ST^P4ST](#meta-meta-execution-of-p4stp4st)
+  - [Meta-meta-execution of P4ST^Redex and P4ST^K](#meta-meta-execution-of-p4stredex-and-p4stk)
+  - [Grouped P4 type checking and simulation](#grouped-p4-type-checking-and-simulation)
+  - [P4ST^P4ST coverage](#p4stp4st-coverage)
+  - [Reproducing Tables 1, 2, and 3](#reproducing-tables-1-2-and-3)
+    - [Selecting the logs of each suite](#selecting-the-logs-of-each-suite)
+    - [Selecting the coverage reports of each row](#selecting-the-coverage-reports-of-each-row)
+
 ## 1. Installation
 
 Choose one of the three options below.
@@ -326,6 +349,9 @@ make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 
 ### Meta-meta-execution of P4ST^Redex and P4ST^K
 
+> [!WARNING]
+> Running the entire test suites on P4ST^Redex and P4ST^K can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
+
 The commands below run the P4-SpecTec scripts and P4^P4ST on P4ST^Redex and P4ST^K.
 The scripts run on `spec-meta-redex-detcheck` and `spec-meta-k-detcheck`,
 through the towers `towers/redex-detcheck*.json` and `towers/k-detcheck*.json`,
@@ -401,9 +427,6 @@ make test-metacirc-sim-k SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
 make test-metacirc-sim-k SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
-
-> [!WARNING]
-> Running the entire test suites on P4ST^Redex and P4ST^K can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 80 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
 
 ### Grouped P4 type checking and simulation
 
