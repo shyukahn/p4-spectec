@@ -7,7 +7,8 @@
   - [Option 2: Pull the Docker image from DockerHub](#option-2-pull-the-docker-image-from-dockerhub)
   - [Option 3: Build from source on Ubuntu 24.04](#option-3-build-from-source-on-ubuntu-2404)
 - [2. File structure](#2-file-structure)
-- [3. Evaluation](#3-evaluation)
+- [3. Meta-Meta-Guided Evolution](#3-meta-meta-guided-evolution)
+- [4. Evaluation](#4-evaluation)
   - [Building](#building)
   - [Test suites](#test-suites)
   - [Running a single program](#running-a-single-program)
@@ -139,7 +140,7 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 ```
 /meta/
 ├── p4spectec/                 # Rust implementation of meta-meta execution, built on top of P4-SpecTec
-│   ├── src/                   # P4-SpecTec, with metacircular towers in src/metacirc/
+│   ├── src/                   # P4-SpecTec, with metacircular towers
 │   └── test-driver/           # Test drivers, with test suite registrations (suites/) and expected results (expected/)
 ├── spec/                      # P4^P4ST: the P4 specification from P4-SpecTec
 ├── spec-meta/                 # P4ST^P4ST: the P4-SpecTec AL specification in P4-SpecTec
@@ -150,14 +151,25 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 ├── towers/                    # Tower configurations running P4^P4ST or P4-SpecTec scripts on P4ST^P4ST, P4ST^Redex, or P4ST^K
 ├── p4c/                       # P4 include files (p4include/) and test programs (testdata/) from p4c
 ├── testdata/                  # P4-SpecTec scripts testing P4ST^P4ST (spec-meta/), and STF tests from P4-SpecTec (p4testgen/)
-├── excludes/                  # Excluded tests from P4-SpecTec, and the folders splitting the grouped tests (metacirc-groups/)
+├── excludes/                  # Excluded tests from P4-SpecTec, and the grouped tests (metacirc-groups/)
 ├── patches/                   # Patched STF tests from P4-SpecTec
 ├── docs/                      # P4 specification documents from P4-SpecTec
-├── scripts/                   # Scripts printing statistics of spec-meta-redex and spec-meta-k (stat/), and the tables of the paper from the logs and coverage reports (evaluation/)
+├── scripts/                   # Scripts printing statistics (stat/) and the tables of the paper (evaluation/)
 └── logs/                      # Logs recorded by our runs; TEST_LOG=logs also writes here
 ```
 
-## 3. Evaluation
+## 3. Meta-Meta-Guided Evolution
+
+The prototype scenario of meta-meta-guided evolution in the paper is in two pull requests of this repository.
+
+- PR #1 is the intermediate step of the evolution, with one commit for each change:
+  - v0^v0-to-v1^v0, on the P4-SpecTec specification in `spec-meta/`.
+  - P4^v0-to-P4^v1, on the P4 specification in `spec/`.
+- PR #2 completes the evolution, with one commit for each change:
+  - v0^Rust-to-v1^Rust, on the Rust implementation in `p4spectec/`.
+  - v1^v0-to-v1^v1, on the P4-SpecTec specification in `spec-meta/`.
+
+## 4. Evaluation
 
 Run every command from `/meta` in the container, or from the repository root for option 3.
 
