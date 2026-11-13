@@ -22,7 +22,11 @@ name = "POS"
 pass = ["pass"]
 meta = ["run-sl#pos"]
 al = ["metacirc-p4-al-run-positive"]
-redex = ["metacirc-p4-redex-run-positive"]
+redex = [
+  "metacirc-run-group-redex-run-positive-group1",
+  "metacirc-run-group-redex-run-positive-group2",
+  "metacirc-run-group-redex-run-positive-group3",
+]
 k = ["metacirc-p4-k-run-positive"]
 
 [[suites]]
