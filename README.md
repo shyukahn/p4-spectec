@@ -31,8 +31,8 @@ Options 1 and 2 require Docker; option 1 also requires BuildKit, the default bui
 
 > [!NOTE]
 > The artifact supports architectures x86_64 (amd64) and ARM64 (arm64).
-> On ARM64, the artifact comes without the K framework, which only supports x86_64 Linux-like systems, so P4ST^K is unavailable.
-> Everything else, including P4ST^P4ST and P4ST^Redex, works as on x86_64.
+> On ARM64, the artifact comes without the K framework, which only supports x86_64 Linux-like systems, so $\text{P4ST}^{\text{K}}$ is unavailable.
+> Everything else, including $\text{P4ST}^{\text{P4ST}}$ and $\text{P4ST}^{\text{Redex}}$, works as on x86_64.
 
 ### Option 1: Build the Docker image
 
@@ -163,11 +163,11 @@ For option 3, the same structure is at the repository root instead of `/meta/`.
 The prototype scenario of meta-meta-guided evolution in the paper is in two pull requests of this repository.
 
 - PR #1 is the intermediate step of the evolution, with one commit for each change:
-  - v0^v0-to-v1^v0, on the P4-SpecTec specification in `spec-meta/`.
-  - P4^v0-to-P4^v1, on the P4 specification in `spec/`.
+  - $\text{v0}^{\text{v0}}$-to-$\text{v1}^{\text{v0}}$, on the P4-SpecTec specification in `spec-meta/`.
+  - $\text{P4}^{\text{v0}}$-to-$\text{P4}^{\text{v1}}$, on the P4 specification in `spec/`.
 - PR #2 completes the evolution, with one commit for each change:
-  - v0^Rust-to-v1^Rust, on the Rust implementation in `p4spectec/`.
-  - v1^v0-to-v1^v1, on the P4-SpecTec specification in `spec-meta/`.
+  - $\text{v0}^{\text{Rust}}$-to-$\text{v1}^{\text{Rust}}$, on the Rust implementation in `p4spectec/`.
+  - $\text{v1}^{\text{v0}}$-to-$\text{v1}^{\text{v1}}$, on the P4-SpecTec specification in `spec-meta/`.
 
 ## 4. Evaluation
 
@@ -195,8 +195,8 @@ The test drivers are built automatically when a test command runs.
 
 ### Test suites
 
-The script suites run each P4-SpecTec script (`.watsup`) testing the behavior of P4ST^P4ST
-that P4^P4ST does not reach.
+The script suites run each P4-SpecTec script (`.watsup`) testing the behavior of $\text{P4ST}^{\text{P4ST}}$
+that $\text{P4}^{\text{P4ST}}$ does not reach.
 A script enters at the relation `Main` or the function `$main`.
 Scripts in `spec-meta-rel-err` are intended to fail.
 
@@ -243,7 +243,7 @@ metacirc run-meta -p <SCRIPT> <CONFIG>
 - `<SCRIPT>`: the P4-SpecTec script to run.
 - `<CONFIG>`: the tower configuration. For a script entering at the relation `Main`,
   use `towers/al-rel.json`, `towers/redex-detcheck.json`, or `towers/k-detcheck.json`
-  to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+  to run on $\text{P4ST}^{\text{P4ST}}$, $\text{P4ST}^{\text{Redex}}$, or $\text{P4ST}^{\text{K}}$, respectively.
   For a script entering at the function `$main`, use `towers/al-func.json`,
   `towers/redex-detcheck-func.json`, or `towers/k-detcheck-func.json` instead.
 
@@ -265,7 +265,7 @@ metacirc run-meta -i <INCLUDE> -p <PROGRAM> <CONFIG>
 - `<INCLUDE>`: the include path of the P4 program. The artifact provides `p4c/p4include`.
 - `<PROGRAM>`: the P4 program to type-check.
 - `<CONFIG>`: the tower configuration. Use `towers/al-p4-ok.json`, `towers/redex-p4-ok.json`,
-  or `towers/k-p4-ok.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+  or `towers/k-p4-ok.json` to run on $\text{P4ST}^{\text{P4ST}}$, $\text{P4ST}^{\text{Redex}}$, or $\text{P4ST}^{\text{K}}$, respectively.
 
 ```sh
 # P4ST^P4ST
@@ -287,7 +287,7 @@ metacirc sim --arch <ARCH> -i <INCLUDE> -p <PROGRAM> --stf <STF> <CONFIG>
 - `<PROGRAM>`: the P4 program to simulate.
 - `<STF>`: the STF test to run on the P4 program.
 - `<CONFIG>`: the tower configuration. Use `towers/al-p4.json`, `towers/redex-p4.json`,
-  or `towers/k-p4.json` to run on P4ST^P4ST, P4ST^Redex, or P4ST^K, respectively.
+  or `towers/k-p4.json` to run on $\text{P4ST}^{\text{P4ST}}$, $\text{P4ST}^{\text{Redex}}$, or $\text{P4ST}^{\text{K}}$, respectively.
 
 ```sh
 # P4ST^P4ST
@@ -301,7 +301,7 @@ metacirc sim --arch v1model -i p4c/p4include -p p4c/testdata/p4_16_samples/actio
 ### Meta-execution of P4^P4ST
 
 For comparison, `test-run-st`, `test-run-p4`, and `test-sim` run the P4-SpecTec scripts
-and P4^P4ST directly on the SL interpreter of P4-SpecTec, without a tower.
+and $\text{P4}^{\text{P4ST}}$ directly on the SL interpreter of P4-SpecTec, without a tower.
 `test-run-st` runs all script suites, `test-run-p4` runs all type-checking suites,
 and `test-sim` runs all simulation suites.
 
@@ -316,7 +316,7 @@ make test-sim TEST_LOG=logs
 
 ### Meta-meta-execution of P4ST^P4ST
 
-The commands below run the P4-SpecTec scripts and P4^P4ST on P4ST^P4ST in `spec-meta`,
+The commands below run the P4-SpecTec scripts and $\text{P4}^{\text{P4ST}}$ on $\text{P4ST}^{\text{P4ST}}$ in `spec-meta`,
 through the towers `towers/al-rel.json` and `towers/al-func.json` for the scripts,
 `towers/al-p4-ok.json` for type checking, and `towers/al-p4.json` for simulation.
 They take the options below:
@@ -362,15 +362,15 @@ make test-metacirc-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ### Meta-meta-execution of P4ST^Redex and P4ST^K
 
 > [!WARNING]
-> Running the entire test suites on P4ST^Redex and P4ST^K can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
+> Running the entire test suites on $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$ can take a very long time. `make test-metacirc-run-redex-p4` and `make test-metacirc-sim-k` took over 60 hours and 100 hours, respectively, on our machine. The `logs` folder contains the log file of each suite recorded in our runs.
 
-The commands below run the P4-SpecTec scripts and P4^P4ST on P4ST^Redex and P4ST^K.
+The commands below run the P4-SpecTec scripts and $\text{P4}^{\text{P4ST}}$ on $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$.
 The scripts run on `spec-meta-redex-detcheck` and `spec-meta-k-detcheck`,
 through the towers `towers/redex-detcheck*.json` and `towers/k-detcheck*.json`,
 since the expected outputs of the scripts rely on determinism checking.
-P4^P4ST runs on `spec-meta-redex`, through the towers `towers/redex-p4-ok.json` and `towers/redex-p4.json`,
+$\text{P4}^{\text{P4ST}}$ runs on `spec-meta-redex`, through the towers `towers/redex-p4-ok.json` and `towers/redex-p4.json`,
 and on `spec-meta-k`, through the towers `towers/k-p4-ok.json` and `towers/k-p4.json`.
-They take the same options as the commands for P4ST^P4ST.
+They take the same options as the commands for $\text{P4ST}^{\text{P4ST}}$.
 
 `test-metacirc-run-redex-st` runs the script suites.
 
@@ -461,7 +461,7 @@ simulation suite, so that the suite can be split over four commands.
 `SUITE` and `GROUP` are required. Group `<n>` skips the tests listed in
 `excludes/static/`, `excludes/dynamic/`, and the other groups' folders under
 `excludes/metacirc-groups/sim/`.
-Since P4ST^Redex and P4ST^K take a long time, we recommend running the 1870 tests of
+Since $\text{P4ST}^{\text{Redex}}$ and $\text{P4ST}^{\text{K}}$ take a long time, we recommend running the 1870 tests of
 `v1model-p4testgen` on them group by group with these commands.
 
 ```sh
@@ -483,8 +483,8 @@ make test-metacirc-sim-group-k SUITE=v1model-p4testgen GROUP=4 TIMEOUT=300 TEST_
 ### P4ST^P4ST coverage
 
 `metacirc cover-run` and `metacirc cover-sim` measure the SL instruction coverage of
-P4ST^P4ST over many inputs.
-The commands below run them on the test suites through the towers of P4ST^P4ST,
+$\text{P4ST}^{\text{P4ST}}$ over many inputs.
+The commands below run them on the test suites through the towers of $\text{P4ST}^{\text{P4ST}}$,
 and write one report per run into `coverage/`; `COV_DIR=<DIR>` writes them into `<DIR>` instead.
 
 - `metacirc-cover-run-st` runs the scripts of the script suites through `towers/al-rel.json`
@@ -536,7 +536,7 @@ so either remove our log first, or list the new log in `scripts/evaluation/suite
 #### Selecting the logs of each suite
 
 `scripts/evaluation/suites.toml` decides which logs make up each row and column of the tables.
-`[columns]` names the columns: `meta` for P4^P4ST, shown only in Table 2,
+`[columns]` names the columns: `meta` for $\text{P4}^{\text{P4ST}}$, shown only in Table 2,
 and `al`, `redex`, and `k` for the towers.
 Each `[[suites]]` entry is a row of the tables, in order:
 
