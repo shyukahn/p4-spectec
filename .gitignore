@@ -16,6 +16,9 @@ debug
 !/logs/metacirc-p4-k-run-negative.log
 !/logs/metacirc-p4-k-run-positive.log
 !/logs/metacirc-p4-redex-run-negative.log
+!/logs/metacirc-run-group-redex-run-positive-group1.log
+!/logs/metacirc-run-group-redex-run-positive-group2.log
+!/logs/metacirc-run-group-redex-run-positive-group3.log
 !/logs/metacirc-sim-al-ebpf-p4c.log
 !/logs/metacirc-sim-al-ebpf-p4testgen.log
 !/logs/metacirc-sim-al-psa-p4c.log

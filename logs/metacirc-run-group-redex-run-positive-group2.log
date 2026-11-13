@@ -1,0 +1,1352 @@
+p4spectec-test metacirc-run-group-redex-run-positive-group2
+metacirc run-group redex cache=true det=true run-positive group 2: collected=1334 excluded=1164; preparing specification
+
+== run-positive (p4c/testdata/p4_16_samples)
+[   1/1334] action-bind.p4 ... exclude
+[   2/1334] action-synth.p4 ... exclude
+[   3/1334] action-two-params.p4 ... exclude
+[   4/1334] action-uses.p4 ... exclude
+[   5/1334] actionAnnotations.p4 ... exclude
+[   6/1334] action_call_ebpf.p4 ... exclude
+[   7/1334] action_call_table_ebpf.p4 ... exclude
+[   8/1334] action_call_ubpf.p4 ... exclude
+[   9/1334] action_fwd_ubpf.p4 ... exclude
+[  10/1334] action_param.p4 ... exclude
+[  11/1334] action_param1.p4 ... exclude
+[  12/1334] action_profile-bmv2.p4 ... exclude
+[  13/1334] action_profile_max_group_size_annotation.p4 ... exclude
+[  14/1334] action_profile_sum_of_members_annotation.p4 ... exclude
+[  15/1334] action_selector_shared-bmv2.p4 ... exclude
+[  16/1334] action_selector_unused-bmv2.p4 ... exclude
+[  17/1334] actions-almost-duplicate-names1.p4 ... exclude
+[  18/1334] advance_ebpf.p4 ... exclude
+[  19/1334] advance_ubpf.p4 ... exclude
+[  20/1334] after-return.p4 ... exclude
+[  21/1334] alias.p4 ... exclude
+[  22/1334] annotation-bug.p4 ... exclude
+[  23/1334] annotation-inline-propagate.p4 ... exclude
+[  24/1334] annotation-likely.p4 ... exclude
+[  25/1334] annotations.p4 ... exclude
+[  26/1334] apply-cf.p4 ... exclude
+[  27/1334] apply.p4 ... exclude
+[  28/1334] arch1.p4 ... exclude
+[  29/1334] arch2.p4 ... exclude
+[  30/1334] arch3.p4 ... exclude
+[  31/1334] arith-bmv2.p4 ... exclude
+[  32/1334] arith-inline-bmv2.p4 ... exclude
+[  33/1334] arith-inline-skeleton.p4 ... exclude
+[  34/1334] arith-skeleton.p4 ... exclude
+[  35/1334] arith1-bmv2.p4 ... exclude
+[  36/1334] arith2-bmv2.p4 ... exclude
+[  37/1334] arith2-inline-bmv2.p4 ... exclude
+[  38/1334] arith3-bmv2.p4 ... exclude
+[  39/1334] arith4-bmv2.p4 ... exclude
+[  40/1334] arith5-bmv2.p4 ... exclude
+[  41/1334] array-copy-bmv2.p4 ... exclude
+[  42/1334] array1.p4 ... exclude
+[  43/1334] array2.p4 ... exclude
+[  44/1334] array3.p4 ... exclude
+[  45/1334] array5.p4 ... exclude
+[  46/1334] array_field.p4 ... exclude
+[  47/1334] array_field1.p4 ... exclude
+[  48/1334] assign.p4 ... exclude
+[  49/1334] basic2-bmv2.p4 ... exclude
+[  50/1334] basic_routing-bmv2.p4 ... exclude
+[  51/1334] bfd_offload.p4 ... exclude
+[  52/1334] bit0-bmv2.p4 ... exclude
+[  53/1334] bitExtract.p4 ... exclude
+[  54/1334] bitexpr1.p4 ... exclude
+[  55/1334] bitwise-and.p4 ... exclude
+[  56/1334] bitwise-cast.p4 ... exclude
+[  57/1334] bool_cast.p4 ... exclude
+[  58/1334] bool_double_cast.p4 ... exclude
+[  59/1334] bool_ebpf.p4 ... exclude
+[  60/1334] bool_to_bit_cast.p4 ... exclude
+[  61/1334] bvec-hdr-bmv2.p4 ... exclude
+[  62/1334] bvec_union-bmv2.p4 ... exclude
+[  63/1334] calc-ebpf.p4 ... exclude
+[  64/1334] call.p4 ... exclude
+[  65/1334] cases.p4 ... exclude
+[  66/1334] cast-call.p4 ... exclude
+[  67/1334] cast.p4 ... exclude
+[  68/1334] cast_noop.p4 ... exclude
+[  69/1334] cfoldBitTypedefs.p4 ... exclude
+[  70/1334] chain.p4 ... exclude
+[  71/1334] chain1.p4 ... exclude
+[  72/1334] checksum-l4-bmv2.p4 ... exclude
+[  73/1334] checksum1-bmv2.p4 ... exclude
+[  74/1334] checksum2-bmv2.p4 ... exclude
+[  75/1334] checksum3-bmv2.p4 ... exclude
+[  76/1334] complex.p4 ... exclude
+[  77/1334] complex1.p4 ... exclude
+[  78/1334] complex10.p4 ... exclude
+[  79/1334] complex2.p4 ... exclude
+[  80/1334] complex3.p4 ... exclude
+[  81/1334] complex4.p4 ... exclude
+[  82/1334] complex5.p4 ... exclude
+[  83/1334] complex6.p4 ... exclude
+[  84/1334] complex8.p4 ... exclude
+[  85/1334] complex9.p4 ... exclude
+[  86/1334] concat-bmv2.p4 ... exclude
+[  87/1334] concat-fold.p4 ... exclude
+[  88/1334] concat.p4 ... exclude
+[  89/1334] const.p4 ... exclude
+[  90/1334] constStruct.p4 ... exclude
+[  91/1334] constant-fold-infint.p4 ... exclude
+[  92/1334] constant-in-calculation-bmv2.p4 ... exclude
+[  93/1334] constant_folding.p4 ... exclude
+[  94/1334] constants.p4 ... exclude
+[  95/1334] constructor_cast.p4 ... exclude
+[  96/1334] constsigned.p4 ... exclude
+[  97/1334] control-as-param.p4 ... exclude
+[  98/1334] control-hs-index-test1.p4 ... exclude
+[  99/1334] control-hs-index-test2.p4 ... exclude
+[ 100/1334] control-hs-index-test3.p4 ... exclude
+[ 101/1334] control-hs-index-test4.p4 ... exclude
+[ 102/1334] control-hs-index-test5.p4 ... exclude
+[ 103/1334] control-hs-index-test6.p4 ... exclude
+[ 104/1334] copy.p4 ... exclude
+[ 105/1334] copyprop1.p4 ... exclude
+[ 106/1334] copyprop2.p4 ... exclude
+[ 107/1334] count_add_ebpf.p4 ... exclude
+[ 108/1334] count_ebpf.p4 ... exclude
+[ 109/1334] crash-typechecker.p4 ... exclude
+[ 110/1334] crc32-bmv2.p4 ... exclude
+[ 111/1334] csum_ubpf.p4 ... exclude
+[ 112/1334] custom-type-restricted-fields.p4 ... exclude
+[ 113/1334] dash/dash-pipeline-pna-dpdk.p4 ... exclude
+[ 114/1334] dash/dash-pipeline-v1model-bmv2.p4 ... exclude
+[ 115/1334] decl.p4 ... exclude
+[ 116/1334] decl2.p4 ... exclude
+[ 117/1334] def-use.p4 ... exclude
+[ 118/1334] default-action-arg-bmv2.p4 ... exclude
+[ 119/1334] default-control-argument.p4 ... exclude
+[ 120/1334] default-initializer.p4 ... exclude
+[ 121/1334] default-package-argument.p4 ... exclude
+[ 122/1334] default-switch.p4 ... exclude
+[ 123/1334] default.p4 ... exclude
+[ 124/1334] default2.p4 ... exclude
+[ 125/1334] default_action-bmv2.p4 ... exclude
+[ 126/1334] default_action_ubpf.p4 ... exclude
+[ 127/1334] deletekey.p4 ... exclude
+[ 128/1334] direct-action.p4 ... exclude
+[ 129/1334] direct-action1.p4 ... exclude
+[ 130/1334] direct-call.p4 ... exclude
+[ 131/1334] direct-call1.p4 ... exclude
+[ 132/1334] direct-call2.p4 ... exclude
+[ 133/1334] drop-bmv2.p4 ... exclude
+[ 134/1334] duplicateMethod.p4 ... exclude
+[ 135/1334] ebpf_checksum_extern.p4 ... exclude
+[ 136/1334] ebpf_conntrack_extern.p4 ... exclude
+[ 137/1334] ebpf_headers.p4 ... exclude
+[ 138/1334] elimActRun1.p4 ... exclude
+[ 139/1334] elimActRun2.p4 ... exclude
+[ 140/1334] empty-bmv2.p4 ... exclude
+[ 141/1334] empty.p4 ... exclude
+[ 142/1334] emptyTuple.p4 ... exclude
+[ 143/1334] entries-empty-keyless.p4 ... exclude
+[ 144/1334] entries-prio.p4 ... exclude
+[ 145/1334] enum-bmv2.p4 ... exclude
+[ 146/1334] enum-folding.p4 ... exclude
+[ 147/1334] enum.p4 ... exclude
+[ 148/1334] enumCast.p4 ... exclude
+[ 149/1334] equality-bmv2.p4 ... exclude
+[ 150/1334] equality-varbit-bmv2.p4 ... exclude
+[ 151/1334] equality.p4 ... exclude
+[ 152/1334] ex1.p4 ... exclude
+[ 153/1334] exit1.p4 ... exclude
+[ 154/1334] exit2.p4 ... exclude
+[ 155/1334] exit3.p4 ... exclude
+[ 156/1334] exit4.p4 ... exclude
+[ 157/1334] exit5.p4 ... exclude
+[ 158/1334] expression.p4 ... exclude
+[ 159/1334] extern-funcs-bmv2.p4 ... exclude
+[ 160/1334] extern-inst-as-param.p4 ... exclude
+[ 161/1334] extern-int-arg1.p4 ... exclude
+[ 162/1334] extern.p4 ... exclude
+[ 163/1334] extern2.p4 ... exclude
+[ 164/1334] extern3.p4 ... exclude
+[ 165/1334] externArray1.p4 ... exclude
+[ 166/1334] extract_for_header_union.p4 ... exclude
+[ 167/1334] fabric_20190420/fabric.p4 ... exclude
+[ 168/1334] factory1.p4 ... exclude
+[ 169/1334] factory2.p4 ... exclude
+[ 170/1334] filter.p4 ... exclude
+[ 171/1334] flag_lost-bmv2.p4 ... exclude
+[ 172/1334] flowlet_switching-bmv2.p4 ... exclude
+[ 173/1334] fold_match.p4 ... exclude
+[ 174/1334] forloop-bmv2.p4 ... exclude
+[ 175/1334] forloop1.p4 ... exclude
+[ 176/1334] forloop10.p4 ... exclude
+[ 177/1334] forloop11.p4 ... exclude
+[ 178/1334] forloop12.p4 ... exclude
+[ 179/1334] forloop2.p4 ... exclude
+[ 180/1334] forloop3.p4 ... exclude
+[ 181/1334] forloop4.p4 ... exclude
+[ 182/1334] forloop5.p4 ... exclude
+[ 183/1334] forloop5a.p4 ... exclude
+[ 184/1334] forloop6.p4 ... exclude
+[ 185/1334] forloop7.p4 ... exclude
+[ 186/1334] forloop8.p4 ... exclude
+[ 187/1334] forloop9.p4 ... exclude
+[ 188/1334] free-form-annotation.p4 ... exclude
+[ 189/1334] function.p4 ... exclude
+[ 190/1334] functors.p4 ... exclude
+[ 191/1334] functors1.p4 ... exclude
+[ 192/1334] functors2.p4 ... exclude
+[ 193/1334] functors3.p4 ... exclude
+[ 194/1334] functors4.p4 ... exclude
+[ 195/1334] functors5.p4 ... exclude
+[ 196/1334] functors6.p4 ... exclude
+[ 197/1334] functors7.p4 ... exclude
+[ 198/1334] functors8.p4 ... exclude
+[ 199/1334] functors9.p4 ... exclude
+[ 200/1334] fwd-bmv2-psa.p4 ... exclude
+[ 201/1334] gauntlet_action_mux-bmv2.p4 ... exclude
+[ 202/1334] gauntlet_action_return-bmv2.p4 ... exclude
+[ 203/1334] gauntlet_arithref_cast-bmv2.p4 ... exclude
+[ 204/1334] gauntlet_bounded_loop.p4 ... exclude
+[ 205/1334] gauntlet_complex_initialization-bmv2.p4 ... exclude
+[ 206/1334] gauntlet_copy_out-bmv2.p4 ... exclude
+[ 207/1334] gauntlet_ctrl_plane_hdr.p4 ... exclude
+[ 208/1334] gauntlet_enum_assign-bmv2.p4 ... exclude
+[ 209/1334] gauntlet_exit_after_valid-bmv2.p4 ... exclude
+[ 210/1334] gauntlet_exit_combination_1-bmv2.p4 ... exclude
+[ 211/1334] gauntlet_exit_combination_10-bmv2.p4 ... exclude
+[ 212/1334] gauntlet_exit_combination_11-bmv2.p4 ... exclude
+[ 213/1334] gauntlet_exit_combination_12.p4 ... exclude
+[ 214/1334] gauntlet_exit_combination_13-bmv2.p4 ... exclude
+[ 215/1334] gauntlet_exit_combination_14-bmv2.p4 ... exclude
+[ 216/1334] gauntlet_exit_combination_15-bmv2.p4 ... exclude
+[ 217/1334] gauntlet_exit_combination_16-bmv2.p4 ... exclude
+[ 218/1334] gauntlet_exit_combination_17-bmv2.p4 ... exclude
+[ 219/1334] gauntlet_exit_combination_18-bmv2.p4 ... exclude
+[ 220/1334] gauntlet_exit_combination_19-bmv2.p4 ... exclude
+[ 221/1334] gauntlet_exit_combination_2-bmv2.p4 ... exclude
+[ 222/1334] gauntlet_exit_combination_20-bmv2.p4 ... exclude
+[ 223/1334] gauntlet_exit_combination_21-bmv2.p4 ... exclude
+[ 224/1334] gauntlet_exit_combination_22-bmv2.p4 ... exclude
+[ 225/1334] gauntlet_exit_combination_23-bmv2.p4 ... exclude
+[ 226/1334] gauntlet_exit_combination_3-bmv2.p4 ... exclude
+[ 227/1334] gauntlet_exit_combination_4-bmv2.p4 ... exclude
+[ 228/1334] gauntlet_exit_combination_5-bmv2.p4 ... exclude
+[ 229/1334] gauntlet_exit_combination_6-bmv2.p4 ... exclude
+[ 230/1334] gauntlet_exit_combination_7-bmv2.p4 ... exclude
+[ 231/1334] gauntlet_exit_combination_8-bmv2.p4 ... exclude
+[ 232/1334] gauntlet_exit_combination_9-bmv2.p4 ... exclude
+[ 233/1334] gauntlet_extern_arguments_1.p4 ... exclude
+[ 234/1334] gauntlet_extern_arguments_2.p4 ... exclude
+[ 235/1334] gauntlet_extern_arguments_3.p4 ... exclude
+[ 236/1334] gauntlet_function_if_hdr_return-bmv2.p4 ... exclude
+[ 237/1334] gauntlet_function_return-bmv2.p4 ... exclude
+[ 238/1334] gauntlet_function_return_cast-bmv2.p4 ... exclude
+[ 239/1334] gauntlet_hdr_assign_1-bmv2.p4 ... exclude
+[ 240/1334] gauntlet_hdr_assign_2-bmv2.p4 ... exclude
+[ 241/1334] gauntlet_hdr_function_cast-bmv2.p4 ... exclude
+[ 242/1334] gauntlet_hdr_in_value-bmv2.p4 ... exclude
+[ 243/1334] gauntlet_hdr_init-bmv2.p4 ... exclude
+[ 244/1334] gauntlet_hdr_int_initializer-bmv2.p4 ... exclude
+[ 245/1334] gauntlet_hdr_out_in_action-bmv2.p4 ... exclude
+[ 246/1334] gauntlet_hdr_set_valid-bmv2.p4 ... exclude
+[ 247/1334] gauntlet_index_1-bmv2.p4 ... exclude
+[ 248/1334] gauntlet_index_2-bmv2.p4 ... exclude
+[ 249/1334] gauntlet_index_4-bmv2.p4 ... exclude
+[ 250/1334] gauntlet_index_5-bmv2.p4 ... exclude
+[ 251/1334] gauntlet_index_6-bmv2.p4 ... exclude
+[ 252/1334] gauntlet_index_7-bmv2.p4 ... exclude
+[ 253/1334] gauntlet_index_8-bmv2.p4 ... exclude
+[ 254/1334] gauntlet_index_9-bmv2.p4 ... exclude
+[ 255/1334] gauntlet_indirect_hdr_assign_1-bmv2.p4 ... exclude
+[ 256/1334] gauntlet_indirect_hdr_assign_2-bmv2.p4 ... exclude
+[ 257/1334] gauntlet_infinite_loop.p4 ... exclude
+[ 258/1334] gauntlet_inout_slice_table_key-bmv2.p4 ... exclude
+[ 259/1334] gauntlet_instance_overwrite-bmv2.p4 ... exclude
+[ 260/1334] gauntlet_int_casting-bmv2.p4 ... exclude
+[ 261/1334] gauntlet_int_slice-bmv2.p4 ... exclude
+[ 262/1334] gauntlet_invalid_hdr_assign-bmv2.p4 ... exclude
+[ 263/1334] gauntlet_invalid_hdr_short_circuit-bmv2.p4 ... exclude
+[ 264/1334] gauntlet_list_as_in_argument-bmv2.p4 ... exclude
+[ 265/1334] gauntlet_lookahead_expansion-bmv2.p4 ... exclude
+[ 266/1334] gauntlet_mux_eval-bmv2.p4 ... exclude
+[ 267/1334] gauntlet_mux_hdr-bmv2.p4 ... exclude
+[ 268/1334] gauntlet_mux_typecasting-bmv2.p4 ... exclude
+[ 269/1334] gauntlet_mux_validity-bmv2.p4 ... exclude
+[ 270/1334] gauntlet_nested_ifs_in_function-bmv2.p4 ... exclude
+[ 271/1334] gauntlet_nested_slice-bmv2.p4 ... exclude
+[ 272/1334] gauntlet_nested_switch-bmv2.p4 ... exclude
+[ 273/1334] gauntlet_nested_table_calls-bmv2.p4 ... exclude
+[ 274/1334] gauntlet_optional-bmv2.p4 ... exclude
+[ 275/1334] gauntlet_parser_test_1.p4 ... exclude
+[ 276/1334] gauntlet_parser_test_2.p4 ... exclude
+[ 277/1334] gauntlet_parser_test_3.p4 ... exclude
+[ 278/1334] gauntlet_parser_test_4.p4 ... exclude
+[ 279/1334] gauntlet_return_truncate-bmv2.p4 ... exclude
+[ 280/1334] gauntlet_set_invalid-bmv2.p4 ... exclude
+[ 281/1334] gauntlet_set_valid_in_function-bmv2.p4 ... exclude
+[ 282/1334] gauntlet_short_circuit-bmv2.p4 ... exclude
+[ 283/1334] gauntlet_side_effect_order_1-bmv2.p4 ... exclude
+[ 284/1334] gauntlet_side_effect_order_2-bmv2.p4 ... exclude
+[ 285/1334] gauntlet_side_effect_order_3-bmv2.p4 ... exclude
+[ 286/1334] gauntlet_side_effect_order_4-bmv2.p4 ... exclude
+[ 287/1334] gauntlet_side_effect_order_5-bmv2.p4 ... exclude
+[ 288/1334] gauntlet_side_effects_in_mux-bmv2.p4 ... exclude
+[ 289/1334] gauntlet_switch_exclusivity-bmv2.p4 ... exclude
+[ 290/1334] gauntlet_switch_nested_table_apply-bmv2.p4 ... exclude
+[ 291/1334] gauntlet_switch_shadowing-bmv2.p4 ... exclude
+[ 292/1334] gauntlet_table_call_in_expression-bmv2.p4 ... exclude
+[ 293/1334] gauntlet_typedef_cast-bmv2.p4 ... exclude
+[ 294/1334] gauntlet_uninitialized_bool_struct-bmv2.p4 ... exclude
+[ 295/1334] gauntlet_variable_shadowing-bmv2.p4 ... exclude
+[ 296/1334] gauntlet_various_ops-bmv2.p4 ... exclude
+[ 297/1334] generic-extern-inference.p4 ... exclude
+[ 298/1334] generic-struct-tuple.p4 ... exclude
+[ 299/1334] generic-struct.p4 ... exclude
+[ 300/1334] generic.p4 ... exclude
+[ 301/1334] generic1.p4 ... exclude
+[ 302/1334] global-action.p4 ... exclude
+[ 303/1334] global-action1.p4 ... exclude
+[ 304/1334] global_action_after_exit.p4 ... exclude
+[ 305/1334] graph-annotationless-key.p4 ... exclude
+[ 306/1334] hash-bmv2.p4 ... exclude
+[ 307/1334] hash-extern-bmv2.p4 ... exclude
+[ 308/1334] hash_ubpf.p4 ... exclude
+[ 309/1334] hashext.p4 ... exclude
+[ 310/1334] hashext2.p4 ... exclude
+[ 311/1334] hashext3.p4 ... exclude
+[ 312/1334] hashing-non-tuple-bmv2.p4 ... exclude
+[ 313/1334] hdr_stacks2345.p4 ... exclude
+[ 314/1334] header-bmv2.p4 ... exclude
+[ 315/1334] header-bool-bmv2.p4 ... exclude
+[ 316/1334] header-stack-cast-init.p4 ... exclude
+[ 317/1334] header-stack-ops-bmv2.p4 ... exclude
+[ 318/1334] header.p4 ... exclude
+[ 319/1334] header_union_is_valid_in_parser.p4 ... exclude
+[ 320/1334] highorder.p4 ... exclude
+[ 321/1334] hit-expr-bmv2.p4 ... exclude
+[ 322/1334] hit_ebpf.p4 ... exclude
+[ 323/1334] index.p4 ... exclude
+[ 324/1334] init-entries-bmv2.p4 ... exclude
+[ 325/1334] init_ebpf.p4 ... exclude
+[ 326/1334] initializer.p4 ... exclude
+[ 327/1334] initializers.p4 ... exclude
+[ 328/1334] inline-action.p4 ... exclude
+[ 329/1334] inline-bmv2.p4 ... exclude
+[ 330/1334] inline-control.p4 ... exclude
+[ 331/1334] inline-control1.p4 ... exclude
+[ 332/1334] inline-function-to-array-index-chained.p4 ... exclude
+[ 333/1334] inline-function-to-array-index.p4 ... exclude
+[ 334/1334] inline-function.p4 ... exclude
+[ 335/1334] inline-function2.p4 ... exclude
+[ 336/1334] inline-function3.p4 ... exclude
+[ 337/1334] inline-parser.p4 ... exclude
+[ 338/1334] inline-stack-bmv2.p4 ... exclude
+[ 339/1334] inline-switch.p4 ... exclude
+[ 340/1334] inline.p4 ... exclude
+[ 341/1334] intType.p4 ... exclude
+[ 342/1334] interface.p4 ... exclude
+[ 343/1334] interface1.p4 ... exclude
+[ 344/1334] interface2.p4 ... exclude
+[ 345/1334] internet_checksum1-bmv2.p4 ... exclude
+[ 346/1334] intrinsic-bmv2.p4 ... exclude
+[ 347/1334] invalid-hdr-warnings1.p4 ... exclude
+[ 348/1334] invalid-hdr-warnings2.p4 ... exclude
+[ 349/1334] invalid-hdr-warnings3-bmv2.p4 ... exclude
+[ 350/1334] invalid-hdr-warnings4.p4 ... exclude
+[ 351/1334] invalid-hdr-warnings5.p4 ... exclude
+[ 352/1334] invalid-hdr-warnings6.p4 ... exclude
+[ 353/1334] invalid-hdr-warnings7.p4 ... exclude
+[ 354/1334] invalid-hdr-warnings8.p4 ... exclude
+[ 355/1334] invalid-header.p4 ... exclude
+[ 356/1334] invalid-union.p4 ... exclude
+[ 357/1334] invalid_header_default_action_arg.p4 ... exclude
+[ 358/1334] inverted-range.p4 ... exclude
+[ 359/1334] ipv4-actions_ubpf.p4 ... exclude
+[ 360/1334] ipv6-actions_ubpf.p4 ... exclude
+[ 361/1334] ipv6-switch-ml-bmv2.p4 ... exclude
+[ 362/1334] issue-2123-2-bmv2.p4 ... exclude
+[ 363/1334] issue-2123-3-bmv2.p4 ... exclude
+[ 364/1334] issue-2123.p4 ... exclude
+[ 365/1334] issue-3312-graph-bmv2.p4 ... exclude
+[ 366/1334] issue-4969-bmv2.p4 ... exclude
+[ 367/1334] issue1000-bmv2.p4 ... exclude
+[ 368/1334] issue1001-1-bmv2.p4 ... exclude
+[ 369/1334] issue1001-bmv2.p4 ... exclude
+[ 370/1334] issue1006.p4 ... exclude
+[ 371/1334] issue1025-bmv2.p4 ... exclude
+[ 372/1334] issue1043-bmv2.p4 ... exclude
+[ 373/1334] issue1049-bmv2.p4 ... exclude
+[ 374/1334] issue1062-1-bmv2.p4 ... exclude
+[ 375/1334] issue1062-bmv2.p4 ... exclude
+[ 376/1334] issue1079-bmv2.p4 ... exclude
+[ 377/1334] issue1097-2-bmv2.p4 ... exclude
+[ 378/1334] issue1097-bmv2.p4 ... exclude
+[ 379/1334] issue1107.p4 ... exclude
+[ 380/1334] issue1127-bmv2.p4 ... exclude
+[ 381/1334] issue1160.p4 ... exclude
+[ 382/1334] issue1172.p4 ... exclude
+[ 383/1334] issue1193-bmv2.p4 ... exclude
+[ 384/1334] issue1205-bmv2.p4 ... exclude
+[ 385/1334] issue1208-1.p4 ... exclude
+[ 386/1334] issue1208.p4 ... exclude
+[ 387/1334] issue1210.p4 ... exclude
+[ 388/1334] issue1291-bmv2.p4 ... exclude
+[ 389/1334] issue1301.p4 ... exclude
+[ 390/1334] issue1304.p4 ... exclude
+[ 391/1334] issue1325-bmv2.p4 ... exclude
+[ 392/1334] issue1333.p4 ... exclude
+[ 393/1334] issue1334.p4 ... exclude
+[ 394/1334] issue134-bmv2.p4 ... exclude
+[ 395/1334] issue1342.p4 ... exclude
+[ 396/1334] issue1352-bmv2.p4 ... exclude
+[ 397/1334] issue1386.p4 ... exclude
+[ 398/1334] issue1406.p4 ... exclude
+[ 399/1334] issue1409-bmv2.p4 ... exclude
+[ 400/1334] issue1412-bmv2.p4 ... exclude
+[ 401/1334] issue1452-1.p4 ... exclude
+[ 402/1334] issue1452.p4 ... exclude
+[ 403/1334] issue1466.p4 ... exclude
+[ 404/1334] issue1470-bmv2.p4 ... exclude
+[ 405/1334] issue1478-bmv2.p4 ... exclude
+[ 406/1334] issue1517-bmv2.p4 ... exclude
+[ 407/1334] issue1520-bmv2.p4 ... exclude
+[ 408/1334] issue1524.p4 ... exclude
+[ 409/1334] issue1535.p4 ... exclude
+[ 410/1334] issue1538.p4 ... exclude
+[ 411/1334] issue1540.p4 ... exclude
+[ 412/1334] issue1541.p4 ... exclude
+[ 413/1334] issue1544-1-bmv2.p4 ... exclude
+[ 414/1334] issue1544-2-bmv2.p4 ... exclude
+[ 415/1334] issue1544-2.p4 ... exclude
+[ 416/1334] issue1544-bmv2.p4 ... exclude
+[ 417/1334] issue1560-bmv2.p4 ... exclude
+[ 418/1334] issue1566-bmv2.p4 ... exclude
+[ 419/1334] issue1586.p4 ... exclude
+[ 420/1334] issue1595-1.p4 ... exclude
+[ 421/1334] issue1595.p4 ... exclude
+[ 422/1334] issue1607-bmv2.p4 ... exclude
+[ 423/1334] issue1630-bmv2.p4 ... exclude
+[ 424/1334] issue1638.p4 ... exclude
+[ 425/1334] issue1642-bmv2.p4 ... exclude
+[ 426/1334] issue1653-bmv2.p4 ... exclude
+[ 427/1334] issue1653-complex-bmv2.p4 ... exclude
+[ 428/1334] issue1660-bmv2.p4 ... exclude
+[ 429/1334] issue1670-bmv2.p4 ... exclude
+[ 430/1334] issue1713-bmv2.p4 ... exclude
+[ 431/1334] issue1717.p4 ... exclude
+[ 432/1334] issue1724.p4 ... exclude
+[ 433/1334] issue1739-bmv2.p4 ... exclude
+[ 434/1334] issue1755-1-bmv2.p4 ... exclude
+[ 435/1334] issue1755-bmv2.p4 ... exclude
+[ 436/1334] issue1765-1-bmv2.p4 ... exclude
+[ 437/1334] issue1765-bmv2.p4 ... exclude
+[ 438/1334] issue1768-bmv2.p4 ... exclude
+[ 439/1334] issue1781-bmv2.p4 ... exclude
+[ 440/1334] issue1806.p4 ... exclude
+[ 441/1334] issue1814-1-bmv2.p4 ... exclude
+[ 442/1334] issue1814-bmv2.p4 ... exclude
+[ 443/1334] issue1822.p4 ... exclude
+[ 444/1334] issue1824-bmv2.p4 ... exclude
+[ 445/1334] issue1829-4-bmv2.p4 ... exclude
+[ 446/1334] issue1830.p4 ... exclude
+[ 447/1334] issue1834-bmv2.p4 ... exclude
+[ 448/1334] issue1863.p4 ... exclude
+[ 449/1334] issue1876.p4 ... exclude
+[ 450/1334] issue1879-bmv2.p4 ... exclude
+[ 451/1334] issue1882-1-bmv2.p4 ... exclude
+[ 452/1334] issue1882-bmv2.p4 ... exclude
+[ 453/1334] issue1897-bmv2.p4 ... exclude
+[ 454/1334] issue1914-1.p4 ... exclude
+[ 455/1334] issue1914.p4 ... exclude
+[ 456/1334] issue1937-1-bmv2.p4 ... exclude
+[ 457/1334] issue1937-2-bmv2.p4 ... exclude
+[ 458/1334] issue1937-3-bmv2.p4 ... exclude
+[ 459/1334] issue1937.p4 ... exclude
+[ 460/1334] issue1955.p4 ... exclude
+[ 461/1334] issue1958.p4 ... exclude
+[ 462/1334] issue1985.p4 ... exclude
+[ 463/1334] issue1989-bmv2.p4 ... exclude
+[ 464/1334] issue1997.p4 ... exclude
+[ 465/1334] issue2019-1.p4 ... exclude
+[ 466/1334] issue2019.p4 ... exclude
+[ 467/1334] issue2036-3.p4 ... exclude
+[ 468/1334] issue2037.p4 ... exclude
+[ 469/1334] issue2044-bmv2.p4 ... exclude
+[ 470/1334] issue2090.p4 ... exclude
+[ 471/1334] issue210.p4 ... exclude
+[ 472/1334] issue2102.p4 ... exclude
+[ 473/1334] issue2104-1.p4 ... exclude
+[ 474/1334] issue2104.p4 ... exclude
+[ 475/1334] issue2105.p4 ... exclude
+[ 476/1334] issue2126.p4 ... exclude
+[ 477/1334] issue2127.p4 ... exclude
+[ 478/1334] issue2147-1.p4 ... exclude
+[ 479/1334] issue2147-bmv2.p4 ... exclude
+[ 480/1334] issue2147.p4 ... exclude
+[ 481/1334] issue2148.p4 ... exclude
+[ 482/1334] issue2151.p4 ... exclude
+[ 483/1334] issue2153-bmv2.p4 ... exclude
+[ 484/1334] issue2155.p4 ... exclude
+[ 485/1334] issue2170-bmv2.p4 ... exclude
+[ 486/1334] issue2175-1.p4 ... exclude
+[ 487/1334] issue2175-2.p4 ... exclude
+[ 488/1334] issue2175-3.p4 ... exclude
+[ 489/1334] issue2175-4.p4 ... exclude
+[ 490/1334] issue2175-5.p4 ... exclude
+[ 491/1334] issue2175-6.p4 ... exclude
+[ 492/1334] issue2175.p4 ... exclude
+[ 493/1334] issue2176-bmv2.p4 ... exclude
+[ 494/1334] issue2190.p4 ... exclude
+[ 495/1334] issue2201-bmv2.p4 ... exclude
+[ 496/1334] issue2205-1-bmv2.p4 ... exclude
+[ 497/1334] issue2205-bmv2.p4 ... exclude
+[ 498/1334] issue2208.p4 ... exclude
+[ 499/1334] issue2213-1.p4 ... exclude
+[ 500/1334] issue2213-bmv2.p4 ... exclude
+[ 501/1334] issue2213.p4 ... exclude
+[ 502/1334] issue2221-bmv2.p4 ... exclude
+[ 503/1334] issue2225-bmv2.p4 ... exclude
+[ 504/1334] issue2248.p4 ... exclude
+[ 505/1334] issue2258-bmv2.p4 ... exclude
+[ 506/1334] issue2260-2.p4 ... exclude
+[ 507/1334] issue2261.p4 ... exclude
+[ 508/1334] issue2265-1.p4 ... exclude
+[ 509/1334] issue2265.p4 ... exclude
+[ 510/1334] issue2266.p4 ... exclude
+[ 511/1334] issue2273-1.p4 ... exclude
+[ 512/1334] issue2273.p4 ... exclude
+[ 513/1334] issue2279.p4 ... exclude
+[ 514/1334] issue2279_1.p4 ... exclude
+[ 515/1334] issue2279_2.p4 ... exclude
+[ 516/1334] issue2279_3.p4 ... exclude
+[ 517/1334] issue2279_4.p4 ... exclude
+[ 518/1334] issue2283_1-bmv2.p4 ... exclude
+[ 519/1334] issue2287-bmv2.p4 ... exclude
+[ 520/1334] issue2288-1.p4 ... exclude
+[ 521/1334] issue2288-2.p4 ... exclude
+[ 522/1334] issue2288.p4 ... exclude
+[ 523/1334] issue2289.p4 ... exclude
+[ 524/1334] issue2291-bmv2.p4 ... exclude
+[ 525/1334] issue2303.p4 ... exclude
+[ 526/1334] issue2314.p4 ... exclude
+[ 527/1334] issue232-bmv2.p4 ... exclude
+[ 528/1334] issue2321.p4 ... exclude
+[ 529/1334] issue2330-1.p4 ... exclude
+[ 530/1334] issue2330.p4 ... exclude
+[ 531/1334] issue2335-1.p4 ... exclude
+[ 532/1334] issue2342.p4 ... exclude
+[ 533/1334] issue2343-bmv2.p4 ... exclude
+[ 534/1334] issue2344.p4 ... exclude
+[ 535/1334] issue2345-1.p4 ... exclude
+[ 536/1334] issue2345-2.p4 ... exclude
+[ 537/1334] issue2345-multiple_dependencies.p4 ... exclude
+[ 538/1334] issue2345-with_nested_if.p4 ... exclude
+[ 539/1334] issue2345.p4 ... exclude
+[ 540/1334] issue2355.p4 ... exclude
+[ 541/1334] issue2356.p4 ... exclude
+[ 542/1334] issue2359.p4 ... exclude
+[ 543/1334] issue2362-bmv2.p4 ... exclude
+[ 544/1334] issue2375-1-bmv2.p4 ... exclude
+[ 545/1334] issue2375-bmv2.p4 ... exclude
+[ 546/1334] issue2383-bmv2.p4 ... exclude
+[ 547/1334] issue2391.p4 ... exclude
+[ 548/1334] issue2392-bmv2.p4 ... exclude
+[ 549/1334] issue2393.p4 ... exclude
+[ 550/1334] issue2409.p4 ... exclude
+[ 551/1334] issue242.p4 ... exclude
+[ 552/1334] issue2444.p4 ... exclude
+[ 553/1334] issue2445.p4 ... exclude
+[ 554/1334] issue2465-bmv2.p4 ... exclude
+[ 555/1334] issue2480.p4 ... exclude
+[ 556/1334] issue2485.p4 ... exclude
+[ 557/1334] issue2487.p4 ... exclude
+[ 558/1334] issue2488-bmv2.p4 ... exclude
+[ 559/1334] issue249.p4 ... exclude
+[ 560/1334] issue2492.p4 ... exclude
+[ 561/1334] issue2495-bmv2.p4 ... exclude
+[ 562/1334] issue2498-bmv2.p4 ... exclude
+[ 563/1334] issue2514.p4 ... exclude
+[ 564/1334] issue2542.p4 ... exclude
+[ 565/1334] issue2543-1.p4 ... exclude
+[ 566/1334] issue2543-2.p4 ... exclude
+[ 567/1334] issue2544_shadowing2.p4 ... exclude
+[ 568/1334] issue2546-1.p4 ... exclude
+[ 569/1334] issue2546-2.p4 ... exclude
+[ 570/1334] issue2546.p4 ... exclude
+[ 571/1334] issue2583_simplify_slice.p4 ... exclude
+[ 572/1334] issue2583_simplify_slice2.p4 ... exclude
+[ 573/1334] issue2585.p4 ... exclude
+[ 574/1334] issue2599.p4 ... exclude
+[ 575/1334] issue2614-bmv2.p4 ... exclude
+[ 576/1334] issue2617.p4 ... exclude
+[ 577/1334] issue2627.p4 ... exclude
+[ 578/1334] issue2630.p4 ... exclude
+[ 579/1334] issue2635.p4 ... exclude
+[ 580/1334] issue2648.p4 ... exclude
+[ 581/1334] issue2657-bmv2.p4 ... exclude
+[ 582/1334] issue2664-bmv2.p4 ... exclude
+[ 583/1334] issue270-bmv2.p4 ... exclude
+[ 584/1334] issue2710.p4 ... exclude
+[ 585/1334] issue272-1-bmv2.p4 ... exclude
+[ 586/1334] issue272-2-bmv2.p4 ... exclude
+[ 587/1334] issue2726-bmv2.p4 ... exclude
+[ 588/1334] issue2735-bmv2.p4 ... exclude
+[ 589/1334] issue2735.p4 ... exclude
+[ 590/1334] issue2791_ebpf.p4 ... exclude
+[ 591/1334] issue2793_ebpf.p4 ... exclude
+[ 592/1334] issue2795.p4 ... exclude
+[ 593/1334] issue2797_ebpf.p4 ... exclude
+[ 594/1334] issue2800a.p4 ... exclude
+[ 595/1334] issue2800b.p4 ... exclude
+[ 596/1334] issue2800c.p4 ... exclude
+[ 597/1334] issue2800d.p4 ... exclude
+[ 598/1334] issue281.p4 ... exclude
+[ 599/1334] issue2810.p4 ... exclude
+[ 600/1334] issue2816-1_ebpf.p4 ... exclude
+[ 601/1334] issue2816_ebpf.p4 ... exclude
+[ 602/1334] issue2844-enum.p4 ... exclude
+[ 603/1334] issue2890.p4 ... exclude
+[ 604/1334] issue2900.p4 ... exclude
+[ 605/1334] issue2904.p4 ... exclude
+[ 606/1334] issue2905-bmv2.p4 ... exclude
+[ 607/1334] issue2905.p4 ... exclude
+[ 608/1334] issue2956.p4 ... exclude
+[ 609/1334] issue2957.p4 ... exclude
+[ 610/1334] issue2958.p4 ... exclude
+[ 611/1334] issue297-bmv2.p4 ... exclude
+[ 612/1334] issue298-bmv2.p4 ... exclude
+[ 613/1334] issue2982.p4 ... exclude
+[ 614/1334] issue3001-1.p4 ... exclude
+[ 615/1334] issue3001.p4 ... exclude
+[ 616/1334] issue304-1.p4 ... exclude
+[ 617/1334] issue304.p4 ... exclude
+[ 618/1334] issue3051.p4 ... exclude
+[ 619/1334] issue3056.p4 ... exclude
+[ 620/1334] issue3057-2.p4 ... exclude
+[ 621/1334] issue3091-1.p4 ... exclude
+[ 622/1334] issue3091.p4 ... exclude
+[ 623/1334] issue3118-bmv2.p4 ... exclude
+[ 624/1334] issue313_1.p4 ... exclude
+[ 625/1334] issue313_2.p4 ... exclude
+[ 626/1334] issue313_3.p4 ... exclude
+[ 627/1334] issue314.p4 ... exclude
+[ 628/1334] issue3178.p4 ... exclude
+[ 629/1334] issue3197.p4 ... exclude
+[ 630/1334] issue3203.p4 ... exclude
+[ 631/1334] issue3204.p4 ... exclude
+[ 632/1334] issue3219.p4 ... exclude
+[ 633/1334] issue3225.p4 ... exclude
+[ 634/1334] issue323.p4 ... exclude
+[ 635/1334] issue3233.p4 ... exclude
+[ 636/1334] issue3238.p4 ... exclude
+[ 637/1334] issue3246-1.p4 ... exclude
+[ 638/1334] issue3274-1.p4 ... exclude
+[ 639/1334] issue3274-2.p4 ... exclude
+[ 640/1334] issue3274.p4 ... exclude
+[ 641/1334] issue3283.p4 ... exclude
+[ 642/1334] issue3287.p4 ... exclude
+[ 643/1334] issue3288.p4 ... exclude
+[ 644/1334] issue3289.p4 ... exclude
+[ 645/1334] issue3292.p4 ... exclude
+[ 646/1334] issue3307.p4 ... exclude
+[ 647/1334] issue3324.p4 ... exclude
+[ 648/1334] issue3329-bmv2.p4 ... exclude
+[ 649/1334] issue3333.p4 ... exclude
+[ 650/1334] issue3343.p4 ... exclude
+[ 651/1334] issue3364.p4 ... exclude
+[ 652/1334] issue3374.p4 ... exclude
+[ 653/1334] issue3379-1.p4 ... exclude
+[ 654/1334] issue3379.p4 ... exclude
+[ 655/1334] issue3394.p4 ... exclude
+[ 656/1334] issue3417.p4 ... exclude
+[ 657/1334] issue344.p4 ... exclude
+[ 658/1334] issue3483_ubpf.p4 ... exclude
+[ 659/1334] issue3486.p4 ... exclude
+[ 660/1334] issue3488-1-bmv2.p4 ... exclude
+[ 661/1334] issue3488-bmv2.p4 ... exclude
+[ 662/1334] issue3531.p4 ... exclude
+[ 663/1334] issue355-bmv2.p4 ... exclude
+[ 664/1334] issue3550.p4 ... exclude
+[ 665/1334] issue356-bmv2.p4 ... exclude
+[ 666/1334] issue361-bmv2.p4 ... exclude
+[ 667/1334] issue3616.p4 ... exclude
+[ 668/1334] issue3619-1.p4 ... exclude
+[ 669/1334] issue3619.p4 ... exclude
+[ 670/1334] issue3623-1.p4 ... exclude
+[ 671/1334] issue3623.p4 ... exclude
+[ 672/1334] issue3635.p4 ... exclude
+[ 673/1334] issue364-bmv2.p4 ... exclude
+[ 674/1334] issue3650.p4 ... exclude
+[ 675/1334] issue3671-1.p4 ... exclude
+[ 676/1334] issue3671.p4 ... exclude
+[ 677/1334] issue3672.p4 ... exclude
+[ 678/1334] issue3699.p4 ... exclude
+[ 679/1334] issue3702-bmv2.p4 ... exclude
+[ 680/1334] issue3779.p4 ... exclude
+[ 681/1334] issue3806.p4 ... exclude
+[ 682/1334] issue383-bmv2.p4 ... exclude
+[ 683/1334] issue3884-1.p4 ... exclude
+[ 684/1334] issue3884.p4 ... exclude
+[ 685/1334] issue396.p4 ... exclude
+[ 686/1334] issue4057.p4 ... exclude
+[ 687/1334] issue407-2.p4 ... exclude
+[ 688/1334] issue407-3.p4 ... exclude
+[ 689/1334] issue4133.p4 ... exclude
+[ 690/1334] issue414-bmv2.p4 ... exclude
+[ 691/1334] issue4143.p4 ... exclude
+[ 692/1334] issue420.p4 ... exclude
+[ 693/1334] issue422.p4 ... exclude
+[ 694/1334] issue4288.p4 ... exclude
+[ 695/1334] issue430-1-bmv2.p4 ... exclude
+[ 696/1334] issue430-bmv2.p4 ... exclude
+[ 697/1334] issue4365_wdisable_precedence_over_werror.p4 ... exclude
+[ 698/1334] issue4365_wdisable_precedence_over_werror_control.p4 ... exclude
+[ 699/1334] issue447-1-bmv2.p4 ... exclude
+[ 700/1334] issue447-2-bmv2.p4 ... exclude
+[ 701/1334] issue447-3-bmv2.p4 ... exclude
+[ 702/1334] issue447-4-bmv2.p4 ... exclude
+[ 703/1334] issue447-5-bmv2.p4 ... exclude
+[ 704/1334] issue447-bmv2.p4 ... exclude
+[ 705/1334] issue4500.p4 ... exclude
+[ 706/1334] issue4507_1.p4 ... exclude
+[ 707/1334] issue4507_2.p4 ... exclude
+[ 708/1334] issue4548.p4 ... exclude
+[ 709/1334] issue461-bmv2.p4 ... exclude
+[ 710/1334] issue4625_remove_compile_time_bool_methodcall_of_mcs.p4 ... exclude
+[ 711/1334] issue4625_remove_compile_time_const_methodcall_of_mcs.p4 ... exclude
+[ 712/1334] issue4656_const_fold_generic_switch_label_expr.p4 ... exclude
+[ 713/1334] issue4656_fold_bit_width_const_mux_expr.p4 ... exclude
+[ 714/1334] issue4661_non_pure_extern_function_const_args.p4 ... exclude
+[ 715/1334] issue4661_pure_extern_function_const_args.p4 ... exclude
+[ 716/1334] issue47.p4 ... exclude
+[ 717/1334] issue4739.p4 ... exclude
+[ 718/1334] issue4760_dontcare_action_out_arg.p4 ... exclude
+[ 719/1334] issue4775-2.p4 ... exclude
+[ 720/1334] issue4775.p4 ... exclude
+[ 721/1334] issue4796.p4 ... exclude
+[ 722/1334] issue4835-generic-struct.p4 ... exclude
+[ 723/1334] issue486-bmv2.p4 ... exclude
+[ 724/1334] issue4883_dup_has_returned_decl.p4 ... exclude
+[ 725/1334] issue4883_dup_has_returned_decl2.p4 ... exclude
+[ 726/1334] issue4901_new_start_with_no_start_loopback.p4 ... exclude
+[ 727/1334] issue4901_new_start_with_start_state_loopback.p4 ... exclude
+[ 728/1334] issue4901_new_start_with_start_state_loopback2.p4 ... exclude
+[ 729/1334] issue4932.p4 ... exclude
+[ 730/1334] issue496.p4 ... exclude
+[ 731/1334] issue5035.p4 ... exclude
+[ 732/1334] issue5085.p4 ... exclude
+[ 733/1334] issue5094-typedef-bmv2.p4 ... exclude
+[ 734/1334] issue510-bmv2.p4 ... exclude
+[ 735/1334] issue512.p4 ... exclude
+[ 736/1334] issue5211_simplify_parsers_dup_state_local_var_decl.p4 ... exclude
+[ 737/1334] issue5231-const-int-concat.p4 ... exclude
+[ 738/1334] issue5237-folding-unused-const.p4 ... exclude
+[ 739/1334] issue5237-folding-unused-minsizeinbits.p4 ... exclude
+[ 740/1334] issue5253_legal_overloads.p4 ... exclude
+[ 741/1334] issue529.p4 ... exclude
+[ 742/1334] issue5331-explicit-cast-overflow-mismatch-warning.p4 ... exclude
+[ 743/1334] issue5331-explicit-cast-overflow-mismatch-warning2.p4 ... exclude
+[ 744/1334] issue5331-explicit-cast-overflow-mismatch-warning3.p4 ... exclude
+[ 745/1334] issue5331_srcinfo.p4 ... exclude
+[ 746/1334] issue5335_default_initialized_non_header_stack.p4 ... exclude
+[ 747/1334] issue5335_default_initialized_non_header_stack_nested.p4 ... exclude
+[ 748/1334] issue5439.p4 ... exclude
+[ 749/1334] issue5499.p4 ... exclude
+[ 750/1334] issue561-1-bmv2.p4 ... exclude
+[ 751/1334] issue561-2-bmv2.p4 ... exclude
+[ 752/1334] issue561-3-bmv2.p4 ... exclude
+[ 753/1334] issue561-4-bmv2.p4 ... exclude
+[ 754/1334] issue561-5-bmv2.p4 ... exclude
+[ 755/1334] issue561-6-bmv2.p4 ... exclude
+[ 756/1334] issue561-7-bmv2.p4 ... exclude
+[ 757/1334] issue561-bmv2.p4 ... exclude
+[ 758/1334] issue561.p4 ... exclude
+[ 759/1334] issue562-bmv2.p4 ... exclude
+[ 760/1334] issue5653.p4 ... exclude
+[ 761/1334] issue5706_header_union_stack.p4 ... exclude
+[ 762/1334] issue584-1-bmv2.p4 ... exclude
+[ 763/1334] issue635-bmv2.p4 ... exclude
+[ 764/1334] issue638-1.p4 ... exclude
+[ 765/1334] issue648.p4 ... exclude
+[ 766/1334] issue655-bmv2.p4 ... exclude
+[ 767/1334] issue677-bmv2.p4 ... exclude
+[ 768/1334] issue692-bmv2.p4 ... exclude
+[ 769/1334] issue696-bmv2.p4 ... exclude
+[ 770/1334] issue737-bmv2.p4 ... exclude
+[ 771/1334] issue754.p4 ... exclude
+[ 772/1334] issue774-4-bmv2.p4 ... exclude
+[ 773/1334] issue774.p4 ... exclude
+[ 774/1334] issue793.p4 ... exclude
+[ 775/1334] issue794.p4 ... exclude
+[ 776/1334] issue803-2.p4 ... exclude
+[ 777/1334] issue803-3.p4 ... exclude
+[ 778/1334] issue803.p4 ... exclude
+[ 779/1334] issue822.p4 ... exclude
+[ 780/1334] issue823.p4 ... exclude
+[ 781/1334] issue841.p4 ... exclude
+[ 782/1334] issue870_ebpf.p4 ... exclude
+[ 783/1334] issue871.p4 ... exclude
+[ 784/1334] issue887.p4 ... exclude
+[ 785/1334] issue891-bmv2.p4 ... exclude
+[ 786/1334] issue907-bmv2.p4 ... exclude
+[ 787/1334] issue914-bmv2.p4 ... exclude
+[ 788/1334] issue933-1.p4 ... exclude
+[ 789/1334] issue933.p4 ... exclude
+[ 790/1334] issue940.p4 ... exclude
+[ 791/1334] issue949.p4 ... exclude
+[ 792/1334] issue951.p4 ... exclude
+[ 793/1334] issue955.p4 ... exclude
+[ 794/1334] issue982.p4 ... exclude
+[ 795/1334] issue983-bmv2.p4 ... exclude
+[ 796/1334] issue986-1-bmv2.p4 ... exclude
+[ 797/1334] issue986-bmv2.p4 ... exclude
+[ 798/1334] issue995-bmv2.p4 ... exclude
+[ 799/1334] junk-prop-bmv2.p4 ... exclude
+[ 800/1334] key-bmv2.p4 ... exclude
+[ 801/1334] key-issue-1020_ebpf.p4 ... exclude
+[ 802/1334] key1-bmv2.p4 ... exclude
+[ 803/1334] key_after_exit.p4 ... exclude
+[ 804/1334] key_ebpf.p4 ... exclude
+[ 805/1334] kvanno.p4 ... exclude
+[ 806/1334] large.p4 ... exclude
+[ 807/1334] length_ebpf.p4 ... exclude
+[ 808/1334] line.p4 ... exclude
+[ 809/1334] list-compare.p4 ... exclude
+[ 810/1334] list.p4 ... exclude
+[ 811/1334] list1.p4 ... exclude
+[ 812/1334] list2.p4 ... exclude
+[ 813/1334] list3.p4 ... exclude
+[ 814/1334] list4.p4 ... exclude
+[ 815/1334] list5.p4 ... exclude
+[ 816/1334] list6.p4 ... exclude
+[ 817/1334] list7.p4 ... exclude
+[ 818/1334] list8.p4 ... exclude
+[ 819/1334] list9.p4 ... exclude
+[ 820/1334] lj_example.p4 ... exclude
+[ 821/1334] localize_action_dont_care_args.p4 ... exclude
+[ 822/1334] logging-bmv2.p4 ... exclude
+[ 823/1334] lookahead_ubpf.p4 ... exclude
+[ 824/1334] loop-3-clause-tricky2.p4 ... exclude
+[ 825/1334] lpm_ebpf.p4 ... exclude
+[ 826/1334] lpm_ubpf.p4 ... exclude
+[ 827/1334] lvalue-parens.p4 ... exclude
+[ 828/1334] m_psa-dpdk-non-zero-arg-default-action-08.p4 ... exclude
+[ 829/1334] mask.p4 ... exclude
+[ 830/1334] match-on-exprs-bmv2.p4 ... exclude
+[ 831/1334] match-on-exprs2-bmv2.p4 ... exclude
+[ 832/1334] match.p4 ... exclude
+[ 833/1334] metadata_ubpf.p4 ... exclude
+[ 834/1334] methodArgCast.p4 ... exclude
+[ 835/1334] methodArgs.p4 ... exclude
+[ 836/1334] metrics/metrics_test_1.p4 ... exclude
+[ 837/1334] metrics/metrics_test_2.p4 ... exclude
+[ 838/1334] metrics/metrics_test_3.p4 ... exclude
+[ 839/1334] metrics/metrics_test_4.p4 ... exclude
+[ 840/1334] metrics/metrics_test_5.p4 ... exclude
+[ 841/1334] metrics/metrics_test_6.p4 ... exclude
+[ 842/1334] metrics/metrics_test_7.p4 ... exclude
+[ 843/1334] metrics/metrics_test_8.p4 ... exclude
+[ 844/1334] minsize.p4 ... exclude
+[ 845/1334] ml-headers.p4 ... exclude
+[ 846/1334] module.p4 ... exclude
+[ 847/1334] multicast-bmv2.p4 ... exclude
+[ 848/1334] mux-bmv2.p4 ... exclude
+[ 849/1334] name_annotations_to_p4info-bmv2.p4 ... exclude
+[ 850/1334] named-arg.p4 ... exclude
+[ 851/1334] named-arg1.p4 ... exclude
+[ 852/1334] named_meter_1-bmv2.p4 ... exclude
+[ 853/1334] named_meter_bmv2.p4 ... exclude
+[ 854/1334] names.p4 ... exclude
+[ 855/1334] nested-actions-with-return-exit1.p4 ... exclude
+[ 856/1334] nested-struct.p4 ... exclude
+[ 857/1334] nested-tuple.p4 ... exclude
+[ 858/1334] nested-tuple1.p4 ... exclude
+[ 859/1334] nested_if_else.p4 ... exclude
+[ 860/1334] nested_if_lvalue_dependencies.p4 ... exclude
+[ 861/1334] nested_if_statement.p4 ... exclude
+[ 862/1334] nested_select.p4 ... exclude
+[ 863/1334] newtype.p4 ... exclude
+[ 864/1334] newtype1.p4 ... exclude
+[ 865/1334] newtype2.p4 ... exclude
+[ 866/1334] next-def-use.p4 ... exclude
+[ 867/1334] noMatch.p4 ... exclude
+[ 868/1334] noWarn-unknown-diagnostic.p4 ... exclude
+[ 869/1334] non_header_array_access_in_parser.p4 ... exclude
+[ 870/1334] nonstandard_table_names-bmv2.p4 ... exclude
+[ 871/1334] octal.p4 ... exclude
+[ 872/1334] omec/up4.p4 ... exclude
+[ 873/1334] op_bin.p4 ... exclude
+[ 874/1334] opassign1-bmv2.p4 ... exclude
+[ 875/1334] opassign1.p4 ... exclude
+[ 876/1334] opassign2-bmv2.p4 ... exclude
+[ 877/1334] overwrite.p4 ... exclude
+[ 878/1334] p416-type-use3.p4 ... exclude
+[ 879/1334] p4rt_digest_complex.p4 ... exclude
+[ 880/1334] package.p4 ... exclude
+[ 881/1334] parenthesis-test_ubpf.p4 ... exclude
+[ 882/1334] parse.p4 ... exclude
+[ 883/1334] parser-arg.p4 ... exclude
+[ 884/1334] parser-conditional.p4 ... exclude
+[ 885/1334] parser-if.p4 ... exclude
+[ 886/1334] parser-inline/parser-inline-test1.p4 ... exclude
+[ 887/1334] parser-inline/parser-inline-test10.p4 ... exclude
+[ 888/1334] parser-inline/parser-inline-test11.p4 ... exclude
+[ 889/1334] parser-inline/parser-inline-test12.p4 ... exclude
+[ 890/1334] parser-inline/parser-inline-test13.p4 ... exclude
+[ 891/1334] parser-inline/parser-inline-test2.p4 ... exclude
+[ 892/1334] parser-inline/parser-inline-test3.p4 ... exclude
+[ 893/1334] parser-inline/parser-inline-test4.p4 ... exclude
+[ 894/1334] parser-inline/parser-inline-test5.p4 ... exclude
+[ 895/1334] parser-inline/parser-inline-test6.p4 ... exclude
+[ 896/1334] parser-inline/parser-inline-test7.p4 ... exclude
+[ 897/1334] parser-inline/parser-inline-test8.p4 ... exclude
+[ 898/1334] parser-inline/parser-inline-test9.p4 ... exclude
+[ 899/1334] parser-locals.p4 ... exclude
+[ 900/1334] parser-locals2.p4 ... exclude
+[ 901/1334] parser-pragma.p4 ... exclude
+[ 902/1334] parser-unroll-issue3537-1.p4 ... exclude
+[ 903/1334] parser-unroll-issue3537.p4 ... exclude
+[ 904/1334] parser-unroll-issue4006_twice_extracted_header.p4 ... exclude
+[ 905/1334] parser-unroll-t1-cond.p4 ... exclude
+[ 906/1334] parser-unroll-test1.p4 ... exclude
+[ 907/1334] parser-unroll-test10.p4 ... exclude
+[ 908/1334] parser-unroll-test2.p4 ... exclude
+[ 909/1334] parser-unroll-test3.p4 ... exclude
+[ 910/1334] parser-unroll-test4.p4 ... exclude
+[ 911/1334] parser-unroll-test5.p4 ... exclude
+[ 912/1334] parser-unroll-test6.p4 ... exclude
+[ 913/1334] parser-unroll-test7.p4 ... exclude
+[ 914/1334] parser-unroll-test8.p4 ... exclude
+[ 915/1334] parser-unroll-test9.p4 ... exclude
+[ 916/1334] parser-unroll-uninitialized-slice-read.p4 ... exclude
+[ 917/1334] parser-unroll-uninitialized-slice-write.p4 ... exclude
+[ 918/1334] parser_error-bmv2.p4 ... exclude
+[ 919/1334] pins/pins_fabric.p4 ... exclude
+[ 920/1334] pins/pins_middleblock.p4 ... exclude
+[ 921/1334] pins/pins_wbb.p4 ... exclude
+[ 922/1334] pipe.p4 ... exclude
+[ 923/1334] pipeline.p4 ... exclude
+[ 924/1334] pkginfo_annotation.p4 ... exclude
+[ 925/1334] pna-action-selector-1.p4 ... exclude
+[ 926/1334] pna-action-selector.p4 ... exclude
+[ 927/1334] pna-add-on-miss.p4 ... exclude
+[ 928/1334] pna-add_on_miss_action_name.p4 ... exclude
+[ 929/1334] pna-direction-main-parser-err.p4 ... exclude
+[ 930/1334] pna-direction.p4 ... exclude
+[ 931/1334] pna-dpdk-add_on_miss0.p4 ... exclude
+[ 932/1334] pna-dpdk-add_on_miss1.p4 ... exclude
+[ 933/1334] pna-dpdk-bvec_union.p4 ... exclude
+[ 934/1334] pna-dpdk-direct-counter-learner.p4 ... exclude
+[ 935/1334] pna-dpdk-direct-counter.p4 ... exclude
+[ 936/1334] pna-dpdk-direct-meter-learner.p4 ... exclude
+[ 937/1334] pna-dpdk-flatten-local-struct-decl.p4 ... exclude
+[ 938/1334] pna-dpdk-header-stack-assignment.p4 ... exclude
+[ 939/1334] pna-dpdk-header-union-stack.p4 ... exclude
+[ 940/1334] pna-dpdk-header-union-stack1.p4 ... exclude
+[ 941/1334] pna-dpdk-header-union-stack2.p4 ... exclude
+[ 942/1334] pna-dpdk-invalid-hdr-warnings5.p4 ... exclude
+[ 943/1334] pna-dpdk-invalid-hdr-warnings6.p4 ... exclude
+[ 944/1334] pna-dpdk-large-constants.p4 ... exclude
+[ 945/1334] pna-dpdk-parser-state-err.p4 ... exclude
+[ 946/1334] pna-dpdk-parser-wrong-arith.p4 ... exclude
+[ 947/1334] pna-dpdk-small_sample.p4 ... exclude
+[ 948/1334] pna-dpdk-table-key-consolidation-learner-1.p4 ... exclude
+[ 949/1334] pna-dpdk-table-key-consolidation-learner-3.p4 ... exclude
+[ 950/1334] pna-dpdk-table-key-consolidation-learner-4.p4 ... exclude
+[ 951/1334] pna-dpdk-table-key-consolidation-learner-5.p4 ... exclude
+[ 952/1334] pna-dpdk-table-key-consolidation-learner-6.p4 ... exclude
+[ 953/1334] pna-dpdk-table-key-consolidation-learner-7.p4 ... exclude
+[ 954/1334] pna-dpdk-table-key-use-annon.p4 ... exclude
+[ 955/1334] pna-dpdk-toeplitz-hash-1.p4 ... exclude
+[ 956/1334] pna-dpdk-toeplitz-hash.p4 ... exclude
+[ 957/1334] pna-dpdk-union-bmv2.p4 ... exclude
+[ 958/1334] pna-dpdk-wrong-warning.p4 ... exclude
+[ 959/1334] pna-dpdk_128bit_odd_size.p4 ... exclude
+[ 960/1334] pna-elim-hdr-copy-dpdk.p4 ... exclude
+[ 961/1334] pna-example-SelectByDirection.p4 ... exclude
+[ 962/1334] pna-example-SelectByDirection1.p4 ... exclude
+[ 963/1334] pna-example-SelectByDirection2.p4 ... exclude
+[ 964/1334] pna-example-bAnd-in-tableKey.p4 ... exclude
+[ 965/1334] pna-example-dpdk-optional.p4 ... exclude
+[ 966/1334] pna-example-dpdk-varbit-1.p4 ... exclude
+[ 967/1334] pna-example-dpdk-varbit.p4 ... exclude
+[ 968/1334] pna-example-header-union.p4 ... exclude
+[ 969/1334] pna-example-header-union1.p4 ... exclude
+[ 970/1334] pna-example-ipsec.p4 ... exclude
+[ 971/1334] pna-example-mirror-packet-1.p4 ... exclude
+[ 972/1334] pna-example-mirror-packet.p4 ... exclude
+[ 973/1334] pna-example-pass-1.p4 ... exclude
+[ 974/1334] pna-example-pass-2.p4 ... exclude
+[ 975/1334] pna-example-pass-3.p4 ... exclude
+[ 976/1334] pna-example-pass-parser.p4 ... exclude
+[ 977/1334] pna-example-pass.p4 ... exclude
+[ 978/1334] pna-example-recirculate.p4 ... timeout  302.42s  (302.4s)
+[ 979/1334] pna-example-tcp-connection-tracking.p4 ... timeout  302.40s  (604.8s)
+[ 980/1334] pna-example-template.p4 ... timeout  302.38s  (907.2s)
+[ 981/1334] pna-example-tunnel.p4 ... timeout  302.41s  (1209.6s)
+[ 982/1334] pna-example-varIndex-1.p4 ... timeout  302.39s  (1512.0s)
+[ 983/1334] pna-example-varIndex-2.p4 ... timeout  302.39s  (1814.4s)
+[ 984/1334] pna-example-varIndex.p4 ... timeout  302.39s  (2116.8s)
+[ 985/1334] pna-extract-local-header.p4 ... timeout  302.40s  (2419.2s)
+[ 986/1334] pna-ipv6-actions.p4 ... timeout  302.39s  (2721.6s)
+[ 987/1334] pna-issue3041.p4 ... timeout  302.39s  (3024.0s)
+[ 988/1334] pna-lookahead-structure-bit-field.p4 ... timeout  302.38s  (3326.3s)
+[ 989/1334] pna-lookahead-structure.p4 ... timeout  302.39s  (3628.7s)
+[ 990/1334] pna-mux-dismantle.p4 ... timeout  302.38s  (3931.1s)
+[ 991/1334] pna-subparser.p4 ... timeout  302.40s  (4233.5s)
+[ 992/1334] pna-too-big-label-name-dpdk.p4 ... timeout  302.38s  (4535.9s)
+[ 993/1334] pr1363.p4 ... pass  18.71s  (4554.6s)
+[ 994/1334] pragma-action.p4 ... pass  3.05s  (4557.7s)
+[ 995/1334] pragma-deprecated.p4 ... pass  6.52s  (4564.2s)
+[ 996/1334] pragma-pkginfo.p4 ... pass  0.87s  (4565.0s)
+[ 997/1334] pragma-string.p4 ... pass  3.67s  (4568.7s)
+[ 998/1334] pragmas.p4 ... pass  4.06s  (4572.8s)
+[ 999/1334] precedence-lt.p4 ... pass  12.67s  (4585.5s)
+[1000/1334] precedence.p4 ... pass  194.05s  (4779.5s)
+[1001/1334] pred.p4 ... pass  20.75s  (4800.3s)
+[1002/1334] pred1.p4 ... pass  23.52s  (4823.8s)
+[1003/1334] pred2.p4 ... pass  30.56s  (4854.3s)
+[1004/1334] predication_issue.p4 ... timeout  300.00s  (5154.3s)
+[1005/1334] predication_issue_1.p4 ... timeout  302.57s  (5456.9s)
+[1006/1334] predication_issue_2.p4 ... timeout  302.37s  (5759.3s)
+[1007/1334] predication_issue_3.p4 ... timeout  302.41s  (6061.7s)
+[1008/1334] predication_issue_4.p4 ... timeout  302.40s  (6364.1s)
+[1009/1334] proliferation1.p4 ... timeout  302.57s  (6666.7s)
+[1010/1334] psa-action-profile1.p4 ... timeout  302.61s  (6969.3s)
+[1011/1334] psa-action-profile3.p4 ... timeout  302.38s  (7271.7s)
+[1012/1334] psa-action-profile4.p4 ... timeout  302.39s  (7574.0s)
+[1013/1334] psa-action-selector1.p4 ... timeout  302.40s  (7876.4s)
+[1014/1334] psa-action-selector2.p4 ... timeout  302.39s  (8178.8s)
+[1015/1334] psa-action-selector3.p4 ... timeout  302.39s  (8481.2s)
+[1016/1334] psa-action-selector4.p4 ... timeout  302.39s  (8783.6s)
+[1017/1334] psa-action-selector5.p4 ... timeout  302.40s  (9086.0s)
+[1018/1334] psa-action-selector6.p4 ... timeout  302.38s  (9388.4s)
+[1019/1334] psa-basic-counter-bmv2.p4 ... timeout  302.47s  (9690.9s)
+[1020/1334] psa-bool-ternary-const-entry-bmv2.p4 ... timeout  302.40s  (9993.3s)
+[1021/1334] psa-conditional_operator.p4 ... timeout  302.41s  (10295.7s)
+[1022/1334] psa-counter1.p4 ... timeout  302.41s  (10598.1s)
+[1023/1334] psa-counter2.p4 ... timeout  302.45s  (10900.5s)
+[1024/1334] psa-counter3.p4 ... timeout  302.39s  (11202.9s)
+[1025/1334] psa-counter4.p4 ... timeout  302.38s  (11505.3s)
+[1026/1334] psa-custom-type-counter-index.p4 ... timeout  302.38s  (11807.7s)
+[1027/1334] psa-dpdk-128bitCast.p4 ... timeout  302.40s  (12110.1s)
+[1028/1334] psa-dpdk-binary-operations-1.p4 ... exclude
+[1029/1334] psa-dpdk-binary-operations.p4 ... exclude
+[1030/1334] psa-dpdk-checksum-arg-header.p4 ... timeout  302.38s  (12412.4s)
+[1031/1334] psa-dpdk-errorcode-1.p4 ... timeout  302.40s  (12714.8s)
+[1032/1334] psa-dpdk-errorcode-2.p4 ... timeout  302.41s  (13017.3s)
+[1033/1334] psa-dpdk-errorcode.p4 ... timeout  302.38s  (13319.6s)
+[1034/1334] psa-dpdk-flatten-local-struct.p4 ... timeout  302.39s  (13622.0s)
+[1035/1334] psa-dpdk-hdr-field-non-align.p4 ... timeout  302.40s  (13924.4s)
+[1036/1334] psa-dpdk-header-union-typedef.p4 ... exclude
+[1037/1334] psa-dpdk-large-header-fields.p4 ... timeout  302.42s  (14226.8s)
+[1038/1334] psa-dpdk-large-struct-fields.p4 ... timeout  302.39s  (14529.2s)
+[1039/1334] psa-dpdk-lpm-match-err3.p4 ... timeout  302.43s  (14831.7s)
+[1040/1334] psa-dpdk-lpm-match-err4.p4 ... timeout  302.40s  (15134.1s)
+[1041/1334] psa-dpdk-lpm-match-err5.p4 ... timeout  302.46s  (15436.5s)
+[1042/1334] psa-dpdk-lpm-match-valid.p4 ... timeout  302.43s  (15739.0s)
+[1043/1334] psa-dpdk-non-zero-arg-default-action-01.p4 ... timeout  302.40s  (16041.4s)
+[1044/1334] psa-dpdk-non-zero-arg-default-action-02.p4 ... timeout  302.40s  (16343.8s)
+[1045/1334] psa-dpdk-non-zero-arg-default-action-03.p4 ... timeout  302.41s  (16646.2s)
+[1046/1334] psa-dpdk-non-zero-arg-default-action-04.p4 ... timeout  302.39s  (16948.6s)
+[1047/1334] psa-dpdk-non-zero-arg-default-action-05.p4 ... timeout  302.40s  (17251.0s)
+[1048/1334] psa-dpdk-non-zero-arg-default-action-06.p4 ... timeout  302.38s  (17553.3s)
+[1049/1334] psa-dpdk-non-zero-arg-default-action-07.p4 ... timeout  302.38s  (17855.7s)
+[1050/1334] psa-dpdk-non-zero-arg-default-action-08.p4 ... timeout  302.38s  (18158.1s)
+[1051/1334] psa-dpdk-non-zero-arg-default-action-09.p4 ... timeout  302.39s  (18460.5s)
+[1052/1334] psa-dpdk-struct-field.p4 ... timeout  302.40s  (18762.9s)
+[1053/1334] psa-dpdk-table-entries-exact-ternary.p4 ... timeout  302.38s  (19065.3s)
+[1054/1334] psa-dpdk-table-key-consolidation-if-1.p4 ... timeout  302.39s  (19367.7s)
+[1055/1334] psa-dpdk-table-key-consolidation-if.p4 ... timeout  302.41s  (19670.1s)
+[1056/1334] psa-dpdk-table-key-consolidation-mixed-keys-1.p4 ... timeout  302.38s  (19972.5s)
+[1057/1334] psa-dpdk-table-key-consolidation-mixed-keys-10.p4 ... timeout  302.40s  (20274.9s)
+[1058/1334] psa-dpdk-table-key-consolidation-mixed-keys-2.p4 ... timeout  302.38s  (20577.2s)
+[1059/1334] psa-dpdk-table-key-consolidation-mixed-keys-3.p4 ... timeout  302.39s  (20879.6s)
+[1060/1334] psa-dpdk-table-key-consolidation-mixed-keys-4.p4 ... timeout  302.39s  (21182.0s)
+[1061/1334] psa-dpdk-table-key-consolidation-mixed-keys-5.p4 ... timeout  302.40s  (21484.4s)
+[1062/1334] psa-dpdk-table-key-consolidation-mixed-keys-6.p4 ... timeout  302.41s  (21786.8s)
+[1063/1334] psa-dpdk-table-key-consolidation-mixed-keys-7.p4 ... timeout  302.38s  (22089.2s)
+[1064/1334] psa-dpdk-table-key-consolidation-mixed-keys-8.p4 ... timeout  302.38s  (22391.6s)
+[1065/1334] psa-dpdk-table-key-consolidation-mixed-keys-9.p4 ... timeout  302.38s  (22694.0s)
+[1066/1334] psa-dpdk-table-key-consolidation-mixed-keys.p4 ... timeout  302.43s  (22996.4s)
+[1067/1334] psa-dpdk-table-key-consolidation-switch.p4 ... timeout  302.38s  (23298.8s)
+[1068/1334] psa-dpdk-table-key-error-1.p4 ... timeout  302.39s  (23601.2s)
+[1069/1334] psa-dpdk-table-key-error.p4 ... timeout  302.40s  (23903.6s)
+[1070/1334] psa-dpdk-table-key-isValid1.p4 ... timeout  302.39s  (24205.9s)
+[1071/1334] psa-dpdk-table-key-isValid2.p4 ... timeout  302.38s  (24508.3s)
+[1072/1334] psa-dpdk-table-key-isValid3.p4 ... timeout  302.39s  (24810.7s)
+[1073/1334] psa-dpdk-table-key-isValid4.p4 ... timeout  302.39s  (25113.1s)
+[1074/1334] psa-dpdk-table-key-isValid5.p4 ... timeout  302.38s  (25415.5s)
+[1075/1334] psa-dpdk-table-key-isValid6.p4 ... timeout  302.40s  (25717.9s)
+[1076/1334] psa-dpdk-table-key-isValid7.p4 ... timeout  302.39s  (26020.3s)
+[1077/1334] psa-dpdk-tmp-mask-align.p4 ... timeout  302.39s  (26322.7s)
+[1078/1334] psa-dpdk-token-too-big.p4 ... timeout  302.38s  (26625.0s)
+[1079/1334] psa-drop-all-bmv2.p4 ... timeout  302.45s  (26927.5s)
+[1080/1334] psa-drop-all-corrected-bmv2.p4 ... timeout  302.39s  (27229.9s)
+[1081/1334] psa-e2e-cloning-basic-bmv2.p4 ... timeout  302.39s  (27532.3s)
+[1082/1334] psa-end-of-ingress-test-bmv2.p4 ... timeout  302.39s  (27834.7s)
+[1083/1334] psa-example-counters-bmv2.p4 ... timeout  302.38s  (28137.1s)
+[1084/1334] psa-example-digest-bmv2.p4 ... timeout  302.40s  (28439.5s)
+[1085/1334] psa-example-dpdk-byte-alignment_1.p4 ... timeout  302.39s  (28741.8s)
+[1086/1334] psa-example-dpdk-byte-alignment_2.p4 ... timeout  302.39s  (29044.2s)
+[1087/1334] psa-example-dpdk-byte-alignment_3.p4 ... timeout  302.39s  (29346.6s)
+[1088/1334] psa-example-dpdk-byte-alignment_4.p4 ... timeout  302.41s  (29649.0s)
+[1089/1334] psa-example-dpdk-byte-alignment_5.p4 ... timeout  302.40s  (29951.4s)
+[1090/1334] psa-example-dpdk-byte-alignment_6.p4 ... timeout  302.41s  (30253.9s)
+[1091/1334] psa-example-dpdk-byte-alignment_7.p4 ... timeout  302.73s  (30556.6s)
+[1092/1334] psa-example-dpdk-byte-alignment_8.p4 ... timeout  302.56s  (30859.1s)
+[1093/1334] psa-example-dpdk-byte-alignment_9.p4 ... timeout  302.82s  (31162.0s)
+[1094/1334] psa-example-dpdk-counter.p4 ... timeout  302.88s  (31464.8s)
+[1095/1334] psa-example-dpdk-directmeter.p4 ... timeout  303.02s  (31767.9s)
+[1096/1334] psa-example-dpdk-externs.p4 ... timeout  303.07s  (32070.9s)
+[1097/1334] psa-example-dpdk-local-variable.p4 ... timeout  302.74s  (32373.7s)
+[1098/1334] psa-example-dpdk-meter-execute-err.p4 ... timeout  303.40s  (32677.1s)
+[1099/1334] psa-example-dpdk-meter.p4 ... timeout  302.81s  (32979.9s)
+[1100/1334] psa-example-dpdk-meter1.p4 ... timeout  302.63s  (33282.5s)
+[1101/1334] psa-example-dpdk-varbit-bmv2.p4 ... timeout  302.56s  (33585.1s)
+[1102/1334] psa-example-incremental-checksum.p4 ... timeout  302.42s  (33887.5s)
+[1103/1334] psa-example-logical-operations.p4 ... timeout  302.70s  (34190.2s)
+[1104/1334] psa-example-mask-range.p4 ... timeout  303.08s  (34493.3s)
+[1105/1334] psa-example-mask-range1.p4 ... timeout  302.42s  (34795.7s)
+[1106/1334] psa-example-optional-match.p4 ... timeout  302.76s  (35098.5s)
+[1107/1334] psa-example-parser-checksum.p4 ... timeout  302.84s  (35401.3s)
+[1108/1334] psa-example-range-match.p4 ... timeout  303.00s  (35704.3s)
+[1109/1334] psa-example-register2-bmv2.p4 ... timeout  302.68s  (36007.0s)
+[1110/1334] psa-example-select_tuple-1.p4 ... timeout  302.41s  (36309.4s)
+[1111/1334] psa-example-select_tuple-mask.p4 ... timeout  302.43s  (36611.8s)
+[1112/1334] psa-example-select_tuple-wc.p4 ... timeout  302.65s  (36914.5s)
+[1113/1334] psa-example-select_tuple.p4 ... timeout  302.40s  (37216.9s)
+[1114/1334] psa-example-switch-with-constant-expr.p4 ... timeout  302.59s  (37519.4s)
+[1115/1334] psa-fwd-bmv2.p4 ... timeout  302.74s  (37822.2s)
+[1116/1334] psa-hash-02.p4 ... timeout  302.55s  (38124.7s)
+[1117/1334] psa-hash-03.p4 ... timeout  302.99s  (38427.7s)
+[1118/1334] psa-hash-04.p4 ... timeout  303.14s  (38730.9s)
+[1119/1334] psa-hash-05.p4 ... timeout  302.84s  (39033.7s)
+[1120/1334] psa-hash-06.p4 ... timeout  302.93s  (39336.6s)
+[1121/1334] psa-hash-07.p4 ... timeout  302.42s  (39639.1s)
+[1122/1334] psa-hash-08.p4 ... timeout  302.82s  (39941.9s)
+[1123/1334] psa-hash-09.p4 ... timeout  302.68s  (40244.6s)
+[1124/1334] psa-hash-10.p4 ... timeout  302.95s  (40547.5s)
+[1125/1334] psa-hash.p4 ... timeout  302.85s  (40850.4s)
+[1126/1334] psa-header-stack.p4 ... timeout  302.99s  (41153.4s)
+[1127/1334] psa-i2e-cloning-basic-bmv2.p4 ... timeout  303.08s  (41456.4s)
+[1128/1334] psa-idle-timeout.p4 ... timeout  303.01s  (41759.5s)
+[1129/1334] psa-isvalid.p4 ... timeout  303.09s  (42062.5s)
+[1130/1334] psa-metadata-bmv2.p4 ... timeout  302.70s  (42365.2s)
+[1131/1334] psa-meter1.p4 ... timeout  302.43s  (42667.7s)
+[1132/1334] psa-meter3.p4 ... timeout  302.69s  (42970.4s)
+[1133/1334] psa-meter4.p4 ... timeout  302.65s  (43273.0s)
+[1134/1334] psa-meter5.p4 ... timeout  303.03s  (43576.0s)
+[1135/1334] psa-meter7-bmv2.p4 ... timeout  302.58s  (43878.6s)
+[1136/1334] psa-multicast-basic-2-bmv2.p4 ... timeout  302.57s  (44181.2s)
+[1137/1334] psa-multicast-basic-bmv2.p4 ... timeout  302.74s  (44483.9s)
+[1138/1334] psa-multicast-basic-corrected-bmv2.p4 ... timeout  302.57s  (44786.5s)
+[1139/1334] psa-parser-error-test-bmv2.p4 ... timeout  302.74s  (45089.2s)
+[1140/1334] psa-random.p4 ... timeout  303.10s  (45392.3s)
+[1141/1334] psa-recirculate-no-meta-bmv2.p4 ... timeout  302.98s  (45695.3s)
+[1142/1334] psa-register-complex-bmv2.p4 ... timeout  302.75s  (45998.1s)
+[1143/1334] psa-register-read-write-2-bmv2.p4 ... timeout  302.89s  (46301.0s)
+[1144/1334] psa-register-read-write-bmv2.p4 ... timeout  302.82s  (46603.8s)
+[1145/1334] psa-register1.p4 ... timeout  302.60s  (46906.4s)
+[1146/1334] psa-register2.p4 ... timeout  302.75s  (47209.1s)
+[1147/1334] psa-register3.p4 ... timeout  302.83s  (47512.0s)
+[1148/1334] psa-remove-header.p4 ... timeout  303.00s  (47815.0s)
+[1149/1334] psa-resubmit-bmv2.p4 ... timeout  302.82s  (48117.8s)
+[1150/1334] psa-subtract-inst1.p4 ... timeout  302.44s  (48420.2s)
+[1151/1334] psa-switch-expression-without-default.p4 ... exclude
+[1152/1334] psa-table-hit-miss.p4 ... exclude
+[1153/1334] psa-test.p4 ... exclude
+[1154/1334] psa-top-level-assignments-bmv2.p4 ... exclude
+[1155/1334] psa-unicast-or-drop-bmv2.p4 ... exclude
+[1156/1334] psa-unicast-or-drop-corrected-bmv2.p4 ... exclude
+[1157/1334] psa-variable-index.p4 ... exclude
+[1158/1334] pvs-bitstring-bmv2.p4 ... exclude
+[1159/1334] pvs-nested-struct.p4 ... exclude
+[1160/1334] pvs-struct-1-bmv2.p4 ... exclude
+[1161/1334] pvs-struct-2-bmv2.p4 ... exclude
+[1162/1334] pvs-struct-3-bmv2.p4 ... exclude
+[1163/1334] pvs.p4 ... exclude
+[1164/1334] rcp.p4 ... exclude
+[1165/1334] rcp1.p4 ... exclude
+[1166/1334] redundant_parsers_dangling_unused_parser_decl.p4 ... exclude
+[1167/1334] register-serenum-bmv2.p4 ... exclude
+[1168/1334] reject.p4 ... exclude
+[1169/1334] runtime-index-2-bmv2.p4 ... exclude
+[1170/1334] runtime-index-bmv2.p4 ... exclude
+[1171/1334] same_name_for_table_and_action.p4 ... exclude
+[1172/1334] saturated-bmv2.p4 ... exclude
+[1173/1334] scalarmeta-bmv2.p4 ... exclude
+[1174/1334] select-struct.p4 ... exclude
+[1175/1334] select-type.p4 ... exclude
+[1176/1334] serEnumImplCast.p4 ... exclude
+[1177/1334] serenum-expr.p4 ... exclude
+[1178/1334] serenum-int.p4 ... exclude
+[1179/1334] serenum.p4 ... exclude
+[1180/1334] shadow-after-use.p4 ... exclude
+[1181/1334] shadow.p4 ... exclude
+[1182/1334] shadow1.p4 ... exclude
+[1183/1334] shadow3.p4 ... exclude
+[1184/1334] shift-int-const.p4 ... exclude
+[1185/1334] shift_precendence.p4 ... exclude
+[1186/1334] side_effects.p4 ... exclude
+[1187/1334] simple-actions_ubpf.p4 ... exclude
+[1188/1334] simple-firewall_ubpf.p4 ... exclude
+[1189/1334] simplify-select-cases1.p4 ... exclude
+[1190/1334] simplify-select-cases2.p4 ... exclude
+[1191/1334] simplify.p4 ... exclude
+[1192/1334] simplify_method_calls.p4 ... exclude
+[1193/1334] simplify_slice.p4 ... exclude
+[1194/1334] singleton_range_select.p4 ... exclude
+[1195/1334] slice-def-use.p4 ... exclude
+[1196/1334] slice-def-use1.p4 ... exclude
+[1197/1334] slice-def-use2.p4 ... exclude
+[1198/1334] slice1.p4 ... exclude
+[1199/1334] spec-ex01.p4 ... exclude
+[1200/1334] spec-ex03.p4 ... exclude
+[1201/1334] spec-ex04.p4 ... exclude
+[1202/1334] spec-ex06.p4 ... exclude
+[1203/1334] spec-ex08.p4 ... exclude
+[1204/1334] spec-ex09.p4 ... exclude
+[1205/1334] spec-ex10.p4 ... exclude
+[1206/1334] spec-ex12.p4 ... exclude
+[1207/1334] spec-ex13.p4 ... exclude
+[1208/1334] spec-ex14.p4 ... exclude
+[1209/1334] spec-ex15.p4 ... exclude
+[1210/1334] spec-ex16.p4 ... exclude
+[1211/1334] spec-ex17.p4 ... exclude
+[1212/1334] spec-ex18.p4 ... exclude
+[1213/1334] spec-ex19.p4 ... exclude
+[1214/1334] spec-ex20.p4 ... exclude
+[1215/1334] spec-ex22.p4 ... exclude
+[1216/1334] spec-ex25.p4 ... exclude
+[1217/1334] spec-ex27.p4 ... exclude
+[1218/1334] spec-ex29.p4 ... exclude
+[1219/1334] spec-ex30.p4 ... exclude
+[1220/1334] spec-ex31.p4 ... exclude
+[1221/1334] spec-ex34.p4 ... exclude
+[1222/1334] spec-issue1060.p4 ... exclude
+[1223/1334] spec-issue1068.p4 ... exclude
+[1224/1334] spec-issue1297-string-cat.p4 ... exclude
+[1225/1334] specIssue884.p4 ... exclude
+[1226/1334] specialization.p4 ... exclude
+[1227/1334] stack-bmv2.p4 ... exclude
+[1228/1334] stack-bvec-bmv2.p4 ... exclude
+[1229/1334] stack-init.p4 ... exclude
+[1230/1334] stack.p4 ... exclude
+[1231/1334] stack2.p4 ... exclude
+[1232/1334] stack_complex-bmv2.p4 ... exclude
+[1233/1334] stack_ebpf.p4 ... exclude
+[1234/1334] standard_headers.p4 ... exclude
+[1235/1334] states.p4 ... exclude
+[1236/1334] std_meta_inlining.p4 ... exclude
+[1237/1334] strength.p4 ... exclude
+[1238/1334] strength2.p4 ... exclude
+[1239/1334] strength3.p4 ... exclude
+[1240/1334] strength4-bmv2.p4 ... exclude
+[1241/1334] strength5.p4 ... exclude
+[1242/1334] strength6.p4 ... exclude
+[1243/1334] strength7.p4 ... exclude
+[1244/1334] string.p4 ... exclude
+[1245/1334] string_anno.p4 ... exclude
+[1246/1334] struct.p4 ... exclude
+[1247/1334] struct1.p4 ... exclude
+[1248/1334] structArg.p4 ... exclude
+[1249/1334] struct_assignment_optimization.p4 ... exclude
+[1250/1334] struct_init-1.p4 ... exclude
+[1251/1334] struct_init.p4 ... exclude
+[1252/1334] structure-valued-expr-ok-1-bmv2.p4 ... exclude
+[1253/1334] structured-annotation.p4 ... exclude
+[1254/1334] structured_annotations.p4 ... exclude
+[1255/1334] subparser-with-header-stack-bmv2.p4 ... exclude
+[1256/1334] switch-expression.p4 ... exclude
+[1257/1334] switch_ebpf.p4 ... exclude
+[1258/1334] switch_p4_16.p4 ... exclude
+[1259/1334] synth-action.p4 ... exclude
+[1260/1334] table-entries-exact-bmv2.p4 ... exclude
+[1261/1334] table-entries-exact-ternary-bmv2.p4 ... exclude
+[1262/1334] table-entries-lpm-bmv2.p4 ... exclude
+[1263/1334] table-entries-no-arg-actions.p4 ... exclude
+[1264/1334] table-entries-optional-bmv2.p4 ... exclude
+[1265/1334] table-entries-priority-bmv2.p4 ... exclude
+[1266/1334] table-entries-range-bmv2.p4 ... exclude
+[1267/1334] table-entries-ser-enum-bmv2.p4 ... exclude
+[1268/1334] table-entries-ternary-bmv2.p4 ... exclude
+[1269/1334] table-entries-valid-bmv2.p4 ... exclude
+[1270/1334] table-key-serenum-bmv2.p4 ... exclude
+[1271/1334] template.p4 ... exclude
+[1272/1334] ternary2-bmv2.p4 ... exclude
+[1273/1334] ternary_ebpf.p4 ... exclude
+[1274/1334] test-parserinvalidargument-error-bmv2.p4 ... exclude
+[1275/1334] test_ebpf.p4 ... exclude
+[1276/1334] trailing-comma.p4 ... exclude
+[1277/1334] truncate_ubpf.p4 ... exclude
+[1278/1334] tunneling_ubpf.p4 ... exclude
+[1279/1334] tuple.p4 ... exclude
+[1280/1334] tuple0.p4 ... exclude
+[1281/1334] tuple1.p4 ... exclude
+[1282/1334] tuple2.p4 ... exclude
+[1283/1334] tuple3.p4 ... exclude
+[1284/1334] tuple4.p4 ... exclude
+[1285/1334] tuple5.p4 ... exclude
+[1286/1334] tuple5a.p4 ... exclude
+[1287/1334] two-functions.p4 ... exclude
+[1288/1334] twoPipe.p4 ... exclude
+[1289/1334] two_ebpf.p4 ... exclude
+[1290/1334] type-params.p4 ... exclude
+[1291/1334] type-shadow.p4 ... exclude
+[1292/1334] type-spec-nested.p4 ... exclude
+[1293/1334] typedef-constructor.p4 ... exclude
+[1294/1334] ubpf_checksum_extern.p4 ... exclude
+[1295/1334] ubpf_hash_extern.p4 ... exclude
+[1296/1334] uninit-nowarnings.p4 ... exclude
+[1297/1334] uninit.p4 ... exclude
+[1298/1334] union-bmv2.p4 ... exclude
+[1299/1334] union-key.p4 ... exclude
+[1300/1334] union-valid-bmv2.p4 ... exclude
+[1301/1334] union1-bmv2.p4 ... exclude
+[1302/1334] union2-bmv2.p4 ... exclude
+[1303/1334] union3-bmv2.p4 ... exclude
+[1304/1334] union4-bmv2.p4 ... exclude
+[1305/1334] unreachable-accept.p4 ... exclude
+[1306/1334] unreachable.p4 ... exclude
+[1307/1334] unused-counter-bmv2.p4 ... exclude
+[1308/1334] unused.p4 ... exclude
+[1309/1334] use-priority-as-name.p4 ... exclude
+[1310/1334] useless-cast.p4 ... exclude
+[1311/1334] v1model-const-entries-bmv2.p4 ... exclude
+[1312/1334] v1model-digest-containing-ser-enum.p4 ... exclude
+[1313/1334] v1model-digest-custom-type.p4 ... exclude
+[1314/1334] v1model-p4runtime-enumint-types1.p4 ... exclude
+[1315/1334] v1model-p4runtime-most-types1.p4 ... exclude
+[1316/1334] v1model-special-ops-bmv2.p4 ... exclude
+[1317/1334] valid.p4 ... exclude
+[1318/1334] valid_ebpf.p4 ... exclude
+[1319/1334] value-sets.p4 ... exclude
+[1320/1334] value_set_ebpf.p4 ... exclude
+[1321/1334] verify-bmv2.p4 ... exclude
+[1322/1334] verify_disjunction.p4 ... exclude
+[1323/1334] verify_ebpf.p4 ... exclude
+[1324/1334] version.p4 ... exclude
+[1325/1334] very_simple_model.p4 ... exclude
+[1326/1334] virtual.p4 ... exclude
+[1327/1334] virtual2.p4 ... exclude
+[1328/1334] virtual3.p4 ... exclude
+[1329/1334] vss-example.p4 ... exclude
+[1330/1334] wrong-warning.p4 ... exclude
+[1331/1334] x-bmv2.p4 ... exclude
+[1332/1334] xdp_dec_ttl_ebpf-kernel.p4 ... exclude
+[1333/1334] xdp_vlan_push_pop_ebpf-kernel.p4 ... exclude
+[1334/1334] xor_test.p4 ... exclude
+
+metacirc run-group redex cache=true det=true run-positive group 2: collected=1334 excluded=1164 executed=170 pass=11 fail=0 timeout=159 elapsed=48420.255s; all expected records matched
+
+slowest 10:
+  303.40s  p4c/testdata/p4_16_samples/psa-example-dpdk-meter-execute-err.p4
+  303.14s  p4c/testdata/p4_16_samples/psa-hash-04.p4
+  303.10s  p4c/testdata/p4_16_samples/psa-random.p4
+  303.09s  p4c/testdata/p4_16_samples/psa-isvalid.p4
+  303.08s  p4c/testdata/p4_16_samples/psa-example-mask-range.p4
+  303.08s  p4c/testdata/p4_16_samples/psa-i2e-cloning-basic-bmv2.p4
+  303.07s  p4c/testdata/p4_16_samples/psa-example-dpdk-externs.p4
+  303.03s  p4c/testdata/p4_16_samples/psa-meter5.p4
+  303.02s  p4c/testdata/p4_16_samples/psa-example-dpdk-directmeter.p4
+  303.01s  p4c/testdata/p4_16_samples/psa-idle-timeout.p4
