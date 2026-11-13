@@ -21,7 +21,7 @@ MM_TEST = $(CARGO) run --locked --release --manifest-path test-driver/Cargo.toml
 CORPUS_ARGS = $(if $(TIMEOUT),--timeout $(TIMEOUT)) $(if $(SUITE),--suite $(SUITE))
 
 
-.PHONY: metameta metameta-cli kompile redex test-mm-run-al-p4 test-mm-run-k-p4 test-mm-run-redex-p4 test-mm-run-al-st test-mm-run-k-st test-mm-run-redex-st test-mm-run-group-al test-mm-run-group-k test-mm-run-group-redex test-mm-sim-al test-mm-sim-k test-mm-sim-redex test-mm-sim-group-al test-mm-sim-group-k test-mm-sim-group-redex mm-cover-run-p4 mm-cover-run-st mm-cover-sim clean
+.PHONY: metameta metameta-cli kompile redex test-mm-run-st-p4 test-mm-run-k-p4 test-mm-run-redex-p4 test-mm-run-st-st test-mm-run-k-st test-mm-run-redex-st test-mm-run-group-st test-mm-run-group-k test-mm-run-group-redex test-mm-sim-st test-mm-sim-k test-mm-sim-redex test-mm-sim-group-st test-mm-sim-group-k test-mm-sim-group-redex mm-cover-run-p4 mm-cover-run-st mm-cover-sim clean
 
 metameta-cli:
 	cd $(RUST_DIR) && $(CARGO) build --locked --release --bin metacirc --target-dir "$(CARGO_TARGET_DIR)"
@@ -60,7 +60,7 @@ redex: metameta
 	raco make -v $(REDEXMODULE) $(REDEXMODULE_DETCHECK)
 
 # P4 corpus through the AL/P4 towers
-test-mm-run-al-p4:
+test-mm-run-st-p4:
 	cd $(RUST_DIR) && $(MM_TEST) run al --input p4 $(CORPUS_ARGS)
 
 # P4 corpus through the K/P4 towers, spec-meta-k on its K library (ST-in-K)
@@ -72,7 +72,7 @@ test-mm-run-redex-p4:
 	cd $(RUST_DIR) && $(MM_TEST) run redex --input p4 $(CORPUS_ARGS)
 
 # Spec-language script suites through the AL tower
-test-mm-run-al-st:
+test-mm-run-st-st:
 	cd $(RUST_DIR) && $(MM_TEST) run al --input al $(CORPUS_ARGS)
 
 # Spec-language script suites through the K tower on spec-meta-k-detcheck (ST-in-K)
@@ -83,17 +83,28 @@ test-mm-run-k-st:
 test-mm-run-redex-st:
 	cd $(RUST_DIR) && $(MM_TEST) run redex --input al $(CORPUS_ARGS)
 
-# One group of a P4 corpus suite of suites/metacirc/run-group.toml through the AL/P4,
-# K/P4, or Redex/P4 tower, against the group's expected file for the suite
+# One group of a P4 corpus suite of suites/metacirc/run-group.toml,
+# against the group's expected file for the suite
 GROUP_ARGS = --suite $(SUITE) --group $(GROUP) $(if $(TIMEOUT),--timeout $(TIMEOUT))
-RUN_GROUP_TARGETS := test-mm-run-group-al test-mm-run-group-k test-mm-run-group-redex
+RUN_GROUP_CHECK = $(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=run-positive GROUP=1))
 
-$(RUN_GROUP_TARGETS):
-	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=run-positive GROUP=1))
-	cd $(RUST_DIR) && $(MM_TEST) run-group $(@:test-mm-run-group-%=%) $(GROUP_ARGS)
+# Through the AL/P4 tower
+test-mm-run-group-st:
+	$(RUN_GROUP_CHECK)
+	cd $(RUST_DIR) && $(MM_TEST) run-group al $(GROUP_ARGS)
+
+# Through the K/P4 tower (ST-in-K)
+test-mm-run-group-k:
+	$(RUN_GROUP_CHECK)
+	cd $(RUST_DIR) && $(MM_TEST) run-group k $(GROUP_ARGS)
+
+# Through the Redex/P4 tower (ST-in-Redex)
+test-mm-run-group-redex:
+	$(RUN_GROUP_CHECK)
+	cd $(RUST_DIR) && $(MM_TEST) run-group redex $(GROUP_ARGS)
 
 # Registered simulation suites through the AL/P4 tower, against native expectations
-test-mm-sim-al:
+test-mm-sim-st:
 	cd $(RUST_DIR) && $(MM_TEST) sim al $(CORPUS_ARGS)
 
 # Registered simulation suites through the K/P4 tower (ST-in-K), against native expectations
@@ -104,14 +115,24 @@ test-mm-sim-k:
 test-mm-sim-redex:
 	cd $(RUST_DIR) && $(MM_TEST) sim redex $(CORPUS_ARGS)
 
-# One group of a simulation suite of suites/metacirc/sim-group.toml through the AL/P4,
-# K/P4, or Redex/P4 tower, against the group's expected file for the suite
-SIM_GROUP_ARGS = --suite $(SUITE) --group $(GROUP) $(if $(TIMEOUT),--timeout $(TIMEOUT))
-SIM_GROUP_TARGETS := test-mm-sim-group-al test-mm-sim-group-k test-mm-sim-group-redex
+# One group of a simulation suite of suites/metacirc/sim-group.toml,
+# against the group's expected file for the suite
+SIM_GROUP_CHECK = $(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=v1model-p4c GROUP=1))
 
-$(SIM_GROUP_TARGETS):
-	$(if $(and $(SUITE),$(GROUP)),,$(error SUITE and GROUP are required, e.g. make $@ SUITE=v1model-p4c GROUP=1))
-	cd $(RUST_DIR) && $(MM_TEST) sim-group $(@:test-mm-sim-group-%=%) $(GROUP_ARGS)
+# Through the AL/P4 tower
+test-mm-sim-group-st:
+	$(SIM_GROUP_CHECK)
+	cd $(RUST_DIR) && $(MM_TEST) sim-group al $(GROUP_ARGS)
+
+# Through the K/P4 tower (ST-in-K)
+test-mm-sim-group-k:
+	$(SIM_GROUP_CHECK)
+	cd $(RUST_DIR) && $(MM_TEST) sim-group k $(GROUP_ARGS)
+
+# Through the Redex/P4 tower (ST-in-Redex)
+test-mm-sim-group-redex:
+	$(SIM_GROUP_CHECK)
+	cd $(RUST_DIR) && $(MM_TEST) sim-group redex $(GROUP_ARGS)
 
 # SL instruction coverage of spec-meta, the base of the AL towers, written to $(COV_DIR)/*.cov
 COV_DIR = coverage

@@ -325,38 +325,38 @@ They take the options below:
 - `TIMEOUT=300` runs each test case with a timeout of 300 seconds.
 - `TEST_LOG=logs` writes a per-test timing log into `logs/`.
 
-`test-mm-run-al-st` runs the script suites.
+`test-mm-run-st-st` runs the script suites.
 
 ```sh
 # run all suites
-make test-mm-run-al-st TEST_LOG=logs
+make test-mm-run-st-st TEST_LOG=logs
 # run each suite separately
-make test-mm-run-al-st SUITE=spec-meta-rel-succ TEST_LOG=logs
-make test-mm-run-al-st SUITE=spec-meta-rel-err TEST_LOG=logs
-make test-mm-run-al-st SUITE=spec-meta-func-succ TEST_LOG=logs
+make test-mm-run-st-st SUITE=spec-meta-rel-succ TEST_LOG=logs
+make test-mm-run-st-st SUITE=spec-meta-rel-err TEST_LOG=logs
+make test-mm-run-st-st SUITE=spec-meta-func-succ TEST_LOG=logs
 ```
 
-`test-mm-run-al-p4` runs the type-checking suites.
+`test-mm-run-st-p4` runs the type-checking suites.
 
 ```sh
 # run all suites
-make test-mm-run-al-p4 TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-st-p4 TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-mm-run-al-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
-make test-mm-run-al-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-st-p4 SUITE=run-positive TIMEOUT=300 TEST_LOG=logs
+make test-mm-run-st-p4 SUITE=run-negative TIMEOUT=300 TEST_LOG=logs
 ```
 
-`test-mm-sim-al` runs the simulation suites.
+`test-mm-sim-st` runs the simulation suites.
 
 ```sh
 # run all suites
-make test-mm-sim-al TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-st TIMEOUT=300 TEST_LOG=logs
 # run each suite separately
-make test-mm-sim-al SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
-make test-mm-sim-al SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-mm-sim-al SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
-make test-mm-sim-al SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
-make test-mm-sim-al SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-st SUITE=ebpf-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-st SUITE=ebpf-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-st SUITE=v1model-p4c TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-st SUITE=v1model-p4testgen TIMEOUT=300 TEST_LOG=logs
+make test-mm-sim-st SUITE=psa-p4c TIMEOUT=300 TEST_LOG=logs
 ```
 
 ### Meta-meta-execution of P4ST^Redex and P4ST^K

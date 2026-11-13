@@ -1,6 +1,6 @@
 # P4 corpus groups through a metacircular P4 tower:
 # `run-group <config> --suite <name> --group <name>`
-# (make test-mm-run-group-al, test-mm-run-group-k, test-mm-run-group-redex,
+# (make test-mm-run-group-st, test-mm-run-group-k, test-mm-run-group-redex,
 # each with SUITE=<name> and GROUP=<name>).
 #
 # Each suite runs every .p4 file under `root` through its tower for the configuration's base,

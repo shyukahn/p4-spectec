@@ -1,5 +1,5 @@
 # Simulation through a metacircular P4 tower: `sim <config>`
-# (make test-mm-sim-al, test-mm-sim-k, test-mm-sim-redex).
+# (make test-mm-sim-st, test-mm-sim-k, test-mm-sim-redex).
 #
 # Runs the suites of `suites/sim.toml`, with their corpus pairing, exclusions,
 # and expected files, on simulators built from the configuration's tower.

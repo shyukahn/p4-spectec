@@ -45,13 +45,13 @@ TEST_TARGETS := test test-expected test-p4parse test-run-p4 test-run-st test-sim
 $(TEST_TARGETS):
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $(if $(TEST_LOG),TEST_LOG="$(abspath $(TEST_LOG))") $@
 
-METAMETA_TARGETS := metameta kompile redex test-mm-run-al-p4 \
+METAMETA_TARGETS := metameta kompile redex test-mm-run-st-p4 \
   test-mm-run-k-p4 test-mm-run-redex-p4 \
-  test-mm-run-al-st test-mm-run-k-st test-mm-run-redex-st \
-  test-mm-run-group-al \
+  test-mm-run-st-st test-mm-run-k-st test-mm-run-redex-st \
+  test-mm-run-group-st \
   test-mm-run-group-k test-mm-run-group-redex \
-  test-mm-sim-al \
-  test-mm-sim-k test-mm-sim-redex test-mm-sim-group-al \
+  test-mm-sim-st \
+  test-mm-sim-k test-mm-sim-redex test-mm-sim-group-st \
   test-mm-sim-group-k test-mm-sim-group-redex \
   mm-cover-run-p4 mm-cover-run-st mm-cover-sim
 
