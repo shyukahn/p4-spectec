@@ -12,9 +12,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 ARG TARGETARCH
 
 # ---- System packages and document dependencies ----
+ARG PYTHON_VERSION=3.12.3
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ca-certificates curl build-essential pkg-config python3 ruby-dev \
+      ca-certificates curl build-essential pkg-config ruby-dev \
+      "python3=${PYTHON_VERSION}-*" "python3.12=${PYTHON_VERSION}-*" \
  && rm -rf /var/lib/apt/lists/* \
  && gem install asciidoctor asciidoctor-pdf rouge --no-document
 

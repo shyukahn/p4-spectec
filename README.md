@@ -85,7 +85,7 @@ git clone <URL>
 
 # install system packages
 sudo apt-get update
-sudo apt-get install -y ca-certificates curl build-essential pkg-config python3
+sudo apt-get install -y ca-certificates curl build-essential pkg-config 'python3=3.12.3-*' 'python3.12=3.12.3-*'
 
 # install rustup and the Rust toolchain pinned in p4spectec/rust-toolchain.toml
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain none
