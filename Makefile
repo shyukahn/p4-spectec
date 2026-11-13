@@ -1,5 +1,6 @@
 SPEC = bin/p4spectec
 STAT = bin/stat
+FALLTHROUGH = bin/fallthrough
 RUST_DIR = p4spectec
 # Resolve an override before entering the Rust crate or documentation directories
 override CARGO_TARGET_DIR := $(if $(CARGO_TARGET_DIR),$(CARGO_TARGET_DIR),$(RUST_DIR)/target)
@@ -13,7 +14,7 @@ export CARGO_TARGET_DIR
 # Recursive Rust tests still use the caller's parallel job count
 .NOTPARALLEL:
 
-.PHONY: build release debug stat fmt fmt-check lint rustdoc clean
+.PHONY: build release debug stat fallthrough fmt fmt-check lint rustdoc clean
 
 build release debug:
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $@
@@ -26,6 +27,12 @@ stat:
 	mkdir -p $(dir $(STAT))
 	rm -f ./$(STAT)
 	cp "$(CARGO_TARGET_DIR)/release/stat" ./$(STAT)
+
+fallthrough:
+	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $@
+	mkdir -p $(dir $(FALLTHROUGH))
+	rm -f ./$(FALLTHROUGH)
+	cp "$(CARGO_TARGET_DIR)/release/fallthrough" ./$(FALLTHROUGH)
 
 fmt fmt-check lint rustdoc:
 	$(MAKE) -C $(RUST_DIR) CARGO_TARGET_DIR="$(CARGO_TARGET_DIR)" $@
